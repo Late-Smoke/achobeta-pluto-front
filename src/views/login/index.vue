@@ -109,13 +109,14 @@ body {
     font-size: 11px;
     margin-bottom: 15px;
     display: none; /* 默认隐藏 */
-    margin-left: 90px; 
 }
 
 .input-group {
-    margin-bottom: 5px;
+    margin-bottom: 15px;
     display: flex; /* 使用flex布局 */
     align-items: center; /* 垂直居中对齐 */
+    gap: 8px; /* 控制输入框与按钮的间距 */
+    width: 100%; /* 确保 input-group 在容器内 */
 }
 
 label {
@@ -129,18 +130,20 @@ input[type="tel"], input[type="text"] {
     border: 1px solid #ccc; /* 添加边框 */
     border-radius: 4px; /* 圆角边框 */
     outline: none; /* 去掉聚焦时的轮廓 */
+    box-sizing: border-box; /* 防止内边距影响尺寸 */
+    min-width: 0; /* 避免 flex 布局导致的输入框溢出 */
 }
 
 .get-code {
-    padding: 10px 15px; /* 添加内边距 */
+    padding: 8px 12px; /* 调整内边距 */
     background-color: transparent; /* 按钮背景透明 */
     color: #4682b4; /* 按钮文字颜色为浅蓝色 */
-    border: none; /* 去掉按钮边框 */
+    border: none; /* 移除边框 */
     border-radius: 4px; /* 圆角 */
     cursor: pointer; /* 鼠标悬停效果 */
-    margin-left: 10px; /* 按钮和输入框之间的间距 */
-    font-size: 14px;
+    font-size: 12px;
     white-space: nowrap; /* 防止文字换行 */
+    flex-shrink: 0; /* 防止按钮缩小 */
 }
 
 
@@ -166,5 +169,5 @@ input[type="tel"], input[type="text"] {
     color: gray;
     text-align: center;
 }
-
 </style>
+
