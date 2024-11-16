@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+
 function parseJwt(token) {
   // 解析 JWT 中的 payload 部分
   const base64Url = token.split('.')[1];
@@ -13,11 +14,12 @@ function parseJwt(token) {
   return JSON.parse(jsonPayload);
 }
 
-export function login(phoneInput, captchaInput, captchaError) {
+export function login(phoneInput, captchaInput, captchaError, loginRemember) {
   const phoneNumber = phoneInput.value;
   const captcha = captchaInput.value;
-
+  const remember = loginRemember;
   const captchaPattern = /^[A-Za-z0-9]{6}$/;
+
   if (!captchaPattern.test(captcha)) {
     captchaError.style.display = 'block';
     captchaError.textContent = '验证码格式不正确，请重试';
@@ -26,10 +28,11 @@ export function login(phoneInput, captchaInput, captchaError) {
     captchaError.style.display = 'none';
   }
 
-  axios.post('/api/login/login', { 
-      phone: String(phoneNumber), // 将手机号转为字符串
-      code: String(captcha),   // 将验证码转为字符串
-      auto_login: true            // 添加 auto_login 参数并设置为 true
+  this.$post('/api/login/login', { //修改axios.post为this.$post
+      phone: String(phoneNumber),  // 将手机号转为字符串
+      code: String(captcha),       // 将验证码转为字符串
+      auto_login: true,            // 添加 auto_login 参数并设置为 true
+      remember: remember,            // 三十天免登录
     })
     .then(response => {
       const data = response.data;
@@ -42,7 +45,7 @@ export function login(phoneInput, captchaInput, captchaError) {
 
          // 存储必要的登录信息
          localStorage.setItem('atoken', responseData.atoken);    // 令牌
-         if (responseData.rtoken) localStorage.setItem('rtoken', responseData.rtoken); // 刷新令牌
+         if (remember && responseData.rtoken) localStorage.setItem('rtoken', responseData.rtoken); // 当用户勾选了且rtokrn存在时，刷新令牌
          localStorage.setItem('service_id', responseData['service id']); // 业务id
          localStorage.setItem('user_agent', responseData.user_agent); // 用户代理信息
          localStorage.setItem('ip', responseData.ip); // IP地址

@@ -8,6 +8,7 @@ const phoneError = ref(null);
 const captchaInput = ref(null);
 const captchaError = ref(null);
 const getCodeButton = ref(null);
+const loginRemember = ref(false);
 
 // 在页面加载时启动倒计时检查
 onMounted(() => {
@@ -16,7 +17,7 @@ onMounted(() => {
 
 // 封装函数调用
 const handleGetCodeClick = () => requestCaptcha(phoneInput.value, phoneError.value, () => updateCountdown(getCodeButton.value, () => resetGetCodeButton(getCodeButton.value)));
-const handleLoginClick = () => login(phoneInput.value, captchaInput.value, captchaError.value);
+const handleLoginClick = () => login(phoneInput.value, captchaInput.value, captchaError.value, loginRemember.value);
 </script>
 
 <template>
@@ -39,7 +40,7 @@ const handleLoginClick = () => login(phoneInput.value, captchaInput.value, captc
       <div ref="captchaError" id="captcha-error" class="error-message"></div>
       <div class="options">
         <label>
-          <input type="checkbox" /> 三十天自动登录
+          <input v-model="loginRemember" type="checkbox" /> 三十天自动登录
         </label>
       </div>
       <button class="login-btn" @click="handleLoginClick">登录/注册</button>
