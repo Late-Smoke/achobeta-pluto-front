@@ -66,7 +66,6 @@ const fetchName = () => {
 <template>
   <el-header class="header">
     <div v-if="name">
-
       <!-- 常用设备对话框 -->
       <el-dialog v-model="deviceDialogVisible" title="常用设备" width="800">
       <el-table :data="gridData">
