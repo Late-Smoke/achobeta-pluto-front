@@ -15,18 +15,10 @@ import '@fortawesome/fontawesome-free/css/all.css';
 import 'normalize.css'
 import '@/assets/styles/common.scss'
 import '@/utils/request'
-import {post} from "@/utils/被废弃";
-import {put} from "@/utils/被废弃";
-import {get} from "@/utils/被废弃";
-import {deleted} from "@/utils/被废弃";
 
 const app = createApp(App)
 app.use(pinia)
 app.use(router)
 app.use(ElementPlus) // 注册 Element Plus
 app.mount('#app')
-Vue.prototype.post = post;
-Vue.prototype.put = put;
-Vue.prototype.get = get;
-Vue.prototype.deleted = deleted;
  
