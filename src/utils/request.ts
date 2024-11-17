@@ -1,5 +1,4 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import Cookies from 'js-cookie';
 import apiClient from './axios'
 
 interface PendingTask {
