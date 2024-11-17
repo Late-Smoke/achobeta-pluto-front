@@ -21,7 +21,7 @@ const constantRoutes = [
       },
       {
         path: 'home',
-        component: () => import('@/views/home/index.vue'),
+        component: () => import('@/views/home/Homepage.vue'),
         name: 'home',
       },
       {

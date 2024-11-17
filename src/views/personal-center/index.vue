@@ -144,6 +144,7 @@ onMounted(async () => {
 }
 
 .header h2 {
+  font-size: 1.8em;
   font-weight: 400; /* 调整字体粗细 */
 }
 
@@ -199,9 +200,8 @@ onMounted(async () => {
 }
 
 .info-row span {
-  display: block;
   font-weight: bold;
-  font-size: 0.85em;
+  font-size: 1em;
   color: #666;
   margin-bottom: 4px;
 }
