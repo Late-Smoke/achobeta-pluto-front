@@ -1,7 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { ArrowDown } from '@element-plus/icons-vue';
-import { FetchName } from '@/components/layout/header'
+//import { FetchName } from '@/components/layout/header.vue'
 
 const router = useRouter();
 const name = ref('林浅');
@@ -17,12 +17,6 @@ const handleLogout = () => {
   router.push('/login');
 };
 
-// 获取并赋值name 开发阶段保持注释，否则将无法正常显示下拉菜单
-const atoken = localStorage.getItem('atoken');//从本地获取atoken
-FetchName(atoken,response => {
-    const data = response.data;
-    name.value = data.username; // 获取并赋值name 
-  })
 
   
 //常用设备弹窗
@@ -46,6 +40,7 @@ const gridData = ref([
     { name: '设备J', ip: '192.168.1.10', time: '2023-04-01 14:30:00' }
   ]);
 
+  //分页
 const totalDevices = 10; // 假设总共有10台设备
 const pageSize = 3; // 开发阶段为3，后期更改为每页显示5台设备 
 const currentPage = ref('1'); // 当前页码
@@ -78,8 +73,15 @@ const handleOffline = (row) =>{
 
   onMounted(async () => {
       // 取消注释以实际获取用户名字
-      // await fetchName();
- 
+      // await FetchName();
+    // 获取并赋值name 开发阶段保持注释，否则将无法正常显示下拉菜单
+    const atoken = localStorage.getItem('atoken');//从本地获取atoken
+    /*
+    FetchName(atoken,response => {
+    const data = response.data;
+    name.value = data.username; // 获取并赋值name 
+    })
+    */
       try {
         //const devicesData = await fetchAllDevices(); // 获取设备数据
         //updateCurrentGridData(devicesData); // 更新网格数据

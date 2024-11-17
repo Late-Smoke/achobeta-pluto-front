@@ -4,14 +4,16 @@
         <PointsBox />
         <MessagesBox />
       </div>
-      <ProgressBox />
+      <div class="box progress-box">
+        <Progress />
+      </div>
     </div>
   </template>
   
   <script setup>
   import PointsBox from './components/PointsBox.vue';
   import MessagesBox from './components/MessagesBox.vue';
-  import ProgressBox from './components/ProgressBox.vue';
+  import Progress from '@/views/home/components/ProgressBox.vue';
   </script>
   
   <style scoped>
