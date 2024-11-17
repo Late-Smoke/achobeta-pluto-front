@@ -15,10 +15,10 @@ import '@fortawesome/fontawesome-free/css/all.css';
 import 'normalize.css'
 import '@/assets/styles/common.scss'
 import '@/utils/request'
-import {post} from "@/utils/api.ts";
-import {put} from "@/utils/api.ts";
-import {get} from "@/utils/api.ts";
-import {deleted} from "@/utils/api.ts";
+import {post} from "@/utils/被废弃";
+import {put} from "@/utils/被废弃";
+import {get} from "@/utils/被废弃";
+import {deleted} from "@/utils/被废弃";
 
 const app = createApp(App)
 app.use(pinia)

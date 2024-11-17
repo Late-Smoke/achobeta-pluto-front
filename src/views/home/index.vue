@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getPoints } from './utils/getPoints';
+import Progress from '@/views/home/utils/progress.vue';
 
 // 积分数据
 const userId = localStorage.getItem('userid');
@@ -13,6 +14,7 @@ async function fetchPoints() {
   if (!userId) {
     console.warn('用户ID不存在，无法获取积分信息');
     return;
+
   }
   const pointsData = await getPoints(userId);
   if (pointsData) {
@@ -155,8 +157,7 @@ onMounted(() => {
 
     <!-- 第二排：项目进度框 -->
     <div class="box progress-box">
-      <h3 class="box-title">项目进度</h3>
-      <p>这里显示项目进度的详情。</p>
+        <Progress/>
     </div>
 
     <!-- 弹窗 -->
@@ -379,4 +380,5 @@ button:disabled {
   font-size: 1.5em;
   cursor: pointer;
 }
+
 </style>
