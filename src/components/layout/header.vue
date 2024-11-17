@@ -1,6 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { ArrowDown } from '@element-plus/icons-vue';
+import { FetchName } from '@/components/layout/header'
 
 const router = useRouter();
 const name = ref('林浅');
@@ -15,19 +16,14 @@ const handleLogout = () => {
   console.log('执行登出操作');
   router.push('/login');
 };
-/*
+
 // 获取并赋值name 开发阶段保持注释，否则将无法正常显示下拉菜单
-const fetchName = () => {
-  const atoken = localStorage.getItem('atoken');//从本地获取atoken
-  this.$get('https://api.example.com/data', { atoken })
-  .then(response => {
+const atoken = localStorage.getItem('atoken');//从本地获取atoken
+FetchName(atoken,response => {
     const data = response.data;
     name.value = data.username; // 获取并赋值name 
   })
-  .catch(error => {
-    console.error(error);
-  });}
-  */
+
   
 //常用设备弹窗
 const deviceDialogVisible = ref(false);
