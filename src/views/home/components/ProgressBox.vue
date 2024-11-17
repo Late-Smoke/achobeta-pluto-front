@@ -1,5 +1,30 @@
 <script setup>
+import { GetFeiShu } from '@/utils/api/home'
 
+const total_task_count = ref('0');
+const incomplete_task_count = ref('0');
+const upcoming_overdue_task_count = ref('0');
+const overdue_task_count = ref('0');
+
+onMounted(async () => {
+    const atoken = localStorage.getItem('atoken');
+    GetFeiShu(atoken)
+    .then(data => {
+      total_task_count.value = data.total_task_count;
+      incomplete_task_count.value = data.incomplete_task_count;
+      upcoming_overdue_task_count.value = data.upcoming_overdue_task_count;
+      overdue_task_count.value = data.overdue_task_count;
+  })
+  .catch(error => {
+    ElNotification({
+            title: 'Error',
+            message: '项目进度数据获取失败', 
+            type: 'error',
+            position: 'bottom-right'
+          });
+    console.error('Error fetching progress:', error);
+  });
+  });
 </script>
 
 <template>
@@ -9,22 +34,22 @@
     <div class="progress-details">
       <div class="progress-item">
           <span class="item-title">总任务数</span>
-          <div class="item-content">{{  }}</div>
+          <div class="item-content">{{ total_task_count }}</div>
       </div>
 
       <div class="progress-item">
           <span class="item-title">我的未完成任务</span>
-          <div class="item-content">{{  }}</div>
+          <div class="item-content">{{ incomplete_task_count }}</div>
       </div>
 
       <div class="progress-item">
           <span class="item-title">即将逾期</span>
-          <div class="item-content">{{  }}</div>
+          <div class="item-content">{{ upcoming_overdue_task_count }}</div>
       </div>
 
       <div class="progress-item">
           <span class="item-title">已逾期</span>
-          <div class="item-content">{{  }}</div>
+          <div class="item-content">{{ overdue_task_count }}</div>
       </div>
     </div>
   </div>
@@ -73,5 +98,12 @@ margin-left: 20px;;
     text-align: center;
 }
 
+.item-content {
+  margin-top: 10px;
+    font-size: 3em; /* 数字的字体大小 */
+    color: #333;
+    line-height: 1;
+    font-weight: 100;
+  }
 
 </style>

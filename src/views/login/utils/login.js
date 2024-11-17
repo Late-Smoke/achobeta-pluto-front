@@ -28,7 +28,7 @@ export function login(phoneInput, captchaInput, captchaError, loginRemember) {
     captchaError.style.display = 'none';
   }
 
-  this.$post('/api/login/login', { //修改axios.post为this.$post
+  axios.post('/api/login/login', {
       phone: String(phoneNumber),  // 将手机号转为字符串
       code: String(captcha),       // 将验证码转为字符串
       auto_login: true,            // 添加 auto_login 参数并设置为 true
