@@ -80,7 +80,7 @@ onMounted(async () => {
 <style scoped>
 /* 主框样式 */
 .box {
-  background-color: #eafaf1;
+  background-color: #e8d14f79;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 20px;
