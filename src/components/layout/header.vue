@@ -1,7 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { ArrowDown } from '@element-plus/icons-vue';
-import { FetchName, GetAutoLoginDevices, RemoveAutoDevice } from '@/utils/api/home'
+import { fetchNameApi, getDevicesApi, removeDeviceApi } from '@/utils/api/home'
 
 const router = useRouter();
 const name = ref('林浅');
@@ -28,12 +28,7 @@ const showDeviceDialog = () => {
       updateCurrentGridData(currentPage);
     } catch (error) {
       // 处理获取设备数据时发生的错误
-      ElNotification({
-            title: 'Error',
-            message: '数据获取失败', 
-            type: 'error',
-            position: 'bottom-right'
-          });
+      ElMessage.error('成员信息获取失败。')
       console.error('Failed to update grid data:', error);
     }
   }
@@ -67,18 +62,13 @@ const updateCurrentGridData = (currentPage) => {
   // const startIndex = (currentPage.value - 1) * pageSize;
   // const endIndex = currentPage.value * pageSize;
   // currentGridData.value = gridData.value.slice(startIndex, endIndex);
-  GetAutoLoginDevices(atoken,currentPage)
+  getDevicesApi(atoken,currentPage)
   .then(data => {
     currentGridData.value = data.gridData.value;
     totalDevices.value = data.total.value;
   })
   .catch(error => {
-    ElNotification({
-            title: 'Error',
-            message: '数据获取失败', 
-            type: 'error',
-            position: 'bottom-right'
-          });
+    ElMessage.error('成员信息获取失败。');
     console.error('Error fetching devices:', error);
   });
 }
@@ -88,26 +78,19 @@ const updateCurrentGridData = (currentPage) => {
   buttonStates.value = currentGridData.value.map(() => false);
   function handleClick(index) {
       const atoken = localStorage.getItem('atoken');
-      RemoveAutoDevice(atoken)
+      removeDeviceApi(atoken)
       .then(data => {
         if(data.result.value){
+          ElMessage({
+          message: '下线成功。',
+          type: 'success',
+        })
           buttonStates.value[index] = true;
         }
         else{
-          ElNotification({
-            title: 'Error',
-            message: '下线失败', 
-            type: 'error',
-            position: 'bottom-right'
-          });
-        }
-      }).catch(error => {
-        ElNotification({
-            title: 'Error',
-            message: '下线失败', 
-            type: 'error',
-            position: 'bottom-right'
-          });
+          ElMessage.error('下线失败。');
+      }}).catch(error => {
+        ElMessage.error('下线失败。');
         console.error('Error Offline devices', error);
       });}
 
@@ -115,17 +98,12 @@ const updateCurrentGridData = (currentPage) => {
   onMounted(async () => {
     // 获取并赋值name
     const atoken = localStorage.getItem('atoken');//从本地获取atoken
-    FetchName(atoken)
+    fetchNameApi(atoken)
     .then(data => {
         name.value = data.username; // 获取并赋值给 name
     })
     .catch(error => {
-      ElNotification({
-            title: 'Error',
-            message: '名字获取失败', 
-            type: 'error',
-            position: 'bottom-right'
-          });
+      ElMessage.error('名字获取失败。');
         console.error('Error fetching name:', error);
     });
     });
