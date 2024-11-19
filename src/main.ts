@@ -17,6 +17,10 @@ import 'normalize.css'
 import '@/assets/styles/common.scss'
 import '@/utils/request'
 
+//element-plus/icon
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+
+
 const app = createApp(App)
 app.use(pinia)
 app.use(router)
