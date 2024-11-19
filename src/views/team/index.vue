@@ -174,29 +174,47 @@ const teamEdit = ref('团队架构');
 
 
 //const tableData = ref([]); // 所有数据
-    const displayedData = ref([]); // 当前展示的数据
-    const loading = ref(false); // 加载状态
-    const allDataLoaded = ref(false); // 所有数据是否已加载完毕
-    const currentPage = ref(1); // 当前页码
-    const pageSize = 9; // 每页展示的数据条数
+const displayedData = ref([]); // 当前展示的数据
+const loading = ref(false); // 加载状态
+const allDataLoaded = ref(false); // 所有数据是否已加载完毕
+const currentPage = ref(1); // 当前页码
+const pageSize = 9; // 每页展示的数据条数
  
     // 模拟获取数据的方法
-    const fetchData = async (page) => {
-      loading.value = true;
-      // 这里应该是异步请求数据，比如使用 axios 或 fetch
-      // 但为了示例，我们使用 setTimeout 来模拟异步请求
-      setTimeout(() => {
-        const newData = [
-          // ...（假设这里是新获取的数据，格式与 tableData 相同）
-        ];
-        tableData.value = [...tableData.value, ...newData];
-        updateDisplayedData();
-        loading.value = false;
-        if (newData.length < pageSize) {
-          allDataLoaded.value = true;
-        }
-      }, 1000); // 假设请求需要 1 秒
-    };
+const fetchData = async (page) => {
+  loading.value = true;
+  try {
+    // 发起 GET 请求到 API 端点，这里假设 API 接受一个 'page' 参数来分页数据
+    const response = await axios.get(`https://api.example.com/data?page=${page}`);
+    
+    // 检查响应状态并处理数据
+    if (response.status === 200) {
+      const newData = response.data; // 假设响应的数据直接在新数据数组中
+      
+      // 将新数据添加到 tableData 中
+      tableData.value = [...tableData.value, ...newData];
+      
+      // 更新显示的数据（这个函数的具体实现取决于你的需求）
+      updateDisplayedData();
+      
+      // 设置加载状态为 false
+      loading.value = false;
+      
+      // 如果新数据的长度小于 pageSize，则认为所有数据已加载
+      if (newData.length < pageSize) {
+        allDataLoaded.value = true;
+      }
+    } else {
+      // 如果响应状态不是 200，处理错误情况
+      console.error('请求失败，状态码:', response.status);
+      loading.value = false;
+    }
+  } catch (error) {
+    // 捕获请求过程中的错误
+    console.error('请求过程中发生错误:', error);
+    loading.value = false;
+  }
+};
  
     // 更新当前展示的数据
     const updateDisplayedData = () => {
