@@ -16,10 +16,6 @@ import '@fortawesome/fontawesome-free/js/all.js';
 import 'normalize.css'
 import '@/assets/styles/common.scss'
 import '@/utils/request'
-import {post} from "@/utils/被废弃";
-import {put} from "@/utils/被废弃";
-import {get} from "@/utils/被废弃";
-import {deleted} from "@/utils/被废弃";
 
 const app = createApp(App)
 app.use(pinia)
@@ -32,8 +28,4 @@ for (const [key, component] of Object.entries(Icons)) {
 }
 
 app.mount('#app')
-Vue.prototype.post = post;
-Vue.prototype.put = put;
-Vue.prototype.get = get;
-Vue.prototype.deleted = deleted;
  

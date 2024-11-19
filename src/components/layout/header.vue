@@ -1,33 +1,44 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { ArrowDown } from '@element-plus/icons-vue';
-//import { FetchName } from '@/components/layout/header.vue'
+import { FetchName, GetAutoLoginDevices, RemoveAutoDevice } from '@/utils/api/home'
 
 const router = useRouter();
 const name = ref('林浅');
 
-// 导航到个人中心
+//// 导航到个人中心
 const navigateToPersonalCenter = () => {
   router.push({ name: 'PersonalCenter' });
 };
 
-// 退出登录
+//// 退出登录
 const handleLogout = () => {
   console.log('执行登出操作');
   router.push('/login');
 };
-
-
   
-//常用设备弹窗
+////常用设备
+
+//弹窗
 const deviceDialogVisible = ref(false);
 
 const showDeviceDialog = () => {
-    deviceDialogVisible.value = true; // 显示对话框
-    console.log(deviceDialogVisible);
+  deviceDialogVisible.value = true; // 显示对话框 骨架扇
+  try {
+      updateCurrentGridData(currentPage);
+    } catch (error) {
+      // 处理获取设备数据时发生的错误
+      ElNotification({
+            title: 'Error',
+            message: '数据获取失败', 
+            type: 'error',
+            position: 'bottom-right'
+          });
+      console.error('Failed to update grid data:', error);
+    }
   }
   
-const gridData = ref([
+const currentGridData = ref([
     { name: '设备A', ip: '192.168.1.1', time: '2023-04-01 10:00:00' },
     { name: '设备B', ip: '192.168.1.2', time: '2023-04-01 10:30:00' },
     { name: '设备C', ip: '192.168.1.3', time: '2023-04-01 11:00:00' },
@@ -40,56 +51,83 @@ const gridData = ref([
     { name: '设备J', ip: '192.168.1.10', time: '2023-04-01 14:30:00' }
   ]);
 
-  //分页
-const totalDevices = 10; // 假设总共有10台设备
-const pageSize = 3; // 开发阶段为3，后期更改为每页显示5台设备 
+//分页
+const totalDevices = ref(10); // 假设总共有10台设备
+const pageSize = 5; // 开发阶段为3，后期更改为每页显示5台设备 
 const currentPage = ref('1'); // 当前页码
-const currentGridData = ref([]); // 当前页显示的设备数据
 
-const currentName = ('设备A');
-
-// 处理分页变化
+// 更新当前页数据
+const buttonStates= ref([]);
 const handlePageChange = (page) => {
+  buttonStates.value = [];
   currentPage.value = page;
-  updateCurrentGridData();
+  updateCurrentGridData(currentPage);
 }
-// 更新当前页的设备数据
-const updateCurrentGridData = () => {
-  const startIndex = (currentPage.value - 1) * pageSize;
-  const endIndex = currentPage.value * pageSize;
-  currentGridData.value = gridData.value.slice(startIndex, endIndex);
+const updateCurrentGridData = (currentPage) => {
+  // const startIndex = (currentPage.value - 1) * pageSize;
+  // const endIndex = currentPage.value * pageSize;
+  // currentGridData.value = gridData.value.slice(startIndex, endIndex);
+  GetAutoLoginDevices(atoken,currentPage)
+  .then(data => {
+    currentGridData.value = data.gridData.value;
+    totalDevices.value = data.total.value;
+  })
+  .catch(error => {
+    ElNotification({
+            title: 'Error',
+            message: '数据获取失败', 
+            type: 'error',
+            position: 'bottom-right'
+          });
+    console.error('Error fetching devices:', error);
+  });
 }
 
-// 处理下线操作
-const handleOffline = (row) =>{
-  // 下线逻辑
-  console.log('下线设备:'+row.name);
-}
+//下线
+  const currentName = ('设备A');
+  buttonStates.value = currentGridData.value.map(() => false);
+  function handleClick(index) {
+      const atoken = localStorage.getItem('atoken');
+      RemoveAutoDevice(atoken)
+      .then(data => {
+        if(data.result.value){
+          buttonStates.value[index] = true;
+        }
+        else{
+          ElNotification({
+            title: 'Error',
+            message: '下线失败', 
+            type: 'error',
+            position: 'bottom-right'
+          });
+        }
+      }).catch(error => {
+        ElNotification({
+            title: 'Error',
+            message: '下线失败', 
+            type: 'error',
+            position: 'bottom-right'
+          });
+        console.error('Error Offline devices', error);
+      });}
 
-  // 假设有一个方法用于从后端获取所有数据
-  // fetchAllDevices() {
-  //   // 发送请求获取数据，并更新gridData
-  // }
-
+////挂载
   onMounted(async () => {
-      // 取消注释以实际获取用户名字
-      // await FetchName();
-    // 获取并赋值name 开发阶段保持注释，否则将无法正常显示下拉菜单
+    // 获取并赋值name
     const atoken = localStorage.getItem('atoken');//从本地获取atoken
-    /*
-    FetchName(atoken,response => {
-    const data = response.data;
-    name.value = data.username; // 获取并赋值name 
+    FetchName(atoken)
+    .then(data => {
+        name.value = data.username; // 获取并赋值给 name
     })
-    */
-      try {
-        //const devicesData = await fetchAllDevices(); // 获取设备数据
-        //updateCurrentGridData(devicesData); // 更新网格数据
-        updateCurrentGridData();
-      } catch (error) {
-        // 处理获取设备数据时发生的错误
-        console.error('Failed to update grid data:', error);
-      }
+    .catch(error => {
+      ElNotification({
+            title: 'Error',
+            message: '名字获取失败', 
+            type: 'error',
+            position: 'bottom-right'
+          });
+        console.error('Error fetching name:', error);
+    });
     });
 </script>
 
@@ -106,22 +144,31 @@ const handleOffline = (row) =>{
         <el-table-column property="time" label="上次登录时间" />
         <el-table-column label="操作" width="180">
         <template v-slot="scope">
+           
           <el-button
-            v-if="scope.row.name !== currentName"
-            type="text"
-            size="small"
-            @click="handleOffline(scope.row)"
-          >
-            下线
-          </el-button>
-          <el-button
-            v-else
+          v-if="scope.row.name === currentName"
             type="text"
             size="small"
             :disabled="true"
           >
             当前设备
           </el-button>
+          <el-button
+              v-else-if="!buttonStates[scope.$index]"
+              type="text"
+              size="small"
+              @click="handleClick(scope.$index)"
+            >
+              下线
+            </el-button>
+            <el-button
+              v-else
+              type="text"
+              size="small"
+              :disabled="true"
+            >
+              下线成功
+            </el-button>
         </template>
       </el-table-column>
       </el-table>
