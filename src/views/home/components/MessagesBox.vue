@@ -121,7 +121,7 @@ onMounted(() => {
 <style scoped>
 /* 消息框样式 */
 .box {
-  background-color: #eafaf1; /* 消息框背景颜色 */
+  background-color: #ffffff; /* 消息框背景颜色 */
   border-radius: 8px; /* 圆角 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 阴影效果 */
   padding: 20px; /* 内边距 */
