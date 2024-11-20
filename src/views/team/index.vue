@@ -1,6 +1,11 @@
 <script setup>
-const tableData = ref([
+import { getPowerApi } from '@/utils/api/teamInformation.ts'
+
+const tableData = ref([]);
+
+const allData = ref([
       {
+        id:1,
         name: '张三',
         group: 'A组',
         grade: '大二',
@@ -9,6 +14,7 @@ const tableData = ref([
         phone: '13800000001'
       },
       {
+        id:2,
         name: '李四',
         group: 'B组',
         grade: '大三',
@@ -17,6 +23,7 @@ const tableData = ref([
         phone: '13800000002'
       },
       {
+        id:3,
         name: '王五',
         group: 'C组',
         grade: '大四',
@@ -25,6 +32,7 @@ const tableData = ref([
         phone: '13800000003'
       },
       {
+        id:4,
         name: '赵六',
         group: 'D组',
         grade: '研究生',
@@ -33,6 +41,7 @@ const tableData = ref([
         phone: '13800000004'
       },
       {
+        id:5,
         name: '孙七',
         group: 'E组',
         grade: '博士生',
@@ -41,6 +50,7 @@ const tableData = ref([
         phone: '13800000005'
       },
       {
+        id:6,
         name: '张三',
         group: 'A组',
         grade: '大二',
@@ -49,6 +59,7 @@ const tableData = ref([
         phone: '13800000001'
       },
       {
+        id:7,
         name: '李四',
         group: 'B组',
         grade: '大三',
@@ -57,6 +68,7 @@ const tableData = ref([
         phone: '13800000002'
       },
       {
+        id:8,
         name: '王五',
         group: 'C组',
         grade: '大四',
@@ -65,6 +77,7 @@ const tableData = ref([
         phone: '13800000003'
       },
       {
+        id:9,
         name: '赵六',
         group: 'D组',
         grade: '研究生',
@@ -73,6 +86,7 @@ const tableData = ref([
         phone: '13800000004'
       },
       {
+        id:10,
         name: '孙七',
         group: 'E组',
         grade: '博士生',
@@ -81,6 +95,7 @@ const tableData = ref([
         phone: '13800000005'
       },
       {
+        id:11,
         name: '张三',
         group: 'A组',
         grade: '大二',
@@ -89,6 +104,7 @@ const tableData = ref([
         phone: '13800000001'
       },
       {
+        id:12,
         name: '李四',
         group: 'B组',
         grade: '大三',
@@ -97,6 +113,7 @@ const tableData = ref([
         phone: '13800000002'
       },
       {
+        id:13,
         name: '王五',
         group: 'C组',
         grade: '大四',
@@ -105,6 +122,7 @@ const tableData = ref([
         phone: '13800000003'
       },
       {
+        id:14,
         name: '赵六',
         group: 'D组',
         grade: '研究生',
@@ -113,6 +131,7 @@ const tableData = ref([
         phone: '13800000004'
       },
       {
+        id:15,
         name: '孙七',
         group: 'E组',
         grade: '博士生',
@@ -121,6 +140,7 @@ const tableData = ref([
         phone: '13800000005'
       },
       {
+        id:16,
         name: '张三',
         group: 'A组',
         grade: '大二',
@@ -129,6 +149,7 @@ const tableData = ref([
         phone: '13800000001'
       },
       {
+        id:17,
         name: '李四',
         group: 'B组',
         grade: '大三',
@@ -137,6 +158,7 @@ const tableData = ref([
         phone: '13800000002'
       },
       {
+        id:18,
         name: '王五',
         group: 'C组',
         grade: '大四',
@@ -145,6 +167,7 @@ const tableData = ref([
         phone: '13800000003'
       },
       {
+        id:19,
         name: '赵六',
         group: 'D组',
         grade: '研究生',
@@ -153,6 +176,7 @@ const tableData = ref([
         phone: '13800000004'
       },
       {
+        id:20,
         name: '孙七',
         group: 'E组',
         grade: '博士生',
@@ -160,89 +184,111 @@ const tableData = ref([
         present: '在读',
         phone: '13800000005'
       }
-    ])
+    ]);
+const loading = ref(false);
+const pageSize = 9; // 每次加载的数据量
+let currentPage = 1;
+ 
+const noMore = computed(() => currentPage * pageSize >= allData.value.length);
+ 
+const loadMore = () => {
+  if (loading.value || noMore.value) return;
+  loading.value = true;
+  setTimeout(() => {
+    const start = (currentPage - 1) * pageSize;
+    const end = currentPage * pageSize;
+    tableData.value = [...tableData.value, ...allData.value.slice(start, end)];
+    currentPage++;
+    loading.value = false;
+  }, 2000); // 模拟异步加载延迟
+};
+// 初始加载第一页数据//while(currentPage < allData.value.length)
+loadMore();
+
+//拉框
 const selectedTeam = ref('AchoBeta 1.0');
 const dropdownItems = ref([
   { command: 'AchoBeta 1.0', label: 'AchoBeta 1.0' },
   { command: 'AchoBeta 2.0', label: 'AchoBeta 2.0' },
   { command: 'AchoBeta 3.0', label: 'AchoBeta 3.0' }
-])
-function handleCommand(command) {
+]);
+const handleCommand = (command) => {
   selectedTeam.value = command;
-}
+};
 const teamEdit = ref('团队架构');
 
-
-//const tableData = ref([]); // 所有数据
-const displayedData = ref([]); // 当前展示的数据
-const loading = ref(false); // 加载状态
-const allDataLoaded = ref(false); // 所有数据是否已加载完毕
-const currentPage = ref(1); // 当前页码
-const pageSize = 9; // 每页展示的数据条数
- 
-    // 模拟获取数据的方法
-const fetchData = async (page) => {
-  loading.value = true;
-  try {
-    // 发起 GET 请求到 API 端点，这里假设 API 接受一个 'page' 参数来分页数据
-    const response = await axios.get(`https://api.example.com/data?page=${page}`);
-    
-    // 检查响应状态并处理数据
-    if (response.status === 200) {
-      const newData = response.data; // 假设响应的数据直接在新数据数组中
-      
-      // 将新数据添加到 tableData 中
-      tableData.value = [...tableData.value, ...newData];
-      
-      // 更新显示的数据（这个函数的具体实现取决于你的需求）
-      updateDisplayedData();
-      
-      // 设置加载状态为 false
-      loading.value = false;
-      
-      // 如果新数据的长度小于 pageSize，则认为所有数据已加载
-      if (newData.length < pageSize) {
-        allDataLoaded.value = true;
-      }
-    } else {
-      // 如果响应状态不是 200，处理错误情况
-      console.error('请求失败，状态码:', response.status);
-      loading.value = false;
+//删除
+function showDelete(id) {
+  ElMessageBox.confirm(
+    '是否确认删除此团队成员？',
+    '提示',
+    {
+      type: 'warning',
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      // 可以添加其他配置选项，如 showCancelButton: true（默认情况下已经是 true）
     }
-  } catch (error) {
-    // 捕获请求过程中的错误
-    console.error('请求过程中发生错误:', error);
-    loading.value = false;
-  }
-};
+  ).then((confirm) => {
+    if (confirm) {
+
+      console.log("用户点击了确认，准备删除ID为", id, "的成员");
+      // 在这里添加删除成员的逻辑，比如发送请求到服务器
+    } else {
+      ElMessage({
+      message: '已取消删除。',
+      type: 'warning'
+    }),
+      console.log("用户点击了取消");
+    }
+  }).catch((error) => {
+    ElMessage.error('出错了！'),
+    console.error("显示消息框时发生错误:", error);
+    // 处理显示消息框过程中可能出现的错误
+  });
+}
+function handleDelete(id){
+  console.log("执行了接口")
+}
+
+
+//团队信息
+const first_teamid = ref();
+const first_team_name = ref('');
+const teams = ref([]);//团队成员信息
+
+//权限组  **需要修改url
+const urls = ref([1]);
+const TeamStrManage = computed(() => urls.value.includes("/team/members/:userid"));//团队架构管理
+const deleteMember = computed(() => urls.value.includes("/team/memberlist/:userid"));//删除团队成员
+const addMember = computed(() => urls.value.includes("/team/memberlist/:userid"));//新增用户
+
+onMounted(async() =>{
+  try {
+        const atoken = localStorage.getItem('atoken');
+        if (!atoken) {
+          ElMessage.error('未找到认证令牌。');
+          return; // 如果没有令牌，则不继续执行
+        }
+
+        const responseFirst = await getPowerApi({atoken});
+        first_teamid.value = responseFirst.first_teamid;
+        first_team_name.value = responseFirst.first_team_name;
  
-    // 更新当前展示的数据
-    const updateDisplayedData = () => {
-      const start = (currentPage.value - 1) * pageSize;
-      const end = start + pageSize;
-      displayedData.value = tableData.value.slice(start, end);
-    };
- 
-    // 监听滚动事件，判断是否加载下一页数据
-    const handleScroll = (event) => {
-      const { scrollTop, scrollHeight, clientHeight } = event.target;
-      if (scrollTop + clientHeight >= scrollHeight - 50 && !loading.value && !allDataLoaded.value) {
-        currentPage.value++;
-        fetchData(currentPage.value);
+        const responseScecond = await getPowerApi({atoken , first_teamid});
+        urls.value = responseScecond.urls;
+        teams.value = responseScecond.teams;
+      } catch (error) {
+        ElMessage.error('数据获取失败。');
+        console.error('Error fetching data:', error);
       }
-    };
- 
-    // 组件挂载时获取第一页数据
-    onMounted(() => {
-      fetchData(currentPage.value);
-    });
+})
 </script>
 
 <template>
   <div class="box">
     <div class="box-header">
-      <span class="title">团队信息</span>
-      <span class="currentTeam">当前团队：</span>
+      <span class="title" style="cursor: default">团队信息</span>
+      <span class="currentTeam" style="cursor: default">当前团队：</span>
       <el-dropdown @command="handleCommand">
       <span class="el-dropdown-link">
         {{ selectedTeam }}
@@ -263,42 +309,38 @@ const fetchData = async (page) => {
         </el-dropdown-menu>
       </template>
     </el-dropdown>
-    <div class="btn-group">
+    <div v-if="urls.length!=0" class="btn-group">
       <el-button type="info" plain class="btn1">
-        <span class="btn-content">{{ teamEdit }}</span>
+        <span v-if="TeamStrManage" class="btn-content">团队架构管理</span>
+        <span v-else class="btn-content">团队架构查看</span>
       </el-button>
-      <el-button type="primary" plain class="btn2">
+      <el-button v-if="addMember" type="primary" plain class="btn2">
         <span class="btn-content">新增用户</span>
       </el-button>
     </div>
     </div>
-    <div class="box-team">
-  <el-table :data="tableData" height="500" stripe style="width: 100%" 
-    @scroll="handleScroll" ref="table"  class="large-text-table">
-    <el-table-column prop="name" label="姓名" width="150" />
-    <el-table-column prop="group" label="组别" width="150" />
-    <el-table-column prop="grade" label="年级" width="150" />
-    <el-table-column prop="major" label="专业" width="200" />
-    <el-table-column prop="present" label="现状" width="150" />
-    <el-table-column prop="phone" label="联系方式" width="180" />
-    <el-table-column label="操作" width="auto">
-      <template #default="scope">
-        <el-button type="text" @click="handleViewDetail(scope.row)">查看详情</el-button>
-        <el-button type="text" @click="handleDelete(scope.row)" class="delete">
-          <el-icon><DeleteFilled /></el-icon>
-          删除
-        </el-button>
-      </template>
-    </el-table-column>
-  </el-table>
-  <div v-if="loading" class="loading-container">
-    <el-icon class="loading-indicator"><Loading /></el-icon>
-    <span>加载中...</span>
-  </div>
-  <div v-else-if="allDataLoaded" class="no-more-data">
-    <span>没有更多数据了</span>
-  </div>
-</div> 
+    <div class="box-team" v-infinite-scroll="loadMore" infinite-scroll-disabled="loading || noMore" infinite-scroll-distance="10" style="cursor: default">
+      <el-table :data="allData" stripe style="width: 100%"  height="550px" class="large-text-table">
+          <el-table-column prop="name" label="姓名"/>
+          <el-table-column prop="group" label="组别"/>
+          <el-table-column prop="grade" label="年级"/>
+          <el-table-column prop="major" label="专业"/>
+          <el-table-column prop="present" label="现状"/>
+          <el-table-column prop="phone" label="联系方式"/>
+          <el-table-column label="操作" width="auto">
+            <template v-slot="scope">
+              <!-- <el-button type="text" @click="handleViewDetail(scope.row.id)">查看详情</el-button> -->
+              <el-button type="text">查看详情</el-button>
+              <el-button v-if="deleteMember" type="text" @click="showDelete(scope.row.id)" class="delete">
+                <el-icon><DeleteFilled /></el-icon>
+                删除
+              </el-button>
+            </template>
+          </el-table-column>
+      </el-table>
+      <p v-if="loading">Loading...</p>
+      <p v-if="noMore">No more data</p>
+    </div> 
   </div>
 </template>
 
@@ -347,20 +389,19 @@ const fetchData = async (page) => {
 .btn-group {
   float: right;
   margin-right: 20px;
-  .btn1 , .btn2 {
-    width: 120px;
-    height: 50px;
-    margin-left:40px;
-  }
-  .btn1:hover {
-    border:solid 2px #1f0202;
-  }
-  .btn2:hover {
-    border:solid 2px #005eff;
-  }
-  .btn-content {
-  font-size: 20px;
 }
+.btn1 , .btn2{
+  padding: 25px;
+  margin-left:40px;
+}
+.btn1:hover {
+    border:solid 1.5px #1f0202;
+}
+.btn2:hover {
+  border:solid 1.5px #005eff;
+}
+.btn-content {
+font-size: 20px;
 }
 
 /*表格*/
@@ -371,24 +412,17 @@ const fetchData = async (page) => {
   padding:5px;
 }
 .delete:hover {
-  color: red; /* 鼠标悬浮时文本和图标颜色变为红色 */
+  color: red; 
 }
 .large-text-table {
-  font-size: 18px; /* 调整为你想要的字体大小 */
+  font-size: 18px; 
 }
-
-.loading-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+.large-text-table .el-table__body-wrapper::-webkit-scrollbar-track {
+  background-color: red; /* 滚动条轨道的颜色 */
 }
-.loading-indicator {
-  margin-right: 10px;
-}
-.no-more-data {
-  text-align: center;
-  padding: 20px;
-  color: #999;
+p {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 16px;
 }
 </style>

@@ -33,5 +33,12 @@
     max-width: 1200px;
     gap: 20px;
   }
+  .progress-box {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1200px;
+    gap: 20px;
+  }
   </style>
   

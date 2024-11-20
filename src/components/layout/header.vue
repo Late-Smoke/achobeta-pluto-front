@@ -113,7 +113,7 @@ const updateCurrentGridData = (currentPage) => {
   <el-header class="header">
     <div v-if="name">
       <!-- 常用设备对话框 -->
-      <el-dialog v-model="deviceDialogVisible" title="常用设备" width="800">
+      <el-dialog v-model="deviceDialogVisible" title="常用设备" width="800" style="cursor: default">
         <span>此处将显示所有您开启了“三十天内自动登录”的设备</span>
         <hr>
       <el-table :data="currentGridData">
@@ -168,9 +168,18 @@ const updateCurrentGridData = (currentPage) => {
       </span>
       <template #dropdown>
         <el-dropdown-menu>
-          <el-dropdown-item @click="navigateToPersonalCenter">个人中心</el-dropdown-item>
-          <el-dropdown-item @click="showDeviceDialog">常用设备</el-dropdown-item>
-          <el-dropdown-item @click="handleLogout">登出</el-dropdown-item>
+          <el-dropdown-item @click="navigateToPersonalCenter">
+            <el-icon><User /></el-icon>
+            <span>个人中心</span>
+          </el-dropdown-item>
+          <el-dropdown-item @click="showDeviceDialog">
+            <el-icon><Monitor /></el-icon>
+            <span>常用设备</span>
+          </el-dropdown-item>
+          <el-dropdown-item @click="handleLogout">
+            <el-icon><SwitchButton /></el-icon>
+            <span>登出</span>
+          </el-dropdown-item>
         </el-dropdown-menu>
       </template>
 
