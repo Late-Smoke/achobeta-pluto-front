@@ -78,114 +78,121 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="personal-center">
-    <!-- 外层容器，包含 header 和 info-box，共享背景 -->
-    <div class="content-wrapper">
-      <div class="header">
-        <el-icon class="back-icon" @click="$router.push('/home')">
+    <div class="personal-center">
+      <!-- 外层容器，包含 header 和 info-box，共享背景 -->
+      <div class="content-wrapper">
+        <div class="header">
+          <el-icon class="back-icon" @click="$router.push('/team')">
             <ArrowLeftBold />
-        </el-icon>
-        <div class="title-with-icon">
-        <h2>个人信息</h2>
-          <!-- 用户图标 -->
-          <img src="@/assets/icons/personal-center-pepole.svg" alt="用户图标" class="info-icon" />
-        </div>
-        <div class="action-section">
-          <!-- 点赞按钮 -->
-          <button @click="toggleLike" class="like-button">
-            <!-- 动态切换 SVG 图标 -->
-            <img :src="isLiked ? hand2 : hand1" alt="点赞图标" class="like-icon" />
-            <span class="like-count">{{ likeCount }}</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="info-box">
-      <!-- 信息展示 -->
-      <div class="info-section">
-        <!-- 第二行 -->
-        <div class="info-row">
-          <div>
-            <span>真实姓名</span>
-            <div>{{ userData.name || '未知' }}</div>
+          </el-icon>
+          <div class="title-with-icon">
+            <h2>个人信息</h2>
+            <!-- 用户图标 -->
+            <img src="@/assets/icons/personal-center-pepole.svg" alt="用户图标" class="info-icon" />
           </div>
-          <div>
-            <span>性别</span>
-            <div>{{ userData.sex || '未知' }}</div>
+          <div class="action-section">
+            <!-- 重置按钮 -->
+            <el-button type="info" @click="resetUserData" class="reset-button">重置</el-button>
+            <!-- 保存按钮 -->
+            <el-button type="primary" @click="saveUserData" class="save-button">保存</el-button>
+            <button @click="toggleLike" class="like-button">
+              <img :src="isLiked ? hand2 : hand1" alt="点赞图标" class="like-icon" />
+              <span class="like-count">{{ likeCount }}</span>
+            </button>
           </div>
-          <div></div>
         </div>
-
-        <!-- 第三行 -->
+  
+        <div class="info-box">
+          <!-- 信息展示 -->
+          <div class="info-section">
+            <!-- 通用行 -->
+            <div class="info-row">
+              <div>
+                <span>真实姓名</span>
+                <el-input style="width: 240px" size="large" placeholder="请输入姓名" />
+              </div>
+              <div>
+                <span>性别</span>
+                <el-select
+                placeholder="请选择性别"
+                size="large"
+                style="width: 130px"
+              >
+                <el-option label="男" value="男"></el-option>
+                <el-option label="女" value="女"></el-option>
+              </el-select>
+              </div>
+            </div>
+  
+            <!-- 第三行 -->
         <div class="info-row">
           <div>
             <span>加入时间</span>
-            <div>{{ userData.create_date || '未知' }}</div>
+            <p>1360000000000000000</p>
           </div>
           <div>
-            <span>所属团队/职位</span>
-            <div>{{ userData.strucet_name || '未知' }}</div>
-          </div>
-          <div></div>
-        </div>
-
-        <!-- 第四行 -->
-        <div class="info-row">
-          <div>
-            <span>身份证号</span>
-            <div>{{ userData.idcard || '未知' }}</div>
-          </div>
-          <div>
-            <span>手机号</span>
-            <div>{{ userData.phone_num || '未知' }}</div>
-          </div>
-          <div>
-            <span>邮箱</span>
-            <div>{{ userData.email || '未知' }}</div>
+            <span>&nbsp&nbsp&nbsp所属团队/职位</span>
+            <p>&nbsp&nbsp&nbsp你好</p>
           </div>
         </div>
 
-        <!-- 第五行 -->
-        <div class="info-row">
-          <div>
-            <span>年级</span>
-            <div>{{ userData.grade || '未知' }}</div>
-          </div>
-          <div>
-            <span>专业</span>
-            <div>{{ userData.major || '未知' }}</div>
-          </div>
-          <div>
-            <span>学号</span>
-            <div>{{ userData.student_id || '未知' }}</div>
-          </div>
-        </div>
-
-        <!-- 第六行 -->
-        <div class="info-row">
-          <div>
-            <span>实习、创业、就职经历</span>
-            <div>{{ userData.experience || '未知' }}</div>
-          </div>
-        </div>
-
-        <!-- 最后一行 -->
-        <div class="info-row">
-          <div>
-            <span>现状</span>
-            <div>{{ userData.status || '未知' }}</div>
-          </div>
-        </div>
-      </div>
-            <!-- 右下角图标 -->
-            <div class="message-icon">
-            <img src="@/assets/icons/personal-center-message.svg" alt="消息图标" />
+            <div class="info-row">
+              <div>
+                <span>身份证号</span>
+                <el-input style="width: 240px" size="large" placeholder="请输入身份证号" />
+              </div>
+              <div>
+                <span>手机号</span>
+                <el-input style="width: 240px" size="large" placeholder="请输入手机号" />
+              </div>
+              <div>
+                <span>邮箱</span>
+                <el-input style="width: 240px" size="large" placeholder="请输入邮箱" />
+              </div>
             </div>
+  
+            <div class="info-row">
+              <div>
+                <span>年级</span>
+                <el-input style="width: 240px" size="large" placeholder="请输入年级" />
+              </div>
+              <div>
+                <span>专业</span>
+                <el-input style="width: 240px" size="large" placeholder="请输入专业" />
+              </div>
+              <div>
+                <span>学号</span>
+                <el-input style="width: 240px" size="large" placeholder="请输入学号" />
+              </div>
+            </div>
+  
+            <!-- 第六行 -->
+            <div class="info-row">
+              <div style="grid-column: 1 / 4; text-align: left;">
+                <span>实习、创业、就职经历</span>
+                <el-input
+                  type="textarea"
+                  :rows="5"
+                  placeholder="请输入实习、创业或就职经历"/>
+              </div>
+            </div>
+  
+            <!-- 最后一行 -->
+            <div class="info-row">
+              <div style="grid-column: 1 / 4; text-align: left;">
+                <span>现状</span>
+                <el-input
+                  type="textarea"
+                  :rows="4"
+                  placeholder="请输入现状"/>
+              </div>
+            </div>
+
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</template>
-
+  </template>  
 
 <style scoped>
 .personal-center {
@@ -194,15 +201,12 @@ onMounted(() => {
 
 /* 包裹 header 和 info-box */
 .content-wrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column; /* 让子元素按列布局 */
   background: linear-gradient(to bottom, #fdf6f0, #d7e3fc); /* 消息框背景颜色 */
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 30px; /* 包裹内边距 */
   margin: 0 auto;
-  height: 750px; /* 固定高度*/
+  height: 750px; /* 固定高度，例如 600px，可根据需求调整 */
   overflow-y: auto; /* 垂直方向允许滚动 */
 }
 
@@ -215,32 +219,6 @@ onMounted(() => {
 
 .back-icon:hover {
   color: #409eff; /* 悬停时变为主题色 */
-}
-
-.info-box {
-  flex: 1; /* 占据剩余空间 */
-  position: relative; /* 使图标相对于滚动内容区域 */
-  margin-top: 20px; /* 为 info-box 添加顶部间距 */
-  padding: 10px 120px; /* 左侧增加额外的内边距 */
-  min-height: 100%; /* 确保内容高度适配父容器 */
-}
-
-.message-icon {
-  position: absolute; /* 绝对定位 */
-  bottom: 10px; /* 距离底部 10px */
-  right: 10px; /* 距离右侧 10px */
-}
-
-.message-icon img {
-  width: 200px; /* 控制图标宽度 */
-  height: 200px; /* 控制图标高度 */
-  opacity: 0.8; /* 轻微透明效果 */
-  transition: opacity 0.5s; /* 添加鼠标悬停效果 */
-}
-
-.message-icon img:hover {
-  opacity: 1; /* 悬停时变为不透明 */
-  cursor: pointer;
 }
 
 .header {
@@ -275,7 +253,22 @@ onMounted(() => {
 .action-section {
   display: flex;
   align-items: center;
+  gap: 10px; /* 保存按钮和点赞按钮之间的间距 */
   margin-left: auto; /* 推动到右侧 */
+}
+
+.save-button {
+  height: 35px; 
+  width: 80px;
+  margin-right:50px; 
+}
+
+.reset-button {
+  background-color: #c6c0c0ec;
+  color: black;
+  height: 35px; 
+  width: 80px;
+  margin-right:15px; 
 }
 
 .like-button {
@@ -298,10 +291,15 @@ onMounted(() => {
   color: #333;
 }
 
+.info-box {
+  margin-top: 20px; /* 为 info-box 添加顶部间距 */
+  padding: 10px 120px; /* 左侧增加额外的内边距 */
+}
+
 .info-section {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 20px;
 }
 
 .info-row {
@@ -313,7 +311,8 @@ onMounted(() => {
 
 .info-row div {
   text-align: left;
-  padding: 2px 0;
+  padding: 0;
+  margin: 0;
 }
 
 .info-row span {
@@ -324,9 +323,13 @@ onMounted(() => {
   margin-bottom: 8px;
 }
 
+.el-input {
+  display: block;
+  width: 100%;
+}
+
 .info-row div div {
   font-size: 0.9em;
   color: #333;
-  margin-bottom: 13px;
 }
 </style>

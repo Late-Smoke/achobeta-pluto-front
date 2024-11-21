@@ -21,12 +21,19 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    padding: 10px;
     gap: 20px;
     width: 100%;
   }
   
   .top-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1300px;
+    gap: 20px;
+  }
+  .progress-box {
     display: flex;
     justify-content: space-between;
     width: 100%;

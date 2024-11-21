@@ -66,7 +66,7 @@ body {
 
 .welcome {
     flex: 0 0 35%; /* 左侧欢迎部分占据35%的宽度 */
-    background-color: #f0f8ff;
+    background-color: #9dcaf2d2;
     padding: 40px;
     display: flex;
     flex-direction: column; /* 垂直排列图片和标题 */
@@ -95,14 +95,15 @@ body {
 
 .login-box {
     flex: 1; /* 占据剩余宽度 */
-    max-width: 400px;
-    padding: 20px;
+    max-width: 500px;
+    padding: 40px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     margin: auto;
     border: 1px solid #ccc;
     border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.373);
 }
 
 .error-message {
@@ -116,7 +117,7 @@ body {
     margin-bottom: 15px;
     display: flex; /* 使用flex布局 */
     align-items: center; /* 垂直居中对齐 */
-    gap: 8px; /* 控制输入框与按钮的间距 */
+    gap: 12px; /* 控制输入框与按钮的间距 */
     width: 100%; /* 确保 input-group 在容器内 */
 }
 
@@ -129,20 +130,22 @@ input[type="tel"], input[type="text"] {
     flex: 1; /* 输入框占据剩余空间 */
     padding: 10px;
     border: 1px solid #ccc; /* 添加边框 */
-    border-radius: 4px; /* 圆角边框 */
+    border-radius: 6px; /* 圆角边框 */
     outline: none; /* 去掉聚焦时的轮廓 */
+    font-size: 18px; /* 增加字体大小 */
+    height: 50px; /* 增加高度 */
     box-sizing: border-box; /* 防止内边距影响尺寸 */
     min-width: 0; /* 避免 flex 布局导致的输入框溢出 */
 }
 
 .get-code {
-    padding: 8px 12px; /* 调整内边距 */
+    padding: 10px 14px; /* 调整内边距 */
     background-color: transparent; /* 按钮背景透明 */
     color: #4682b4; /* 按钮文字颜色为浅蓝色 */
     border: none; /* 移除边框 */
     border-radius: 4px; /* 圆角 */
     cursor: pointer; /* 鼠标悬停效果 */
-    font-size: 12px;
+    font-size: 14px;
     white-space: nowrap; /* 防止文字换行 */
     flex-shrink: 0; /* 防止按钮缩小 */
 }

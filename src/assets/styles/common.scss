@@ -22,7 +22,7 @@ html, body {
 #app {
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: scroll;
 }
 
 /* 确保所有元素遵循盒模型 */
@@ -31,4 +31,6 @@ html, body {
 *::after {
   box-sizing: border-box;
 }
+
+
 
