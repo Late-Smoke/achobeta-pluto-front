@@ -15,7 +15,19 @@ const isLiked = ref(false); // 点赞状态
 const initialIsLiked = ref(false);
 const initialLikeCount = ref(0);
 
+// 性别的选项值
 const selectedGender = ref("null"); // 默认值为 "null"
+
+// 管理权限的选项
+const roleOptions = ref([
+  { label: '无权限', value: 0 },
+  { label: '普通管理员', value: 1 },
+  { label: '超级管理员', value: 2 },
+]);
+
+// 选中的角色（初始化为无权限）
+const selectedRole = ref(0); // 或根据用户的实际权限初始化
+
 
 // 获取用户数据函数
 async function fetchUserData() {
@@ -131,11 +143,27 @@ onMounted(() => {
         <div class="info-row">
           <div>
             <span>加入时间</span>
-            <p>2000/00/00</p>
+            <el-input style="width: 240px" size="large"/>
           </div>
           <div>
             <span>所属团队/职位</span>
             <p>你好</p>
+          </div>
+          <div>
+            <span>管理权限</span>
+            <el-select
+              v-model="selectedRole"
+              size="large"
+              style="width: 205px"
+            >
+            <el-option
+              v-for="option in roleOptions"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+            </el-select>
+
           </div>
         </div>
 
@@ -145,8 +173,11 @@ onMounted(() => {
                 <el-input style="width: 240px" size="large"/>
               </div>
               <div>
-                <span>手机号</span>
-                <p>12345678912</p>
+                <div class="field-label">
+                  <span>手机号码</span>
+                  <span class="required">*</span>
+                </div>
+                <el-input style="width: 240px" size="large"/>
               </div>
               <div>
                 <span>邮箱</span>
@@ -329,6 +360,20 @@ onMounted(() => {
 .el-input {
   display: block;
   width: 100%;
+}
+
+.field-label {
+  position: relative; /* 使内部元素可以相对定位 */
+  display: inline-block; /* 保持内容紧凑排列 */
+  font-size: 1.1em; /* 调整字段标签的字体大小 */
+}
+
+.field-label .required {
+  color: red; /* 红色 */
+  font-size: 1.2em; /* 小红星的字体大小略大 */
+  position: absolute; /* 绝对定位 */
+  top: 0; /* 与标题顶部对齐 */
+  right: -12px; /* 让小红星靠近标题右侧 */
 }
 
 .info-row div div {

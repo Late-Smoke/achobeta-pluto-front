@@ -9,6 +9,10 @@ const handleAddUser = () => {
   router.push('/team/new-user'); // 跳转到新增用户页面的路由
 };
 
+const handleViewDetail = (id) => {
+  router.push(`/team/detail/${id}`); // 跳转到带有用户ID的详情页
+};
+
 const tableData = ref([]);
 
 const allData = ref([
@@ -336,8 +340,7 @@ onMounted(async() =>{
           <el-table-column prop="phone" label="联系方式"/>
           <el-table-column label="操作" width="auto">
             <template v-slot="scope">
-              <!-- <el-button type="text" @click="handleViewDetail(scope.row.id)">查看详情</el-button> -->
-              <el-button type="text">查看详情</el-button>
+              <el-button type="text" @click="handleViewDetail(scope.row.id)">查看详情</el-button>
               <el-button v-if="deleteMember" type="text" @click="showDelete(scope.row.id)" class="delete">
                 <el-icon><DeleteFilled /></el-icon>
                 删除

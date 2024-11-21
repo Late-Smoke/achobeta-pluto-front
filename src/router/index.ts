@@ -35,6 +35,11 @@ const constantRoutes = [
         name: 'NewUser',
       },
       {
+        path: '/team/detail/:id', 
+        component: () => import('@/views/team/components/DetailView.vue'),
+        name: 'DetailView',
+      },      
+      {
         path: 'personal-center', // 新增个人中心路由
         component: () => import('@/views/personal-center/index.vue'),
         name: 'PersonalCenter',
