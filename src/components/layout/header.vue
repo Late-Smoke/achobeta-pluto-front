@@ -110,33 +110,8 @@ const updateCurrentGridData = (currentPage) => {
 </script>
 
 <template>
-  <div id="app">
-    <!-- 固定的 Header -->
     <el-header class="header">
       <div v-if="name">
-        <el-dropdown class="header-right" trigger="hover" placement="bottom-end">
-          <span class="el-dropdown-link" style="cursor: pointer;">
-            <span>欢迎回来，{{ name }}</span>
-            <el-icon>
-              <ArrowDown style="font-size: 20px; color: white;" />
-            </el-icon>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="navigateToPersonalCenter">个人中心</el-dropdown-item>
-              <el-dropdown-item @click="showDeviceDialog">常用设备</el-dropdown-item>
-              <el-dropdown-item @click="handleLogout">登出</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
-      <div v-else>
-        <span>加载中...</span>
-      </div>
-    </el-header>
-
-    <!-- 主内容区域 -->
-    <main class="main-content">
       <el-dialog v-model="deviceDialogVisible" title="常用设备" width="800" style="cursor: default">
         <span>此处将显示所有您开启了“三十天内自动登录”的设备</span>
         <hr>
@@ -192,14 +167,27 @@ const updateCurrentGridData = (currentPage) => {
       </span>
       <template #dropdown>
         <el-dropdown-menu>
-          <el-dropdown-item @click="navigateToPersonalCenter">个人中心</el-dropdown-item>
-          <el-dropdown-item @click="showDeviceDialog">常用设备</el-dropdown-item>
-          <el-dropdown-item @click="handleLogout">登出</el-dropdown-item>
+          <el-dropdown-item @click="navigateToPersonalCenter">
+            <el-icon><User /></el-icon>
+            <span>个人中心</span>
+          </el-dropdown-item>
+          <el-dropdown-item @click="showDeviceDialog">
+            <el-icon><Monitor /></el-icon>
+            <span>常用设备</span>
+          </el-dropdown-item>
+          <el-dropdown-item @click="handleLogout">
+            <el-icon><SwitchButton /></el-icon>
+            <span>登出</span>
+          </el-dropdown-item>
         </el-dropdown-menu>
       </template>
 
     </el-dropdown>
   </div>
+  <div v-else>
+        <span>加载中...</span><!--后期改为骨架屏-->
+      </div>
+  </el-header>
 </template>
 
 <style scoped>
