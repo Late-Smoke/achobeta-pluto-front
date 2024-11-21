@@ -71,7 +71,7 @@ onMounted(async () => {
 <style scoped>
 
 .progress-box {
-  width:1200px;
+  width:1300px;
   height:300px;
   background-color: #fff; /* 白色背景 */
   border-radius: 8px; /* 圆角 */

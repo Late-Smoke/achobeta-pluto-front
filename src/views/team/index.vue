@@ -1,4 +1,12 @@
 <script setup>
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
+// 跳转到新增用户页面
+const handleAddUser = () => {
+  router.push('/team/new-user'); // 跳转到新增用户页面的路由
+};
+
 const tableData = ref([
       {
         name: '张三',
@@ -172,7 +180,6 @@ function handleCommand(command) {
 }
 const teamEdit = ref('团队架构');
 
-
 //const tableData = ref([]); // 所有数据
 const displayedData = ref([]); // 当前展示的数据
 const loading = ref(false); // 加载状态
@@ -267,7 +274,7 @@ const fetchData = async (page) => {
       <el-button type="info" plain class="btn1">
         <span class="btn-content">{{ teamEdit }}</span>
       </el-button>
-      <el-button type="primary" plain class="btn2">
+      <el-button type="primary" plain class="btn2" @click="handleAddUser">
         <span class="btn-content">新增用户</span>
       </el-button>
     </div>
