@@ -1,5 +1,16 @@
 <script setup>
 import { getPowerApi, deleteTeamMemberApi, CreateTeamApi ,getTeamMemberListApi } from '@/utils/api/teamInformation.ts'
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
+// 跳转到新增用户页面
+const handleAddUser = () => {
+  router.push('/team/new-user'); // 跳转到新增用户页面的路由
+};
+
+const handleViewDetail = (id) => {
+  router.push(`/team/detail/${id}`); // 跳转到带有用户ID的详情页
+};
 
 //需要后端传的时候加上指定团队成员信息数组的长度 所有关于allData长度的都要修改为allDataLength
 //const allDataLength = ref('');
@@ -259,7 +270,6 @@ const addTeam = () => {
     if(response.message == "成功") ifCreateTeam.value = true;
   }
 };
-
 //删除
 const ifDelete = ref(false);
 function showDelete(id) {
@@ -372,7 +382,7 @@ onMounted(async() =>{
         <span v-if="TeamStrManage" class="btn-content">团队架构管理</span>
         <span v-else class="btn-content">团队架构查看</span>
       </el-button>
-      <el-button v-if="addMember" type="primary" plain class="btn2">
+      <el-button type="primary" plain class="btn2" @click="handleAddUser">
         <span class="btn-content">新增用户</span>
       </el-button>
     </div>
@@ -387,8 +397,7 @@ onMounted(async() =>{
           <el-table-column prop="phone" label="联系方式"/>
           <el-table-column label="操作" width="auto">
             <template v-slot="scope">
-              <!-- <el-button type="text" @click="handleViewDetail(scope.row.id)">查看详情</el-button> -->
-              <el-button type="text">查看详情</el-button>
+              <el-button type="text" @click="handleViewDetail(scope.row.id)">查看详情</el-button>
               <el-button v-if="deleteMember" type="text" @click="showDelete(scope.row.id)" class="delete">
                 <el-icon><DeleteFilled /></el-icon>
                 删除

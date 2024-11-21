@@ -2,41 +2,51 @@
   <div class="box messages-box">
     <div class="messages-header">
       <h3 class="box-title">消息</h3>
-      <!-- Element Plus 的 el-button -->
       <el-button type="primary" text class="read-all-button" @click="markAllAsRead">全部已读</el-button>
     </div>
+
+    <!-- 消息列表 -->
     <ul class="message-list">
-      <li v-for="message in messages" :key="message.id" class="message-item">
-        <div class="dot-and-content" @click="openModal(message)">
-          <span v-if="!message.read" class="unread-dot"></span>
-          <span :class="['message-content', { read: message.read }]">
-            {{ message.content.length > 22 ? message.content.slice(0, 25) + '...' : message.content }}
+      <li
+        v-for="message in messages"
+        :key="message.user_message_id"
+        class="message-item"
+      >
+        <div class="dot-and-content" @click="handleMessageClick(message)">
+          <span v-if="!message.is_read" class="unread-dot"></span>
+          <span :class="['message-content', { read: message.is_read }]">
+            {{ message.content.length > 22
+              ? message.content.slice(0, 25) + '...'
+              : message.content }}
           </span>
         </div>
         <div class="message-right">
           <span
-            :class="['message-type', { system: message.type === '系统通知', team: message.type === '团队通知' }]"
+            :class="['message-type', { system: message.type === 0, team: message.type === 1 }]"
           >
-            {{ message.type }}
+            {{ message.type === 0 ? '系统通知' : '团队通知' }}
           </span>
         </div>
       </li>
+      <p v-if="messages.length === 0" class="no-data-text">暂无信息</p>
     </ul>
+
+    <!-- 分页控件 -->
     <div class="pagination-container">
       <el-pagination
         background
         layout="prev, pager, next"
-        :total="allMessages.length"
+        :total="totalMessages"
         :page-size="5"
-        v-model:current-page="currentPage"
-        @current-change="updateMessages"
+        :current-page.sync="currentPage"
+        @current-change="handlePageChange"
       />
     </div>
 
     <!-- 弹框 -->
     <el-dialog
       v-model="showModal"
-      title="消息"
+      title="消息详情"
       width="500px"
       align-center
       class="custom-dialog"
@@ -50,73 +60,145 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { getMessages, markMessageAsRead, markMessagesAsRead } from '../utils/message.js';
 
-const totalPages = ref(5);
-const currentPage = ref(1);
-const allMessages = ref([]);
 const messages = ref([]);
+const currentPage = ref(1);
+const totalPages = ref(1);
+const totalMessages = ref(0);
 const showModal = ref(false);
 const modalContent = ref('');
+const timestamp = ref(0);
+let intervalId = null;
+// 获取 atoken
+const atoken = localStorage.getItem('atoken') || '';
 
-function loadMessages() {
-  const savedReadStatus = JSON.parse(localStorage.getItem('readStatus')) || {};
-  const mockData = [];
-  for (let i = 1; i <= 50; i++) {
-    const isRead = !!savedReadStatus[i];
-    mockData.push({
-      id: i,
-      content: `这是第${i}条消息内容。这是完整消息内容，用于展示弹窗效果。`,
-      type: i % 2 === 0 ? '系统通知' : '团队通知',
-      read: isRead,
-    });
+const fetchMessages = async (page = 1) => {
+  try {
+    const data = await getMessages(atoken, page, timestamp.value);
+    if (data.code === 200) {
+      if (data.data.messages && data.data.messages.length > 0) {
+        messages.value = data.data.messages.filter((msg) => msg.content);
+        totalPages.value = data.data.total_pages || 1;
+        totalMessages.value = data.data.total_pages * 5;
+      } else {
+        messages.value = [];
+        totalPages.value = 1;
+        totalMessages.value = 0;
+      }
+    } else {
+      console.error('消息请求失败:', data.message);
+    }
+  } catch (error) {
+    console.error('消息请求错误:', error);
   }
-  allMessages.value = mockData;
-  updateMessages();
-}
+};
 
-function saveReadStatus() {
-  const readStatus = {};
-  allMessages.value.forEach((message) => {
-    readStatus[message.id] = message.read;
-  });
-  localStorage.setItem('readStatus', JSON.stringify(readStatus));
-}
+const handlePageChange = async (page) => {
+  currentPage.value = page;
+  await fetchMessages(page);
+};
 
-function updateMessages() {
-  const start = (currentPage.value - 1) * 5;
-  messages.value = allMessages.value.slice(start, start + 5);
-}
+const markAllAsRead = async () => {
+  const unreadMessages = messages.value.filter((msg) => !msg.is_read);
+  const userMessageIds = unreadMessages.map((msg) => msg.user_message_id);
 
-function goToPage(page) {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-    updateMessages();
+  try {
+    const data = await markMessagesAsRead(userMessageIds);
+    if (data.code === 200) {
+      messages.value.forEach((msg) => (msg.is_read = true));
+    } else {
+      console.error('全部已读请求失败:', data.message);
+    }
+  } catch (error) {
+    console.error('全部已读请求失败:', error);
   }
-}
+};
 
-function markAllAsRead() {
-  allMessages.value.forEach((message) => (message.read = true));
-  saveReadStatus();
-  updateMessages();
-}
+const handleMessageClick = async (message) => {
+  try {
+    modalContent.value = message.content;
+    showModal.value = true;
+    if (!message.is_read) {
+      await markMessageAsRead(message.user_message_id); // 单条消息标记为已读
+      message.is_read = true; // 更新本地状态
+    }
+  } catch (error) {
+    console.error('标记消息为已读失败:', error);
+  }
+};
 
-function openModal(message) {
-  message.read = true;
-  saveReadStatus();
-  updateMessages();
-  modalContent.value = message.content;
-  showModal.value = true;
-}
-
-function closeModal() {
+const closeModal = () => {
   showModal.value = false;
-}
+};
+
+const checkForUpdates = async () => {
+  try {
+    const data = await getMessages(atoken, 1, timestamp.value);
+    if (data.code === 200 && data.data.is_updated) {
+      await fetchMessages(1);
+    }
+  } catch (error) {
+    console.error('更新检查失败:', error);
+  }
+};
+
+const handleVisibilityChange = () => {
+  if (document.hidden) {
+    if (intervalId) clearInterval(intervalId);
+  } else {
+    intervalId = setInterval(checkForUpdates, 60000);
+  }
+};
 
 onMounted(() => {
-  loadMessages();
+  fetchMessages();
+  intervalId = setInterval(checkForUpdates, 60000);
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+});
+
+onUnmounted(() => {
+  if (intervalId) clearInterval(intervalId);
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
 });
 </script>
+
+<style scoped>
+.box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* 分页组件始终在底部 */
+  height: 100%; /* 父容器占满高度 */
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.message-list {
+  flex-grow: 1; /* 消息列表占据剩余空间 */
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  max-height: 250px;
+  list-style: none;
+}
+
+.no-data-text {
+  text-align: center;
+  color: gray;
+  font-size: 1em;
+  margin-top: 20px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+</style>
+
 
 <style scoped>
 /* 消息框样式 */
@@ -227,7 +309,15 @@ onMounted(() => {
 .pagination-container {
   display: flex;
   justify-content: center;
+  align-items: center; /* 确保垂直居中 */
   margin-top: 10px;
+}
+
+.no-data-text {
+  text-align: center;
+  color: gray;
+  font-size: 3em;
+  margin-top: 20px;
 }
 
 /* 自定义弹框样式 */

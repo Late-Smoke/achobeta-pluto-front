@@ -97,14 +97,41 @@ const additionalItems = [
   </div>
 </template>
 
+
 <style lang="scss" scoped>
 .container {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
+  height: 100vh; /* 占满视口高度 */
+  background-color: #99c4f0; /* 蓝色背景 */
+  overflow: hidden; /* 防止全局滚动 */
+  position: relative; /* 确保子元素的定位以此为基准 */
+}
 
-  .menu {
-    width: 100%;
-  }
+/* 菜单样式 */
+.menu {
+  position: fixed; /* 固定菜单 */
+  top: 60px; /* 确保不与 header 重叠 */
+  left: 0;
+  width: 200px; /* 固定宽度 */
+  height: calc(100vh - 60px); /* 剩余高度 */
+  background-color: #ffffff;
+  overflow-y: auto; /* 当内容超出时滚动 */
+  z-index: 1000; /* 确保菜单在 container 之上，但不会完全遮盖 */
+  background-color: transparent; /* 透明背景，让蓝色背景可见 */
+  border-right: 1px solid #ddd; /* 分割线 */
+}
+
+/* 菜单按钮样式 */
+.menu .el-menu-item {
+  background-color: #ffffff !important; /* 按钮背景为白色 */
+  color: #000000 !important; /* 按钮文字为黑色 */
+}
+
+.menu .el-menu-item:hover,
+.menu .el-menu-item.is-active {
+  background-color: #e6f7ff !important; /* 鼠标悬浮或激活时背景色 */
+  color: #409eff !important; /* 鼠标悬浮时文字颜色 */
 }
 </style>

@@ -80,7 +80,7 @@ onMounted(async () => {
 <style scoped>
 /* 主框样式 */
 .box {
-  background-color: #e8d14f79;
+  background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 20px;
@@ -116,10 +116,12 @@ onMounted(async () => {
   color: #fff; /* 子框内文字颜色为白色 */
   position: relative; /* 为图标的定位做准备 */
   transition: transform 0.5s ease, box-shadow 0.4s ease;
+  cursor: pointer; /* 鼠标样式为指针 */
 }
 
 .points-item:hover {
   transform: translateY(-5px);
+  cursor: pointer; /* 鼠标悬停时保持指针样式 */
 }
 
 .bg-blue {

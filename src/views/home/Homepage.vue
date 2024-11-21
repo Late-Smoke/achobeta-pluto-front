@@ -21,7 +21,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    padding: 10px;
     gap: 20px;
     width: 100%;
   }
@@ -30,7 +30,7 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1300px;
     gap: 20px;
   }
   .progress-box {

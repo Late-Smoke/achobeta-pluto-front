@@ -99,7 +99,7 @@ onMounted(async () => {
 
 .progress-box {
   width: 100%; /* 改为百分比宽度，以便自适应 */
-  max-width: 1200px; /* 设置最大宽度 */
+  max-width: 1300px; /* 设置最大宽度 */
   height: 300px;
   background-color: #fff;
   border-radius: 8px;
