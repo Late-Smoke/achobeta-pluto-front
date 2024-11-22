@@ -24,6 +24,7 @@
     padding: 10px;
     gap: 20px;
     width: 100%;
+    height:100%;
   }
   
   .top-row , .progress-box{

@@ -98,9 +98,8 @@ onMounted(async () => {
 <style scoped>
 
 .progress-box {
-  width: 100%; /* 改为百分比宽度，以便自适应 */
-  max-width: 1300px; /* 设置最大宽度 */
-  height: 300px;
+  width: 100%;
+  height: 100%;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -110,20 +109,19 @@ onMounted(async () => {
 .box-title, .calendar {
   font-size: 1.7em;
   font-weight: 530;
-  margin-bottom: 20px;
-  margin-top: 0;
-  margin-left: 20px;
+  margin:20px;
+  margin-right: 0px;
 }
 
 .calendar {
   color:blue;
 }
 
-.demo-tabs > .el-tabs__content {
-  padding: 32px;
+.demo-tabs{
+  padding: 30px;
+  padding-top: 20px;
   color: #6b778c;
-  font-size: 32px;
-  font-weight: 600;
+  font-size: 16px;
 }
 
 .card-container {
@@ -132,6 +130,7 @@ onMounted(async () => {
   gap: 30px;
   width: 100%;
   height: 100%;
+  margin-top: 20px;
 }
  
 .progress-card {
@@ -201,7 +200,7 @@ onMounted(async () => {
 
 .demo-progress {
   display: flex;
-  justify-content: space-around; /* 根据需要调整进度条之间的间距 */
+  justify-content: space-around;
 }
  
 .progress-item {
