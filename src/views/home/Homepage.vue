@@ -37,7 +37,7 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1300px;
     gap: 20px;
   }
   </style>

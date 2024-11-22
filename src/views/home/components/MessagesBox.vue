@@ -168,10 +168,11 @@ onUnmounted(() => {
 /* 消息框样式 */
 .box {
   display: flex;
+  flex: 1;
   flex-direction: column;
   justify-content: space-between; /* 分页组件始终在底部 */
-  height: 100%; /* 父容器占满高度 */
   background-color: #ffffff;
+  height: 360px; /* 高度固定 */
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
