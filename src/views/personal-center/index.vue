@@ -79,113 +79,114 @@ onMounted(() => {
 
 <template>
   <div class="personal-center">
-    <!-- 外层容器，包含 header 和 info-box，共享背景 -->
+    <!-- 外层容器 -->
     <div class="content-wrapper">
       <div class="header">
         <el-icon class="back-icon" @click="$router.push('/home')">
-            <ArrowLeftBold />
+          <ArrowLeftBold />
         </el-icon>
         <div class="title-with-icon">
-        <h2>个人信息</h2>
+          <h2>个人信息</h2>
           <!-- 用户图标 -->
           <img src="@/assets/icons/personal-center-pepole.svg" alt="用户图标" class="info-icon" />
         </div>
         <div class="action-section">
           <!-- 点赞按钮 -->
           <button @click="toggleLike" class="like-button">
-            <!-- 动态切换 SVG 图标 -->
             <img :src="isLiked ? hand2 : hand1" alt="点赞图标" class="like-icon" />
             <span class="like-count">{{ likeCount }}</span>
           </button>
         </div>
       </div>
 
+      <!-- 使用 el-scrollbar 包裹滚动内容 -->
       <div class="info-box">
-      <!-- 信息展示 -->
-      <div class="info-section">
-        <!-- 第二行 -->
-        <div class="info-row">
-          <div>
-            <span>真实姓名</span>
-            <div>{{ userData.name || '未知' }}</div>
-          </div>
-          <div>
-            <span>性别</span>
-            <div>{{ userData.sex || '未知' }}</div>
-          </div>
-          <div></div>
-        </div>
-
-        <!-- 第三行 -->
-        <div class="info-row">
-          <div>
-            <span>加入时间</span>
-            <div>{{ userData.create_date || '未知' }}</div>
-          </div>
-          <div>
-            <span>所属团队/职位</span>
-            <div>{{ userData.strucet_name || '未知' }}</div>
-          </div>
-          <div></div>
-        </div>
-
-        <!-- 第四行 -->
-        <div class="info-row">
-          <div>
-            <span>身份证号</span>
-            <div>{{ userData.idcard || '未知' }}</div>
-          </div>
-          <div>
-            <span>手机号</span>
-            <div>{{ userData.phone_num || '未知' }}</div>
-          </div>
-          <div>
-            <span>邮箱</span>
-            <div>{{ userData.email || '未知' }}</div>
-          </div>
-        </div>
-
-        <!-- 第五行 -->
-        <div class="info-row">
-          <div>
-            <span>年级</span>
-            <div>{{ userData.grade || '未知' }}</div>
-          </div>
-          <div>
-            <span>专业</span>
-            <div>{{ userData.major || '未知' }}</div>
-          </div>
-          <div>
-            <span>学号</span>
-            <div>{{ userData.student_id || '未知' }}</div>
-          </div>
-        </div>
-
-        <!-- 第六行 -->
-        <div class="info-row">
-          <div>
-            <span>实习、创业、就职经历</span>
-            <div>{{ userData.experience || '未知' }}</div>
-          </div>
-        </div>
-
-        <!-- 最后一行 -->
-        <div class="info-row">
-          <div>
-            <span>现状</span>
-            <div>{{ userData.status || '未知' }}</div>
-          </div>
-        </div>
-      </div>
-            <!-- 右下角图标 -->
-            <div class="message-icon">
-            <img src="@/assets/icons/personal-center-message.svg" alt="消息图标" />
+        <el-scrollbar class="custom-scrollbar" height="500px" wrap-style="overflow-y: auto; overflow-x: hidden;">
+          <div class="info-section">
+            <!-- 第二行 -->
+            <div class="info-row">
+              <div>
+                <span>真实姓名</span>
+                <div>{{ userData.name || '未知' }}</div>
+              </div>
+              <div>
+                <span>性别</span>
+                <div>{{ userData.sex || '未知' }}</div>
+              </div>
+              <div></div>
             </div>
+
+            <!-- 第三行 -->
+            <div class="info-row">
+              <div>
+                <span>加入时间</span>
+                <div>{{ userData.create_date || '未知' }}</div>
+              </div>
+              <div>
+                <span>所属团队/职位</span>
+                <div>{{ userData.strucet_name || '未知' }}</div>
+              </div>
+              <div></div>
+            </div>
+
+            <!-- 第四行 -->
+            <div class="info-row">
+              <div>
+                <span>身份证号</span>
+                <div>{{ userData.idcard || '未知' }}</div>
+              </div>
+              <div>
+                <span>手机号</span>
+                <div>{{ userData.phone_num || '未知' }}</div>
+              </div>
+              <div>
+                <span>邮箱</span>
+                <div>{{ userData.email || '未知' }}</div>
+              </div>
+            </div>
+
+            <!-- 第五行 -->
+            <div class="info-row">
+              <div>
+                <span>年级</span>
+                <div>{{ userData.grade || '未知' }}</div>
+              </div>
+              <div>
+                <span>专业</span>
+                <div>{{ userData.major || '未知' }}</div>
+              </div>
+              <div>
+                <span>学号</span>
+                <div>{{ userData.student_id || '未知' }}</div>
+              </div>
+            </div>
+
+            <!-- 第六行 -->
+            <div class="info-row">
+              <div>
+                <span>实习、创业、就职经历</span>
+                <div>{{ userData.experience || '未知' }}</div>
+              </div>
+            </div>
+
+            <!-- 最后一行 -->
+            <div class="info-row">
+              <div>
+                <span>现状</span>
+                <div>{{ userData.status || '未知' }}</div>
+              </div>
+            </div>
+          </div>
+        </el-scrollbar>
+
+        <!-- 右下角图标 -->
+        <div class="message-icon">
+          <img src="@/assets/icons/personal-center-message.svg" alt="消息图标" />
+        </div>
       </div>
     </div>
   </div>
 </template>
-
 
 <style scoped>
 .personal-center {
@@ -194,7 +195,6 @@ onMounted(() => {
 
 /* 包裹 header 和 info-box */
 .content-wrapper {
-  position: relative;
   display: flex;
   flex-direction: column; /* 让子元素按列布局 */
   background: linear-gradient(to bottom, #fdf6f0, #d7e3fc); /* 消息框背景颜色 */
@@ -203,7 +203,6 @@ onMounted(() => {
   padding: 30px; /* 包裹内边距 */
   margin: 0 auto;
   height: 750px; /* 固定高度*/
-  overflow-y: auto; /* 垂直方向允许滚动 */
 }
 
 .back-icon {
@@ -222,18 +221,37 @@ onMounted(() => {
   position: relative; /* 使图标相对于滚动内容区域 */
   margin-top: 20px; /* 为 info-box 添加顶部间距 */
   padding: 10px 120px; /* 左侧增加额外的内边距 */
-  min-height: 100%; /* 确保内容高度适配父容器 */
+  max-height: 800px; /* 限制高度 */
 }
 
-.message-icon {
+.el-scrollbar__bar {
+  background: #cfd8dc; /* 滚动条的背景色 */
+  border-radius: 4px;
+}
+
+.custom-scrollbar ::v-deep(.el-scrollbar__bar) {
+  background: transparent; /* 滚动条背景透明 */
+}
+
+.custom-scrollbar ::v-deep(.el-scrollbar__thumb) {
+  height: 5px; /* 固定滑块高度 */
+  background: #90a4ae; /* 滑块颜色 */
+  border-radius: 4px;  /* 滑块圆角 */
+  opacity: 0.8;        /* 滑块透明度 */
+}
+
+.custom-scrollbar ::v-deep(.el-scrollbar__thumb:hover) {
+  background: #607d8b; /* 鼠标悬停时滑块颜色 */
+}
+
+.info-box .message-icon {
   position: absolute; /* 绝对定位 */
-  bottom: 10px; /* 距离底部 10px */
-  right: 10px; /* 距离右侧 10px */
+  bottom: 0px; /* 距离底部 */
+  right: 0px; /* 距离右侧 */
 }
 
 .message-icon img {
-  width: 200px; /* 控制图标宽度 */
-  height: 200px; /* 控制图标高度 */
+  width: 110px; /* 控制图标大小 */
   opacity: 0.8; /* 轻微透明效果 */
   transition: opacity 0.5s; /* 添加鼠标悬停效果 */
 }
