@@ -24,21 +24,19 @@
     padding: 10px;
     gap: 20px;
     width: 100%;
+    height:100%;
   }
   
-  .top-row {
+  .top-row ,.progress-box {
     display: flex;
     justify-content: space-between;
     width: 100%;
     max-width: 1300px;
     gap: 20px;
   }
+
   .progress-box {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 1200px;
-    gap: 20px;
+    height:100%;
   }
   </style>
   
