@@ -165,6 +165,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* 消息框样式 */
 .box {
   display: flex;
   flex-direction: column;
@@ -174,41 +175,6 @@ onUnmounted(() => {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
-}
-
-.message-list {
-  flex-grow: 1; /* 消息列表占据剩余空间 */
-  margin: 0;
-  padding: 0;
-  overflow-y: auto;
-  max-height: 250px;
-  list-style: none;
-}
-
-.no-data-text {
-  text-align: center;
-  color: gray;
-  font-size: 1em;
-  margin-top: 20px;
-}
-
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
-}
-</style>
-
-
-<style scoped>
-/* 消息框样式 */
-.box {
-  background-color: #ffffff; /* 消息框背景颜色 */
-  border-radius: 8px; /* 圆角 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 阴影效果 */
-  padding: 20px; /* 内边距 */
-  flex: 1;
-  height: 360px; /* 高度固定 */
 }
 
 .box-title {
