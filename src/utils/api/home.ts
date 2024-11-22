@@ -10,13 +10,13 @@ export function fetchNameApi(params) {
 ////常用设备
 
 //分页+设备信息
-export function getDevicesApi(params) {
-    return apiClient.get('https://api.example.com/data', { params });
+export function getDevicesApi(data) {
+    return apiClient.post('/api/devices/show',  data );
 }
 
 //下线
 export function removeDeviceApi(params) {
-    return apiClient.get('https://api.example.com/data', { params });
+    return apiClient.delete('/api/devices/remove', { params });
 }
 
 ////项目进度

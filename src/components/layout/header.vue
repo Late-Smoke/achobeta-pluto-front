@@ -48,8 +48,8 @@ const currentGridData = ref([
 
 //分页
 const totalDevices = ref(10); // 假设总共有10台设备
-const pageSize = 5; // 开发阶段为3，后期更改为每页显示5台设备 
-const currentPage = ref('1'); // 当前页码
+const pageSize = 4; // 开发阶段为3，后期更改为每页显示5台设备 
+const currentPage = ref(1); // 当前页码
 
 // 更新当前页数据
 const buttonStates= ref([]);
@@ -58,19 +58,15 @@ const handlePageChange = (page) => {
   currentPage.value = page;
   updateCurrentGridData(currentPage);
 }
-const updateCurrentGridData = (currentPage) => {
-  // const startIndex = (currentPage.value - 1) * pageSize;
-  // const endIndex = currentPage.value * pageSize;
-  // currentGridData.value = gridData.value.slice(startIndex, endIndex);
-  getDevicesApi(atoken,currentPage)
-  .then(data => {
-    currentGridData.value = data.gridData.value;
-    totalDevices.value = data.total.value;
-  })
-  .catch(error => {
+const updateCurrentGridData = async(currentPage) => {
+  try{
+    const response = await getDevicesApi({page_number:1,line_number:4});
+    currentGridData.value = response.data.devices;
+    totalDevices.value = response.data.total;
+}
+  catch(error){
     ElMessage.error('成员信息获取失败。');
     console.error('Error fetching devices:', error);
-  });
 }
 
 //下线
@@ -107,6 +103,7 @@ const updateCurrentGridData = (currentPage) => {
         console.error('Error fetching name:', error);
     });
     });
+  }
 </script>
 
 <template>
@@ -227,5 +224,12 @@ const updateCurrentGridData = (currentPage) => {
   display: flex;
   align-items: center;
   font-size: 20px;
+  border: none !important; /* 取消边框 */
+  outline: none !important; /* 取消轮廓线 */
+}
+
+.el-dropdown-link:hover {
+  border: none !important; /* 取消边框 */
+  outline: none !important; /* 取消轮廓线 */
 }
 </style>

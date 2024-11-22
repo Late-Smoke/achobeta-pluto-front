@@ -1,6 +1,5 @@
 <script setup>
-import { getPowerApi } from '@/utils/api/teamInformation.ts'
-
+import { getPowerApi, deleteTeamMemberApi, CreateTeamApi ,getTeamMemberListApi } from '@/utils/api/teamInformation.ts'
 import { useRouter } from 'vue-router';
 const router = useRouter();
 
@@ -13,8 +12,8 @@ const handleViewDetail = (id) => {
   router.push(`/team/detail/${id}`); // 跳转到带有用户ID的详情页
 };
 
-const tableData = ref([]);
-
+//需要后端传的时候加上指定团队成员信息数组的长度 所有关于allData长度的都要修改为allDataLength
+//const allDataLength = ref('');
 const allData = ref([
       {
         id:1,
@@ -197,6 +196,7 @@ const allData = ref([
         phone: '13800000005'
       }
     ]);
+const tableData = ref([]);
 const loading = ref(false);
 const pageSize = 9; // 每次加载的数据量
 let currentPage = 1;
@@ -206,29 +206,72 @@ const noMore = computed(() => currentPage * pageSize >= allData.value.length);
 const loadMore = () => {
   if (loading.value || noMore.value) return;
   loading.value = true;
-  setTimeout(() => {
-    const start = (currentPage - 1) * pageSize;
-    const end = currentPage * pageSize;
-    tableData.value = [...tableData.value, ...allData.value.slice(start, end)];
+  async() => {
+    const response = await getTeamMemberListApi({selectedTeamId, currentPage , pageSize});
+    tableData.value = response.members;
     currentPage++;
     loading.value = false;
-  }, 2000); // 模拟异步加载延迟
+  }
 };
-// 初始加载第一页数据//while(currentPage < allData.value.length)
 loadMore();
 
-//拉框
-const selectedTeam = ref('AchoBeta 1.0');
+//下拉框
+const selectedTeamId = ref(0);
+const selectedTeamName = ref('第一个团队名称');
 const dropdownItems = ref([
-  { command: 'AchoBeta 1.0', label: 'AchoBeta 1.0' },
-  { command: 'AchoBeta 2.0', label: 'AchoBeta 2.0' },
-  { command: 'AchoBeta 3.0', label: 'AchoBeta 3.0' }
+  { team_id: 0, team_name: '第一个团队名称' },
+  { team_id: 1, team_name: 'AchoBeta 1.0'},
+  { team_id: 2, team_name: 'AchoBeta 2.0'},
+  { team_id: 3, team_name: 'AchoBeta 3.0'}
 ]);
-const handleCommand = (command) => {
-  selectedTeam.value = command;
+const teamName = ref('');
+const showAddTeam = ref(true);
+const hoverItem = ref(null);
+//团队信息
+const first_teamid = ref(0);
+const first_team_name = ref('第一个团队名称');
+const ifCreateTeam = ref(false);
+
+const selectTeam = (item) => {
+  if (!item.isDisabled) {
+    selectedTeamId.value = item.team_id;
+    selectedTeamName.value = item.team_name;
+    // 禁用已选择的团队
+    dropdownItems.value = dropdownItems.value.map(i =>
+      i.team_id === item.team_id ? { ...i, isDisabled: true } : i
+    );
+    // 隐藏输入框，显示下拉菜单项
+    showAddTeam.value = true;
+    currentPage = 1;
+  }
 };
-const teamEdit = ref('团队架构');
+
+const toggleAddTeam = () => {
+  showAddTeam.value = !showAddTeam.value;
+  if (!showAddTeam.value) {
+    // 聚焦到输入框
+    nextTick(() => {
+      if (this.$refs.teamInput) {
+        this.$refs.teamInput.focus();
+      }
+    });
+  }
+};
+
+const addTeam = () => {
+  if (teamName.value.trim()) {
+    const newTeam = { team_id: dropdownItems.value.length, team_name: teamName.value};
+    dropdownItems.value.push(newTeam);
+    selectedTeamId.value = newTeam.team_id;
+    selectedTeamName.value = newTeam.team_name;
+    toggleAddTeam(); // 隐藏输入框，显示下拉菜单项
+    teamName.value = ''; // 清空输入框
+    const response = CreateTeamApi({teamName});
+    if(response.message == "成功") ifCreateTeam.value = true;
+  }
+};
 //删除
+const ifDelete = ref(false);
 function showDelete(id) {
   ElMessageBox.confirm(
     '是否确认删除此团队成员？',
@@ -237,13 +280,11 @@ function showDelete(id) {
       type: 'warning',
       confirmButtonText: '确认',
       cancelButtonText: '取消',
-      // 可以添加其他配置选项，如 showCancelButton: true（默认情况下已经是 true）
     }
   ).then((confirm) => {
     if (confirm) {
-
+      handleDelete(id);
       console.log("用户点击了确认，准备删除ID为", id, "的成员");
-      // 在这里添加删除成员的逻辑，比如发送请求到服务器
     } else {
       ElMessage({
       message: '已取消删除。',
@@ -258,20 +299,20 @@ function showDelete(id) {
   });
 }
 function handleDelete(id){
-  console.log("执行了接口")
+  console.log("执行了接口");
+  const response = deleteTeamMemberApi({id,selectedTeamId});
+  if(response.message == '删除成功') ifDelete.value = true;
 }
 
-
-//团队信息
-const first_teamid = ref();
-const first_team_name = ref('');
-const teams = ref([]);//团队成员信息
-
-//权限组  **需要修改url
-const urls = ref([1]);
-const TeamStrManage = computed(() => urls.value.includes("/team/members/:userid"));//团队架构管理
-const deleteMember = computed(() => urls.value.includes("/team/memberlist/:userid"));//删除团队成员
-const addMember = computed(() => urls.value.includes("/team/memberlist/:userid"));//新增用户
+//权限组
+const urls = ref([1]);//测试期间为[1]
+const TeamStrManage = true;
+const deleteMember = true;
+const addMember = true; 
+//为测试，将一下注掉，统一设为true
+// const TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
+// const deleteMember = computed(() => urls.value.includes("/api/team/memberlist/delete"));//删除团队成员
+// const addMember = computed(() => urls.value.includes("/api/team/memberlist/create"));//新增团队成员
 
 onMounted(async() =>{
   try {
@@ -284,10 +325,14 @@ onMounted(async() =>{
         const responseFirst = await getPowerApi({atoken});
         first_teamid.value = responseFirst.first_teamid;
         first_team_name.value = responseFirst.first_team_name;
+        selectedTeamId.value = first_teamid;
+        selectedTeamName.value = first_team_name;//优先显示用户第一个团队的信息
  
         const responseScecond = await getPowerApi({atoken , first_teamid});
         urls.value = responseScecond.urls;
-        teams.value = responseScecond.teams;
+        dropdownItems.value = responseScecond.teams;
+
+        loadMore();
       } catch (error) {
         ElMessage.error('数据获取失败。');
         console.error('Error fetching data:', error);
@@ -300,23 +345,35 @@ onMounted(async() =>{
     <div class="box-header">
       <span class="title" style="cursor: default">团队信息</span>
       <span class="currentTeam" style="cursor: default">当前团队：</span>
-      <el-dropdown @command="handleCommand">
-      <span class="el-dropdown-link">
-        {{ selectedTeam }}
-        <el-icon class="el-icon--right">
-          <CaretBottom />
-        </el-icon>
-      </span>
-      <template #dropdown>
+      <el-dropdown class="downMenu" @command="handleCommand">
+        <span class="el-dropdown-link">
+          {{ selectedTeamName }}
+          <el-icon class="el-icon--right">
+            <CaretBottom />
+          </el-icon>
+        </span>
+        <template #dropdown>
         <el-dropdown-menu>
-          <el-dropdown-item 
-            v-for="item in dropdownItems" 
-            :key="item.command" 
-            :command="item.command"
-            :disabled="item.command === selectedTeam"
-            :class="{ 'is-disabled': item.command === selectedTeam }">
-            {{ item.label }}
+          <el-dropdown-item
+            v-for="item in dropdownItems"
+            :key="item.team_id"
+            :class="{ 'is-disabled': item.team_id === selectedTeamId }"
+            @click.stop="selectTeam(item)"
+            @mouseenter="hoverItem = item"
+            @mouseleave="hoverItem = null">
+            <span>{{ item.team_name }}</span>
           </el-dropdown-item>
+          <el-dropdown-item v-if="showAddTeam" @click="toggleAddTeam">
+            <span>新增团队</span>
+          </el-dropdown-item>
+          <el-input
+            v-else
+            v-model="teamName"
+            style="width: 120px; margin-left: 5px;"
+            placeholder="请输入团队名称"
+            @keyup.enter="addTeam"
+            ref="teamInput"
+          />
         </el-dropdown-menu>
       </template>
     </el-dropdown>
@@ -380,6 +437,10 @@ onMounted(async() =>{
   padding-left: 0.5em;
   margin-left: 1em;;
 }
+.el-dropdown-link:hover {
+  border: none !important; /* 取消边框 */
+  outline: none !important; /* 取消轮廓线 */
+}
 .el-dropdown-link {
   cursor: pointer;
   color: #000000;
@@ -387,6 +448,8 @@ onMounted(async() =>{
   align-items: center;
   font-size: 1.5em;
   margin-top: 14px;
+  border: none !important; /* 取消边框 */
+  outline: none !important; /* 取消轮廓线 */
 }
 .el-dropdown-menu__item.is-disabled {
   color: gray;
