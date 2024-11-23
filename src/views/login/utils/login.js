@@ -31,8 +31,7 @@ export function login(phoneInput, captchaInput, captchaError, loginRemember) {
   axios.post('/api/login/login', {
       phone: String(phoneNumber),  // 将手机号转为字符串
       code: String(captcha),       // 将验证码转为字符串
-      auto_login: true,            // 添加 auto_login 参数并设置为 true
-      remember: remember,            // 三十天免登录
+      auto_login: remember           // 添加 auto_login 参数并设置为 true
     })
     .then(response => {
       const data = response.data;

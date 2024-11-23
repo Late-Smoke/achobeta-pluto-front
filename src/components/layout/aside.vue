@@ -40,7 +40,7 @@ const additionalItems = [
 ];
 </script>
 
-<template>
+<template v-slop="LayoutAside">
   <div class="container">
     <el-menu class="menu" default-active="1">
       <template v-for="item in routers" :key="item.path">

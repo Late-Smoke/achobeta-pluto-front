@@ -10,8 +10,15 @@ export function fetchNameApi(params) {
 ////常用设备
 
 //分页+设备信息
-export function getDevicesApi(data) {
-    return apiClient.post('/api/devices/show',  data );
+export function getDevicesApi(params) {
+    const atoken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOjE4NTk5MzI3NjAxNjUwNjA2MDgsInR5cGUiOiJhdG9rZW4iLCJleHAiOjE3MzIzMjI1MjMsImlzcyI6IjE4NTk5NDA0MDc3OTA1Mzg3NTIiLCJuYmYiOjE3MzIyNzkzMjN9.V1frj6DvSeMhbT_IwYz6T8z9Cex5-zBnRga7jIUHb0k';
+    return apiClient.get('/api/devices/show',  {
+        params:params,
+        headers:
+        {
+            'Authorization': `${atoken}`, // 正确地将atoken作为请求头传递
+        }
+    } );
 }
 
 //下线
