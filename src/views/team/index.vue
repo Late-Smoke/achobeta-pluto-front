@@ -8,9 +8,15 @@ const handleAddUser = () => {
   router.push('/team/new-user'); // 跳转到新增用户页面的路由
 };
 
-const handleViewDetail = (id) => {
+const handleViewDetail = (id, selectedTeamId) => {
   router.push(`/team/detail/${id}`); // 跳转到带有用户ID的详情页
 };
+
+//团队架构查看和管理跳转
+const teamManageVShow = ref(false);
+const handleTeamManage = () => {
+  teamManageVShow.value = true;
+}
 
 //需要后端传的时候加上指定团队成员信息数组的长度 所有关于allData长度的都要修改为allDataLength
 //const allDataLength = ref('');
@@ -238,7 +244,7 @@ const selectTeam = (item) => {
     selectedTeamName.value = item.team_name;
     // 禁用已选择的团队
     dropdownItems.value = dropdownItems.value.map(i =>
-      i.team_id === item.team_id ? { ...i, isDisabled: true } : i
+      i.team_id === item.team_id ? { ...i, isDisabled: true } : { ...i, isDisabled: false }
     );
     // 隐藏输入框，显示下拉菜单项
     showAddTeam.value = true;
@@ -306,13 +312,283 @@ function handleDelete(id){
 
 //权限组
 const urls = ref([1]);//测试期间为[1]
-const TeamStrManage = true;
+const teamStrManage = true;
 const deleteMember = true;
 const addMember = true; 
 //为测试，将一下注掉，统一设为true
 // const TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
 // const deleteMember = computed(() => urls.value.includes("/api/team/memberlist/delete"));//删除团队成员
 // const addMember = computed(() => urls.value.includes("/api/team/memberlist/create"));//新增团队成员
+
+//团队架构
+const teamStructure = [
+  {
+    value: 'guide',
+    label: 'Guide',
+    children: [
+      {
+        value: 'disciplines',
+        label: 'Disciplines',
+        children: [
+          {
+            value: 'consistency',
+            label: 'Consistency',
+          },
+          {
+            value: 'feedback',
+            label: 'Feedback',
+          },
+          {
+            value: 'efficiency',
+            label: 'Efficiency',
+          },
+          {
+            value: 'controllability',
+            label: 'Controllability',
+          },
+        ],
+      },
+      {
+        value: 'navigation',
+        label: 'Navigation',
+        children: [
+          {
+            value: 'side nav',
+            label: 'Side Navigation',
+          },
+          {
+            value: 'top nav',
+            label: 'Top Navigation',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    value: 'component',
+    label: 'Component',
+    children: [
+      {
+        value: 'basic',
+        label: 'Basic',
+        children: [
+          {
+            value: 'layout',
+            label: 'Layout',
+          },
+          {
+            value: 'color',
+            label: 'Color',
+          },
+          {
+            value: 'typography',
+            label: 'Typography',
+          },
+          {
+            value: 'icon',
+            label: 'Icon',
+          },
+          {
+            value: 'button',
+            label: 'Button',
+          },
+        ],
+      },
+      {
+        value: 'form',
+        label: 'Form',
+        children: [
+          {
+            value: 'radio',
+            label: 'Radio',
+          },
+          {
+            value: 'checkbox',
+            label: 'Checkbox',
+          },
+          {
+            value: 'input',
+            label: 'Input',
+          },
+          {
+            value: 'input-number',
+            label: 'InputNumber',
+          },
+          {
+            value: 'select',
+            label: 'Select',
+          },
+          {
+            value: 'cascader',
+            label: 'Cascader',
+          },
+          {
+            value: 'switch',
+            label: 'Switch',
+          },
+          {
+            value: 'slider',
+            label: 'Slider',
+          },
+          {
+            value: 'time-picker',
+            label: 'TimePicker',
+          },
+          {
+            value: 'date-picker',
+            label: 'DatePicker',
+          },
+          {
+            value: 'datetime-picker',
+            label: 'DateTimePicker',
+          },
+          {
+            value: 'upload',
+            label: 'Upload',
+          },
+          {
+            value: 'rate',
+            label: 'Rate',
+          },
+          {
+            value: 'form',
+            label: 'Form',
+          },
+        ],
+      },
+      {
+        value: 'data',
+        label: 'Data',
+        children: [
+          {
+            value: 'table',
+            label: 'Table',
+          },
+          {
+            value: 'tag',
+            label: 'Tag',
+          },
+          {
+            value: 'progress',
+            label: 'Progress',
+          },
+          {
+            value: 'tree',
+            label: 'Tree',
+          },
+          {
+            value: 'pagination',
+            label: 'Pagination',
+          },
+          {
+            value: 'badge',
+            label: 'Badge',
+          },
+        ],
+      },
+      {
+        value: 'notice',
+        label: 'Notice',
+        children: [
+          {
+            value: 'alert',
+            label: 'Alert',
+          },
+          {
+            value: 'loading',
+            label: 'Loading',
+          },
+          {
+            value: 'message',
+            label: 'Message',
+          },
+          {
+            value: 'message-box',
+            label: 'MessageBox',
+          },
+          {
+            value: 'notification',
+            label: 'Notification',
+          },
+        ],
+      },
+      {
+        value: 'navigation',
+        label: 'Navigation',
+        children: [
+          {
+            value: 'menu',
+            label: 'Menu',
+          },
+          {
+            value: 'tabs',
+            label: 'Tabs',
+          },
+          {
+            value: 'breadcrumb',
+            label: 'Breadcrumb',
+          },
+          {
+            value: 'dropdown',
+            label: 'Dropdown',
+          },
+          {
+            value: 'steps',
+            label: 'Steps',
+          },
+        ],
+      },
+      {
+        value: 'others',
+        label: 'Others',
+        children: [
+          {
+            value: 'dialog',
+            label: 'Dialog',
+          },
+          {
+            value: 'tooltip',
+            label: 'Tooltip',
+          },
+          {
+            value: 'popover',
+            label: 'Popover',
+          },
+          {
+            value: 'card',
+            label: 'Card',
+          },
+          {
+            value: 'carousel',
+            label: 'Carousel',
+          },
+          {
+            value: 'collapse',
+            label: 'Collapse',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    value: 'resource',
+    label: 'Resource',
+    children: [
+      {
+        value: 'axure',
+        label: 'Axure Components',
+      },
+      {
+        value: 'sketch',
+        label: 'Sketch Templates',
+      },
+      {
+        value: 'docs',
+        label: 'Design Documentation',
+      },
+    ],
+  },
+]
 
 onMounted(async() =>{
   try {
@@ -323,14 +599,15 @@ onMounted(async() =>{
         }
 
         const responseFirst = await getPowerApi({atoken});
-        first_teamid.value = responseFirst.first_teamid;
-        first_team_name.value = responseFirst.first_team_name;
+        first_teamid.value = responseFirst.data.first_teamid;
+        first_team_name.value = responseFirst.data.first_team_name;
         selectedTeamId.value = first_teamid;
         selectedTeamName.value = first_team_name;//优先显示用户第一个团队的信息
  
         const responseScecond = await getPowerApi({atoken , first_teamid});
-        urls.value = responseScecond.urls;
-        dropdownItems.value = responseScecond.teams;
+        urls.value = responseScecond.data.urls;
+        dropdownItems.value = responseScecond.data.teams;
+        level.value = responseScecond.data.level;
 
         loadMore();
       } catch (error) {
@@ -341,6 +618,53 @@ onMounted(async() =>{
 </script>
 
 <template>
+  <el-dialog v-model="teamManageVShow" width="800" style="cursor: default " center >
+    <template #title>
+      <div class="custom-title">
+        <el-icon><Tools /></el-icon>
+        团队架构管理
+      </div>
+    </template>
+    <span>此处将显示指定团队的架构”的设备</span>
+    <hr>
+    <!--团队下拉框-->
+    <div class="header">
+    <span class="teamTitle" style="cursor: default">当前团队：</span>
+    <el-dropdown class="teamDownMenu" @command="handleCommand">
+        <span class="el-dropdown-link">
+          {{ selectedTeamName }}
+          <el-icon class="el-icon--right">
+            <CaretBottom />
+          </el-icon>
+        </span>
+        <template #dropdown>
+        <el-dropdown-menu>
+          <el-dropdown-item
+            v-for="item in dropdownItems"
+            :key="item.team_id"
+            :class="{ 'is-disabled': item.team_id === selectedTeamId }"
+            @click.stop="selectTeam(item)"
+            @mouseenter="hoverItem = item"
+            @mouseleave="hoverItem = null">
+            <span>{{ item.team_name }}</span>
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
+  </div>
+
+    <!--团队架构-->
+    <div class="container">
+    <el-cascader-panel :options="teamStructure">
+    <template #default="{ node, data}">
+      <span>{{ data.label }}</span>
+      <span v-if="!node.isLeaf"> ({{ data.children.length }})</span>
+    </template>
+</el-cascader-panel>
+  </div>
+  </el-dialog>
+
+
   <div class="box">
     <div class="box-header">
       <span class="title" style="cursor: default">团队信息</span>
@@ -379,10 +703,10 @@ onMounted(async() =>{
     </el-dropdown>
     <div v-if="urls.length!=0" class="btn-group">
       <el-button type="info" plain class="btn1">
-        <span v-if="TeamStrManage" class="btn-content">团队架构管理</span>
-        <span v-else class="btn-content">团队架构查看</span>
+        <span v-if="teamStrManage" class="btn-content" @click="handleTeamManage">团队架构管理</span>
+        <span v-else class="btn-content" @click="handleTeamView">团队架构查看</span>
       </el-button>
-      <el-button type="primary" plain class="btn2" @click="handleAddUser">
+      <el-button v-if="addMember" type="primary" plain class="btn2" @click="handleAddUser">
         <span class="btn-content">新增用户</span>
       </el-button>
     </div>
@@ -397,7 +721,7 @@ onMounted(async() =>{
           <el-table-column prop="phone" label="联系方式"/>
           <el-table-column label="操作" width="auto">
             <template v-slot="scope">
-              <el-button type="text" @click="handleViewDetail(scope.row.id)">查看详情</el-button>
+              <el-button type="text" @click="handleViewDetail(scope.row.id, selectedTeamId)">查看详情</el-button>
               <el-button v-if="deleteMember" type="text" @click="showDelete(scope.row.id)" class="delete">
                 <el-icon><DeleteFilled /></el-icon>
                 删除
@@ -497,5 +821,34 @@ p {
     text-align: center;
     margin: 20px 0;
     font-size: 16px;
+}
+
+
+/*团队架构管理*/
+.teamDialog .el-dialog__wrapper{
+  min-height:500px !important;
+}
+.header {
+  display:flex;
+  width:100%;
+  margin:0px;
+}
+.custom-title {
+  font-size: 2em;
+  font-weight: 600px;
+}
+.teamTitle {
+  align-content: center;
+  font-weight: 500;
+  color:#000000;
+  font-size: 1.5em;
+  padding-top:15px;
+  margin-left:20px;
+}
+.teamDownMenu {
+  align-content: center;
+}
+.container {
+  margin:20px;
 }
 </style>
