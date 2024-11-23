@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router';
 import { ArrowDown } from '@element-plus/icons-vue';
 import { fetchNameApi, getDevicesApi, removeDeviceApi } from '@/utils/api/home'
+import { exitSystem } from '@/components/layout/utils/Logout'; // 引入 exitSystem 函数
 
 const router = useRouter();
 const name = ref('林浅');
@@ -12,9 +13,34 @@ const navigateToPersonalCenter = () => {
 };
 
 //// 退出登录
-const handleLogout = () => {
-  console.log('执行登出操作');
-  router.push('/login');
+const handleLogout = async () => {
+  try {
+    // 调用 exitSystem 接口
+    const result = await exitSystem();
+    if (result.success) {
+      ElMessage.success(result.message); // 成功提示
+      clearLocalStorage();
+      // 跳转到登录页面，确保用户无法通过返回按钮回到原页面
+      router.replace('/login');
+    } else {
+      ElMessage.warning(result.message); // 警告提示
+      if (result.message.includes('登录已过期') || result.message.includes('无效')) {
+        clearLocalStorage();
+        router.replace('/login');
+      }
+    }
+  } catch (error) {
+    console.error('退出登录出错:', error);
+    ElMessage.error('退出失败，请稍后重试');
+  } 
+};
+// 清理本地存储
+const clearLocalStorage = () => {
+  localStorage.removeItem('atoken');
+  localStorage.removeItem('rtoken');
+  localStorage.removeItem('userid');
+  localStorage.removeItem('user_agent');
+  localStorage.removeItem('ip');
 };
   
 ////常用设备
@@ -57,7 +83,8 @@ const handlePageChange = (page) => {
   buttonStates.value = [];
   currentPage.value = page;
   updateCurrentGridData(currentPage);
-}
+};
+
 const updateCurrentGridData = async(currentPage) => {
   try{
     const response = await getDevicesApi({page_number:1,line_number:4});

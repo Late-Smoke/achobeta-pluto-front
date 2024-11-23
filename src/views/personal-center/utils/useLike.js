@@ -14,7 +14,7 @@ export default function useLike(likeCount, initialLikeState) {
       // 异步发送请求
       const response = await axios.put('/api/PutLikeCount', {
         atoken: localStorage.getItem('atoken'),
-        userid: localStorage.getItem('userid'),
+        member_id: localStorage.getItem('userid'),
       });
 
       if (response.data.code === 200) {

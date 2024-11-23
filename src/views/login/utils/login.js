@@ -1,20 +1,7 @@
 import axios from 'axios';
 
-
-function parseJwt(token) {
-  // 解析 JWT 中的 payload 部分
-  const base64Url = token.split('.')[1];
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  const jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split('')
-      .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-      .join('')
-  );
-  return JSON.parse(jsonPayload);
-}
-
 export function login(phoneInput, captchaInput, captchaError, loginRemember) {
+  const router = useRouter(); // 获取 Vue Router 实例
   const phoneNumber = phoneInput.value;
   const captcha = captchaInput.value;
   const remember = loginRemember;
@@ -38,25 +25,19 @@ export function login(phoneInput, captchaInput, captchaError, loginRemember) {
       const data = response.data;
       console.log('后端响应内容:', data); // 打印后端响应内容
 
-      if (data.code === 200 && data.Message === '成功') { 
+      if (data.code === 200) { 
         // 成功处理逻辑
         alert('登录成功');
-        const responseData = data.Data;
+        const responseData = data.data;
 
          // 存储必要的登录信息
          localStorage.setItem('atoken', responseData.atoken);    // 令牌
          if (remember && responseData.rtoken) localStorage.setItem('rtoken', responseData.rtoken); // 当用户勾选了且rtokrn存在时，刷新令牌
-         localStorage.setItem('service_id', responseData['service id']); // 业务id
          localStorage.setItem('user_agent', responseData.user_agent); // 用户代理信息
          localStorage.setItem('ip', responseData.ip); // IP地址
 
-         // 解析 atoken 以获取 userid
-        const payload = parseJwt(responseData.atoken);
-        if (payload && payload.userid) {
-          localStorage.setItem('userid', payload.userid); // 存储用户 ID
-        } else {
-          console.warn('无法从 atoken 中提取 userid');
-        }
+          // 使用 Vue Router 跳转到主页
+          router.push('/home');
       } else {
         captchaError.style.display = 'block';
         captchaError.textContent = data.Message || '验证码错误，请重试';
