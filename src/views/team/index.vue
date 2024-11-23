@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 // 跳转到新增用户页面
-const handleAddUser = (id, selectedTeamId) => {
+const handleAddUser = (selectedTeamId) => {
   router.push('/team/new-user'); // 跳转到新增用户页面的路由
 };
 
@@ -706,7 +706,7 @@ onMounted(async() =>{
         <span v-if="teamStrManage" class="btn-content" @click="handleTeamManage">团队架构管理</span>
         <span v-else class="btn-content" @click="handleTeamView">团队架构查看</span>
       </el-button>
-      <el-button v-if="addMember" type="primary" plain class="btn2" @click="handleAddUser(id, selectedTeamId)">
+      <el-button v-if="addMember" type="primary" plain class="btn2" @click="handleAddUser(selectedTeamId)">
         <span class="btn-content">新增用户</span>
       </el-button>
     </div>

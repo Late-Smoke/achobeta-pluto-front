@@ -15,19 +15,7 @@ const isLiked = ref(false); // 点赞状态
 const initialIsLiked = ref(false);
 const initialLikeCount = ref(0);
 
-// 性别的选项值
 const selectedGender = ref("null"); // 默认值为 "null"
-
-// 管理权限的选项
-const roleOptions = ref([
-  { label: '无权限', value: 0 },
-  { label: '普通管理员', value: 1 },
-  { label: '超级管理员', value: 2 },
-]);
-
-// 选中的角色（初始化为无权限）
-const selectedRole = ref(0); // 或根据用户的实际权限初始化
-
 
 // 获取用户数据函数
 async function fetchUserData() {
@@ -93,7 +81,7 @@ onMounted(() => {
 
 <template>
     <div class="personal-center">
-      <!-- 外层容器，包含 header 和 info-box，共享背景 -->
+      <!-- 外层容器 -->
       <div class="content-wrapper">
         <div class="header">
           <el-icon class="back-icon" @click="$router.push('/team')">
@@ -109,6 +97,7 @@ onMounted(() => {
             <el-button type="info" @click="resetUserData" class="reset-button">重置</el-button>
             <!-- 保存按钮 -->
             <el-button type="primary" @click="saveUserData" class="save-button">保存</el-button>
+            <!-- 点赞按钮 -->
             <button @click="toggleLike" class="like-button">
               <img :src="isLiked ? hand2 : hand1" alt="点赞图标" class="like-icon" />
               <span class="like-count">{{ likeCount }}</span>
@@ -116,113 +105,93 @@ onMounted(() => {
           </div>
         </div>
   
+        <!-- 内容区域 -->
         <div class="info-box">
-          <!-- 信息展示 -->
-          <div class="info-section">
-            <!-- 通用行 -->
-            <div class="info-row">
-              <div>
-                <span>真实姓名</span>
-                <el-input style="width: 240px" size="large"/>
-              </div>
-              <div>
-                <span>性别</span>
-                <el-select
-                v-model="selectedGender"
-                size="large"
-                style="width: 130px"
-              >
-                <el-option label="未选择" value="null" />
-                <el-option label="男" value="男"></el-option>
-                <el-option label="女" value="女"></el-option>
-              </el-select>
-              </div>
-            </div>
-  
-            <!-- 第三行 -->
-        <div class="info-row">
-          <div>
-            <span>加入时间</span>
-            <el-input style="width: 240px" size="large"/>
-          </div>
-          <div>
-            <span>所属团队/职位</span>
-            <p>你好</p>
-          </div>
-          <div>
-            <span>管理权限</span>
-            <el-select
-              v-model="selectedRole"
-              size="large"
-              style="width: 205px"
-            >
-            <el-option
-              v-for="option in roleOptions"
-              :key="option.value"
-              :label="option.label"
-              :value="option.value"
-            />
-            </el-select>
-
-          </div>
-        </div>
-
-            <div class="info-row">
-              <div>
-                <span>身份证号</span>
-                <el-input style="width: 240px" size="large"/>
-              </div>
-              <div>
-                <div class="field-label">
-                  <span>手机号码</span>
-                  <span class="required">*</span>
+          <el-scrollbar class="custom-scrollbar" height="600px"
+           :native="false"
+           :noresize="false"
+           >
+           <div class="scrollbar-content">
+            <!-- 滚动条中的内容 -->
+            <div class="info-section">
+              <!-- 第一行 -->
+              <div class="info-row">
+                <div>
+                  <span>真实姓名</span>
+                  <el-input style="width: 240px" size="large" />
                 </div>
-                <el-input style="width: 240px" size="large"/>
+                <div>
+                  <span>性别</span>
+                  <el-select v-model="selectedGender" size="large" style="width: 130px">
+                    <el-option label="未选择" value="null" />
+                    <el-option label="男" value="男"></el-option>
+                    <el-option label="女" value="女"></el-option>
+                  </el-select>
+                </div>
               </div>
-              <div>
-                <span>邮箱</span>
-                <el-input style="width: 240px" size="large"/>
-              </div>
-            </div>
   
-            <div class="info-row">
-              <div>
-                <span>年级</span>
-                <el-input style="width: 240px" size="large"/>
+              <!-- 第二行 -->
+              <div class="info-row">
+                <div>
+                  <span>加入时间</span>
+                  <p>2000/00/00</p>
+                </div>
+                <div>
+                  <span>所属团队/职位</span>
+                  <p>你好</p>
+                </div>
               </div>
-              <div>
-                <span>专业</span>
-                <el-input style="width: 240px" size="large"/>
-              </div>
-              <div>
-                <span>学号</span>
-                <el-input style="width: 240px" size="large"/>
-              </div>
-            </div>
   
-            <!-- 第六行 -->
-            <div class="info-row">
-              <div style="grid-column: 1 / 4; text-align: left;">
-                <span>实习、创业、就职经历</span>
-                <el-input
-                  type="textarea"
-                  :rows="5"
-                  />
+              <!-- 第三行 -->
+              <div class="info-row">
+                <div>
+                  <span>身份证号</span>
+                  <el-input style="width: 240px" size="large" />
+                </div>
+                <div>
+                  <span>手机号</span>
+                  <p>12345678912</p>
+                </div>
+                <div>
+                  <span>邮箱</span>
+                  <el-input style="width: 240px" size="large" />
+                </div>
               </div>
-            </div>
   
-            <!-- 最后一行 -->
-            <div class="info-row">
-              <div style="grid-column: 1 / 4; text-align: left;">
-                <span>现状</span>
-                <el-input
-                  type="textarea"
-                  :rows="4"
-                  />
+              <!-- 第四行 -->
+              <div class="info-row">
+                <div>
+                  <span>年级</span>
+                  <el-input style="width: 240px" size="large" />
+                </div>
+                <div>
+                  <span>专业</span>
+                  <el-input style="width: 240px" size="large" />
+                </div>
+                <div>
+                  <span>学号</span>
+                  <el-input style="width: 240px" size="large" />
+                </div>
+              </div>
+  
+              <!-- 第五行 -->
+              <div class="info-row">
+                <div style="grid-column: 1 / 4; text-align: left;">
+                  <span>实习、创业、就职经历</span>
+                  <el-input type="textarea" :rows="5" />
+                </div>
+              </div>
+  
+              <!-- 第六行 -->
+              <div class="info-row">
+                <div style="grid-column: 1 / 4; text-align: left;">
+                  <span>现状</span>
+                  <el-input type="textarea" :rows="4" />
+                </div>
               </div>
             </div>
-
-          </div>
+           </div>
+          </el-scrollbar>
         </div>
       </div>
     </div>
@@ -240,8 +209,8 @@ onMounted(() => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 30px; /* 包裹内边距 */
   margin: 0 auto;
-  height: 750px; /* 固定高度，例如 600px，可根据需求调整 */
-  overflow-y: auto; /* 垂直方向允许滚动 */
+  height: 750px;
+  position: relative; /* 添加相对定位 */
 }
 
 .back-icon {
@@ -253,6 +222,22 @@ onMounted(() => {
 
 .back-icon:hover {
   color: #409eff; /* 悬停时变为主题色 */
+}
+
+/* 滚动条样式 */
+.custom-scrollbar ::v-deep(.el-scrollbar__bar) {
+  background: transparent;
+}
+
+.custom-scrollbar ::v-deep(.el-scrollbar__thumb) {
+  height: 5px;
+  background: #90a4ae;
+  border-radius: 4px;
+  opacity: 0.8;
+}
+
+.custom-scrollbar ::v-deep(.el-scrollbar__thumb:hover) {
+  background: #607d8b;
 }
 
 .header {
@@ -326,14 +311,36 @@ onMounted(() => {
 }
 
 .info-box {
-  margin-top: 20px; /* 为 info-box 添加顶部间距 */
-  padding: 10px 120px; /* 左侧增加额外的内边距 */
+  margin-top: 20px;
+  position: relative;
+  width: 100%;
+}
+
+/* 内容容器样式 */
+.scrollbar-content {
+  padding: 0 140px 20px 120px; /* 左右添加足够的内边距，右侧多加一些为滚动条预留空间 */
+  box-sizing: border-box;
+}
+
+/* 修改滚动条样式 */
+.custom-scrollbar ::v-deep(.el-scrollbar__wrap) {
+  overflow-x: hidden !important; /* 隐藏水平滚动条 */
+}
+
+.custom-scrollbar ::v-deep(.el-scrollbar__bar.is-horizontal) {
+  display: none; /* 隐藏水平滚动条 */
+}
+
+.custom-scrollbar ::v-deep(.el-scrollbar__bar.is-vertical) {
+  width: 6px; /* 调整垂直滚动条宽度 */
+  right: 20px; /* 将滚动条向右移动一些距离 */
 }
 
 .info-section {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width:100%;
 }
 
 .info-row {
@@ -341,6 +348,7 @@ onMounted(() => {
   grid-template-columns: 240px 240px 240px; /* 每列固定宽度 */
   gap: 171px;
   align-items: start;
+  width:100%;
 }
 
 .info-row div {
@@ -360,20 +368,6 @@ onMounted(() => {
 .el-input {
   display: block;
   width: 100%;
-}
-
-.field-label {
-  position: relative; /* 使内部元素可以相对定位 */
-  display: inline-block; /* 保持内容紧凑排列 */
-  font-size: 1.1em; /* 调整字段标签的字体大小 */
-}
-
-.field-label .required {
-  color: red; /* 红色 */
-  font-size: 1.2em; /* 小红星的字体大小略大 */
-  position: absolute; /* 绝对定位 */
-  top: 0; /* 与标题顶部对齐 */
-  right: -12px; /* 让小红星靠近标题右侧 */
 }
 
 .info-row div div {
