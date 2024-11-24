@@ -15,7 +15,7 @@
         <div class="dot-and-content" @click="handleMessageClick(message)">
           <span v-if="!message.is_read" class="unread-dot"></span>
           <span :class="['message-content', { read: message.is_read }]">
-            {{ message.content.length > 22
+            {{ message.content.length > 25
               ? message.content.slice(0, 25) + '...'
               : message.content }}
           </span>
@@ -63,17 +63,17 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { getMessages, markMessageAsRead, markMessagesAsRead } from '../utils/message.js';
 
-const messages = ref([]);
-const currentPage = ref(1);
-const totalPages = ref(1);
-const totalMessages = ref(0);
-const showModal = ref(false);
-const modalContent = ref('');
-const timestamp = ref(0);
-let intervalId = null;
-// 获取 atoken
-const atoken = localStorage.getItem('atoken') || '';
+const messages = ref([]); // 当前页的消息列表
+const currentPage = ref(1); // 当前页码
+const totalPages = ref(1); // 总页数
+const totalMessages = ref(0); // 消息总数
+const showModal = ref(false); // 控制弹框显示状态
+const modalContent = ref(''); // 弹框中的消息内容
+const timestamp = ref(0); // 用于增量更新的时间戳
+let intervalId = null; // 定时器 ID，用于定时检查更新
+const atoken = localStorage.getItem('atoken') || '';// 从 localStorage 获取用户令牌
 
+//获取当前页消息
 const fetchMessages = async (page = 1) => {
   try {
     const data = await getMessages(atoken, page, timestamp.value);
@@ -95,6 +95,7 @@ const fetchMessages = async (page = 1) => {
   }
 };
 
+//翻页时重新获取数据
 const handlePageChange = async (page) => {
   currentPage.value = page;
   await fetchMessages(page);
@@ -104,28 +105,47 @@ const markAllAsRead = async () => {
   const unreadMessages = messages.value.filter((msg) => !msg.is_read);
   const userMessageIds = unreadMessages.map((msg) => msg.user_message_id);
 
+  // 保存原始状态
+  const previousStates = unreadMessages.map((msg) => ({
+    message: msg,
+    is_read: msg.is_read,
+  }));
+
+  // 乐观更新：将所有消息标记为已读
+  unreadMessages.forEach((msg) => (msg.is_read = true));
+
   try {
     const data = await markMessagesAsRead(userMessageIds);
-    if (data.code === 200) {
-      messages.value.forEach((msg) => (msg.is_read = true));
-    } else {
-      console.error('全部已读请求失败:', data.message);
+    if (data.code !== 200) {
+      throw new Error('后端返回错误');
     }
   } catch (error) {
     console.error('全部已读请求失败:', error);
+    // 请求失败时恢复原始状态
+    previousStates.forEach(({ message, is_read }) => {
+      message.is_read = is_read;
+    });
   }
 };
 
+//标记单条消息为已读
 const handleMessageClick = async (message) => {
   try {
-    modalContent.value = message.content;
-    showModal.value = true;
+    modalContent.value = message.content;// 展示消息内容
+    showModal.value = true;// 打开消息详情弹框
     if (!message.is_read) {
-      await markMessageAsRead(message.user_message_id); // 单条消息标记为已读
-      message.is_read = true; // 更新本地状态
+      const previousState = message.is_read; // 保存原始状态
+      message.is_read = true; // 乐观更新：立即标记为已读
+
+      try {
+        await markMessageAsRead(message.user_message_id); // 调用后端接口
+      } catch (error) {
+        console.error('标记消息为已读失败:', error);
+        message.is_read = previousState; // 恢复原始状态
+      }
     }
   } catch (error) {
-    console.error('标记消息为已读失败:', error);
+    console.error('展示消息失败:', error);
   }
 };
 
@@ -133,6 +153,7 @@ const closeModal = () => {
   showModal.value = false;
 };
 
+//定时检查更新
 const checkForUpdates = async () => {
   try {
     const data = await getMessages(atoken, 1, timestamp.value);

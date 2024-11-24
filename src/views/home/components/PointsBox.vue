@@ -67,7 +67,16 @@ const pointsData = ref([
 
 // 动态获取积分数据
 onMounted(async () => {
-  const points = await getPoints(userId);
+  const atoken = localStorage.getItem('atoken'); // 从 localStorage 获取 atoken
+
+  if (!atoken) {
+    console.error('用户未登录或 atoken 缺失');
+    alert('请先登录后查看积分信息'); // 或者直接跳转到登录页,待修改
+    // 跳转到登录页面
+    return;
+  }
+
+  const points = await getPoints(atoken);
   if (points) {
     pointsData.value[0].value = points.monthly_points || '00';
     pointsData.value[1].value = points.monthly_ranking || '00';

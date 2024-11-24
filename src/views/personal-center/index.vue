@@ -20,7 +20,7 @@ async function fetchUserData() {
   try {
     const response = await axios.get('/api/GetMemberDetail', {
       params: {
-        userid: localStorage.getItem('userid'),
+        member_id: localStorage.getItem('userid'),
       },
     });
     if (response.data.code === 200) {
@@ -49,7 +49,7 @@ async function toggleLike() {
   try {
     const response = await axios.put('/api/PutLikeCount', {
       atoken: localStorage.getItem('atoken'),
-      userid: localStorage.getItem('userid'),
+      member_id: localStorage.getItem('userid'),
     });
 
     if (response.data.code === 200) {

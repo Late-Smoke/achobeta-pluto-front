@@ -18,7 +18,7 @@ export function requestCaptcha(phoneInput, phoneError, updateCountdown) {
       const data = response.data;
 
       // 根据后端返回的数据结构调整判断条件
-      if (data.Code === 200 && data.Data.Code === 20000) {
+      if (data.Code === 200) {
         // 如果请求成功，隐藏错误提示，并开始倒计时
         phoneError.style.display = 'none';
         const expirationTime = Date.now() + 60 * 1000;
@@ -27,7 +27,7 @@ export function requestCaptcha(phoneInput, phoneError, updateCountdown) {
       } else {
         // 如果请求不成功，显示错误提示
         phoneError.style.display = 'block';
-        phoneError.textContent = data.Message || '手机号不合法，请重新输入';
+        phoneError.textContent = data.Message || '手机号不合法，请重新输入';//data.Message可能要修改
       }
     })
     .catch(error => {
