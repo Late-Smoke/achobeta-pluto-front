@@ -1,5 +1,5 @@
 <script setup>
-import { getProgressApi } from '@/utils/api/home'
+import { getProgressApi } from '@/axios/api/home'
 
 const total_task_count = ref('0');
 const incomplete_task_count = ref('0');

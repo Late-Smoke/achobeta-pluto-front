@@ -1,7 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { ArrowDown } from '@element-plus/icons-vue';
-import { fetchNameApi, getDevicesApi, removeDeviceApi } from '@/utils/api/home'
+import { fetchNameApi, getDevicesApi, removeDeviceApi } from '@/axios/api/home'
 import dayjs from 'dayjs';
 
 const router = useRouter();
@@ -34,19 +34,19 @@ const showDeviceDialog = () => {
     }
   }
   
-const currentGridData = ref([
-    { device_name: '设备A', ip: '192.168.1.1', online_time: '2024-11-22T20:11:40.56+08:00' },
-    { device_name: '设备B', ip: '192.168.1.2', online_time: '2024-11-23T20:12:00.00+08:00' },
-    { device_name: '设备C', ip: '192.168.1.3', online_time: '2024-11-24T20:13:30.12+08:00' },
-    { device_name: '设备D', ip: '192.168.1.4', online_time: '2024-11-25T20:15:00.45+08:00' },
-    { device_name: '设备E', ip: '192.168.1.5', online_time: '2024-11-26T20:16:40.56+08:00' },
-    { device_name: '设备F', ip: '192.168.1.6', online_time: '2024-11-27T20:17:40.56+08:00' },
-    { device_name: '设备G', ip: '192.168.1.7', online_time: '2024-11-28T20:18:40.56+08:00' },
-    { device_name: '设备H', ip: '192.168.1.8', online_time: '2024-11-29T20:19:40.56+08:00' },
-    { device_name: '设备I', ip: '192.168.1.9', online_time: '2024-11-30T20:20:40.56+08:00' },
-    { device_name: '设备J', ip: '192.168.1.10', online_time: '2024-11-31T20:21:40.56+08:00' }
-  ]);
-//const currentGridData = ref([]);
+//const currentGridData = ref([
+  //   { device_name: '设备A', ip: '192.168.1.1', online_time: '2024-11-22T20:11:40.56+08:00' },
+  //   { device_name: '设备B', ip: '192.168.1.2', online_time: '2024-11-23T20:12:00.00+08:00' },
+  //   { device_name: '设备C', ip: '192.168.1.3', online_time: '2024-11-24T20:13:30.12+08:00' },
+  //   { device_name: '设备D', ip: '192.168.1.4', online_time: '2024-11-25T20:15:00.45+08:00' },
+  //   { device_name: '设备E', ip: '192.168.1.5', online_time: '2024-11-26T20:16:40.56+08:00' },
+  //   { device_name: '设备F', ip: '192.168.1.6', online_time: '2024-11-27T20:17:40.56+08:00' },
+  //   { device_name: '设备G', ip: '192.168.1.7', online_time: '2024-11-28T20:18:40.56+08:00' },
+  //   { device_name: '设备H', ip: '192.168.1.8', online_time: '2024-11-29T20:19:40.56+08:00' },
+  //   { device_name: '设备I', ip: '192.168.1.9', online_time: '2024-11-30T20:20:40.56+08:00' },
+  //   { device_name: '设备J', ip: '192.168.1.10', online_time: '2024-11-31T20:21:40.56+08:00' }
+  // ]);
+const currentGridData = ref([]);
 for(let i = 0; i < currentGridData.value.length; i++){
       let time = currentGridData.value[i].online_time;
       currentGridData.value[i].online_time = dayjs(time).format('YYYY-MM-DD HH:mm:ss ');
@@ -73,7 +73,7 @@ const updateCurrentGridData = async(currentPage) => {
 
     for(let i = 0; i < currentGridData.value.length; i++){
       let time = currentGridData.value[i].online_time;
-      time = dayjs(time).format('YYYY-MM-DD HH:mm:ss ZZ');
+      currentGridData.value[i].online_time = dayjs(time).format('YYYY-MM-DD HH:mm:ss ');
     }
 }
   catch(error){

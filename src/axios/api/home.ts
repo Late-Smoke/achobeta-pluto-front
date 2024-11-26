@@ -1,4 +1,7 @@
-import apiClient from '@/utils/axios'
+import apiClient from '@/axios/axios'
+
+////获取token
+const atoken = localStorage.getItem('atoken');
 
 ////下拉菜单
 
@@ -11,7 +14,6 @@ export function fetchNameApi(params) {
 
 //分页+设备信息
 export function getDevicesApi(params) {
-    const atoken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOjE4NTk5MzI3NjAxNjUwNjA2MDgsInR5cGUiOiJhdG9rZW4iLCJleHAiOjE3MzIzMjI1MjMsImlzcyI6IjE4NTk5NDA0MDc3OTA1Mzg3NTIiLCJuYmYiOjE3MzIyNzkzMjN9.V1frj6DvSeMhbT_IwYz6T8z9Cex5-zBnRga7jIUHb0k';
     return apiClient.get('/api/devices/show',  {
         params:params,
         headers:

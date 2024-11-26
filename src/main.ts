@@ -15,7 +15,7 @@ import '@fortawesome/fontawesome-free/js/all.js';
 
 import 'normalize.css'
 import '@/assets/styles/common.scss'
-import '@/utils/request'
+import '@/axios/request'
 
 //element-plus/icon
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
