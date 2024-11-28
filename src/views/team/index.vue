@@ -1,22 +1,17 @@
 <script setup>
-import { getPowerApi, deleteTeamMemberApi, CreateTeamApi ,getTeamMemberListApi } from '@/utils/api/teamInformation.ts'
+import { getPowerApi, deleteTeamMemberApi, CreateTeamApi ,getTeamMemberListApi, getTeamStructureApi, putTeamNodeApi } from '@/axios/api/teamInformation.ts'
+import { faTruckMedical } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'vue-router';
 const router = useRouter();
 
 // 跳转到新增用户页面
-const handleAddUser = (selectedTeamId) => {
+const handleAddUser = (selectedTeamId,selectedTeamName,level) => {
   router.push('/team/new-user'); // 跳转到新增用户页面的路由
 };
 
 const handleViewDetail = (id, selectedTeamId) => {
   router.push(`/team/detail/${id}`); // 跳转到带有用户ID的详情页
 };
-
-//团队架构查看和管理跳转
-const teamManageVShow = ref(false);
-const handleTeamManage = () => {
-  teamManageVShow.value = true;
-}
 
 //需要后端传的时候加上指定团队成员信息数组的长度 所有关于allData长度的都要修改为allDataLength
 //const allDataLength = ref('');
@@ -222,10 +217,9 @@ const loadMore = () => {
 loadMore();
 
 //下拉框
-const selectedTeamId = ref(0);
-const selectedTeamName = ref('第一个团队名称');
+const selectedTeamId = ref(1);
+const selectedTeamName = ref('AchoBeta 1.0');
 const dropdownItems = ref([
-  { team_id: 0, team_name: '第一个团队名称' },
   { team_id: 1, team_name: 'AchoBeta 1.0'},
   { team_id: 2, team_name: 'AchoBeta 2.0'},
   { team_id: 3, team_name: 'AchoBeta 3.0'}
@@ -234,8 +228,8 @@ const teamName = ref('');
 const showAddTeam = ref(true);
 const hoverItem = ref(null);
 //团队信息
-const first_teamid = ref(0);
-const first_team_name = ref('第一个团队名称');
+const first_teamid = ref(1);
+const first_team_name = ref('AchoBeta 1.0');
 const ifCreateTeam = ref(false);
 
 const selectTeam = (item) => {
@@ -254,28 +248,35 @@ const selectTeam = (item) => {
 
 const toggleAddTeam = () => {
   showAddTeam.value = !showAddTeam.value;
-  if (!showAddTeam.value) {
-    // 聚焦到输入框
-    nextTick(() => {
-      if (this.$refs.teamInput) {
-        this.$refs.teamInput.focus();
-      }
-    });
-  }
+  // if (!showAddTeam.value) {
+  //   // 聚焦到输入框
+  //   nextTick(() => {
+  //     if (this.$refs.teamInput) {
+  //       this.$refs.teamInput.focus();
+  //     }
+  //   });
+  // }
 };
 
-const addTeam = () => {
-  if (teamName.value.trim()) {
-    const newTeam = { team_id: dropdownItems.value.length, team_name: teamName.value};
+const addTeam = async() => {
+  try{
+    if (teamName.value) {
+    const response = await CreateTeamApi({team_name:teamName});
+    console.log("后端响应为："+response.data);
+    const teamId = response.data.data.team_id;
+    const newTeam = { team_id: teamId, team_name: teamName.value};
     dropdownItems.value.push(newTeam);
     selectedTeamId.value = newTeam.team_id;
     selectedTeamName.value = newTeam.team_name;
     toggleAddTeam(); // 隐藏输入框，显示下拉菜单项
     teamName.value = ''; // 清空输入框
-    const response = CreateTeamApi({teamName});
-    if(response.message == "成功") ifCreateTeam.value = true;
+    ifCreateTeam.value = true;
   }
-};
+}
+  catch(error){
+    ElMessage.error('团队新增失败。');
+    console.error('Error adding new team:', error);
+}}
 //删除
 const ifDelete = ref(false);
 function showDelete(id) {
@@ -287,21 +288,18 @@ function showDelete(id) {
       confirmButtonText: '确认',
       cancelButtonText: '取消',
     }
-  ).then((confirm) => {
-    if (confirm) {
-      handleDelete(id);
-      console.log("用户点击了确认，准备删除ID为", id, "的成员");
-    } else {
-      ElMessage({
+  ).then(() => {
+    //调用接口
+    handleDelete(id);
+    ElMessage({
+        type: 'success',
+        message: '已成功删除',
+      })
+  }).catch(() => {
+    ElMessage({
       message: '已取消删除。',
       type: 'warning'
-    }),
-      console.log("用户点击了取消");
-    }
-  }).catch((error) => {
-    ElMessage.error('出错了！'),
-    console.error("显示消息框时发生错误:", error);
-    // 处理显示消息框过程中可能出现的错误
+    })
   });
 }
 function handleDelete(id){
@@ -310,322 +308,329 @@ function handleDelete(id){
   if(response.message == '删除成功') ifDelete.value = true;
 }
 
+//团队架构查看和管理跳转
+const teamManageOptionShow = ref(false);//团队架构管理
+const team_structures = ref([
+  {
+    "team_id": 1859771705543626752,
+    "myself_id": 1859771706189549568,
+    "father_id": 1,
+    "node_name": "根节点",
+    "is_deleted": 0
+  },
+{
+    "team_id": 1859771705543626752,
+    "myself_id": 5,
+    "father_id": 1859771706189549568,
+    "node_name": "测试设计组",//如何做到当名字过长不出错
+    "is_deleted": 0
+},
+{
+    "team_id": 1859771705543626752,
+    "myself_id": 1.1,
+    "father_id": 5,
+    "node_name": "设计组",
+    "is_deleted": 0
+},
+{
+    "team_id": 1859771705543626752,
+    "myself_id": 1.11,
+    "father_id": 1.1,
+    "node_name": "设计组的小弟",
+    "is_deleted": 0
+},
+{
+    "team_id": 1859771705543626752,
+    "myself_id": 2.1,
+    "father_id": 2,
+    "node_name": "财务组",
+    "is_deleted": 0
+},
+{
+    "team_id": 1859771705543626752,
+    "myself_id": 2,
+    "father_id": 1859771706189549568,
+    "node_name": "测试财务组",
+    "is_deleted": 0
+},
+{
+    "team_id": 1859771705543626752,
+    "myself_id": 3,
+    "father_id": 1859771706189549568,
+    "node_name": "测试研发组",
+    "is_deleted": 0
+},
+{
+    "team_id": 1859771705543626752,
+    "myself_id": 4,
+    "father_id": 1859771706189549568,
+    "node_name": "团队负责人",
+    "is_deleted": 0
+}
+]);
+const OldTeam_structures = ref(team_structures);//旧团队架构管理
+const handleTeamManage = async() => {
+  try{
+    teamManageOptionShow.value = true;
+    const response = await getTeamStructureApi({team_id:selectedTeamId.value});
+    console.log("后端响应为：",response.data);
+    if(response.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
+    else{
+      first_teamid.value = 1;
+      first_team_name.value = 'AchoBeta 1.0';
+      ifCreateTeam.value = false;
+      team_structures.value = response.data.data.team_structures;
+      OldTeam_structures.value = response.data.data.team_structures;//备用
+    }
+}
+  catch(error){
+    ElMessage.error('团队架构获取失败。');
+    console.error('Error fetching teamStructures:', error);
+}}
+
 //权限组
+const level = ref(1);
+//超级管理员
 const urls = ref([1]);//测试期间为[1]
-const teamStrManage = true;
 const deleteMember = true;
 const addMember = true; 
-//为测试，将一下注掉，统一设为true
+
+//管理员
+// const urls = ref([1]);//测试期间为[1]
+// const teamStrManage = false;
+// const deleteMember = true;
+// const addMember = true; 
+
+//普通用户
+// const urls = ref([]);//测试期间为[1]
+// const teamStrManage = false;
+// const deleteMember = false;
+// const addMember = false; 
+
+//为测试，将以下注掉，统一设为true
 // const TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
 // const deleteMember = computed(() => urls.value.includes("/api/team/memberlist/delete"));//删除团队成员
 // const addMember = computed(() => urls.value.includes("/api/team/memberlist/create"));//新增团队成员
 
 //团队架构
-const teamStructure = [
-  {
-    value: 'guide',
-    label: 'Guide',
-    children: [
-      {
-        value: 'disciplines',
-        label: 'Disciplines',
-        children: [
-          {
-            value: 'consistency',
-            label: 'Consistency',
-          },
-          {
-            value: 'feedback',
-            label: 'Feedback',
-          },
-          {
-            value: 'efficiency',
-            label: 'Efficiency',
-          },
-          {
-            value: 'controllability',
-            label: 'Controllability',
-          },
-        ],
-      },
-      {
-        value: 'navigation',
-        label: 'Navigation',
-        children: [
-          {
-            value: 'side nav',
-            label: 'Side Navigation',
-          },
-          {
-            value: 'top nav',
-            label: 'Top Navigation',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: 'component',
-    label: 'Component',
-    children: [
-      {
-        value: 'basic',
-        label: 'Basic',
-        children: [
-          {
-            value: 'layout',
-            label: 'Layout',
-          },
-          {
-            value: 'color',
-            label: 'Color',
-          },
-          {
-            value: 'typography',
-            label: 'Typography',
-          },
-          {
-            value: 'icon',
-            label: 'Icon',
-          },
-          {
-            value: 'button',
-            label: 'Button',
-          },
-        ],
-      },
-      {
-        value: 'form',
-        label: 'Form',
-        children: [
-          {
-            value: 'radio',
-            label: 'Radio',
-          },
-          {
-            value: 'checkbox',
-            label: 'Checkbox',
-          },
-          {
-            value: 'input',
-            label: 'Input',
-          },
-          {
-            value: 'input-number',
-            label: 'InputNumber',
-          },
-          {
-            value: 'select',
-            label: 'Select',
-          },
-          {
-            value: 'cascader',
-            label: 'Cascader',
-          },
-          {
-            value: 'switch',
-            label: 'Switch',
-          },
-          {
-            value: 'slider',
-            label: 'Slider',
-          },
-          {
-            value: 'time-picker',
-            label: 'TimePicker',
-          },
-          {
-            value: 'date-picker',
-            label: 'DatePicker',
-          },
-          {
-            value: 'datetime-picker',
-            label: 'DateTimePicker',
-          },
-          {
-            value: 'upload',
-            label: 'Upload',
-          },
-          {
-            value: 'rate',
-            label: 'Rate',
-          },
-          {
-            value: 'form',
-            label: 'Form',
-          },
-        ],
-      },
-      {
-        value: 'data',
-        label: 'Data',
-        children: [
-          {
-            value: 'table',
-            label: 'Table',
-          },
-          {
-            value: 'tag',
-            label: 'Tag',
-          },
-          {
-            value: 'progress',
-            label: 'Progress',
-          },
-          {
-            value: 'tree',
-            label: 'Tree',
-          },
-          {
-            value: 'pagination',
-            label: 'Pagination',
-          },
-          {
-            value: 'badge',
-            label: 'Badge',
-          },
-        ],
-      },
-      {
-        value: 'notice',
-        label: 'Notice',
-        children: [
-          {
-            value: 'alert',
-            label: 'Alert',
-          },
-          {
-            value: 'loading',
-            label: 'Loading',
-          },
-          {
-            value: 'message',
-            label: 'Message',
-          },
-          {
-            value: 'message-box',
-            label: 'MessageBox',
-          },
-          {
-            value: 'notification',
-            label: 'Notification',
-          },
-        ],
-      },
-      {
-        value: 'navigation',
-        label: 'Navigation',
-        children: [
-          {
-            value: 'menu',
-            label: 'Menu',
-          },
-          {
-            value: 'tabs',
-            label: 'Tabs',
-          },
-          {
-            value: 'breadcrumb',
-            label: 'Breadcrumb',
-          },
-          {
-            value: 'dropdown',
-            label: 'Dropdown',
-          },
-          {
-            value: 'steps',
-            label: 'Steps',
-          },
-        ],
-      },
-      {
-        value: 'others',
-        label: 'Others',
-        children: [
-          {
-            value: 'dialog',
-            label: 'Dialog',
-          },
-          {
-            value: 'tooltip',
-            label: 'Tooltip',
-          },
-          {
-            value: 'popover',
-            label: 'Popover',
-          },
-          {
-            value: 'card',
-            label: 'Card',
-          },
-          {
-            value: 'carousel',
-            label: 'Carousel',
-          },
-          {
-            value: 'collapse',
-            label: 'Collapse',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: 'resource',
-    label: 'Resource',
-    children: [
-      {
-        value: 'axure',
-        label: 'Axure Components',
-      },
-      {
-        value: 'sketch',
-        label: 'Sketch Templates',
-      },
-      {
-        value: 'docs',
-        label: 'Design Documentation',
-      },
-    ],
-  },
-]
+// const team_structures = ref([
+// {
+//     "team_id": 1859771705543626752,
+//     "myself_id": 1859871969764184064,
+//     "father_id": 1859771706189549568,
+//     "node_name": "测试设计组",
+//     "is_deleted": 0
+// },
+// {
+//     "team_id": 1859771705543626752,
+//     "myself_id": 1859871970129088512,
+//     "father_id": 1859771706189549568,
+//     "node_name": "测试财务组",
+//     "is_deleted": 0
+// },
+// {
+//     "team_id": 1859771705543626752,
+//     "myself_id": 1859871970519158784,
+//     "father_id": 1859771706189549568,
+//     "node_name": "测试研发组",
+//     "is_deleted": 0
+// },
+// {
+//     "team_id": 1859771705543626752,
+//     "myself_id": 1859871970892451840,
+//     "father_id": 1859771706189549568,
+//     "node_name": "测试团队负责人",
+//     "is_deleted": 0
+// }
+// ]);
+const root_id = team_structures.value.find(node => node.father_id === 1)?.myself_id;//根节点id
+const showLevel2 = ref(false);//展示目录面
+const showLevel3 = ref(false);
+const showLevel4 = ref(false);
+const level1 = ref(root_id);//筛选对应级目录
+const level2 = ref(null);
+const level3 = ref(null);
+const level4 = ref(null);
+const showInput1 = ref(false);//展示输入框
+const showInput2 = ref(false);
+const showInput3 = ref(false);
+const showInput4 = ref(false);
+function show2Node(node){
+  showLevel2.value = true;
+  showLevel3.value = false;
+  showLevel4.value = false;
+  level2.value = node.myself_id;
+  level3.value = null;
+  level4.value = null;
+}
+function show3Node(node){
+  showLevel2.value = true;
+  showLevel3.value = true;
+  showLevel4.value = false;
+  level3.value = node.myself_id;
+  level4.value = null;
+}
+function show4Node(node){
+  showLevel2.value = true;
+  showLevel3.value = true;
+  showLevel4.value = faTruckMedical;
+  level4.value = node.myself_id;
+}
+function handleNodeAdd(input){//新增按钮和输入框间的切换
+  switch(input){
+    case 'input1':
+      showInput1.value = !showInput1.value;
+      break;
+    case 'input2':
+      showInput2.value = !showInput2.value;
+      break;
+    case 'input3':
+      showInput3.value = !showInput3.value;
+      break;
+    case 'input4':
+      showInput4.value = !showInput4.value;
+      break;
+  }
+  //showInput.value = !showInput.value;
+}
+const inputNodeName = ref('');
+const changeTeam = ref([]);
+function inputNode(level,input) {//新增
+  if(inputNodeName.value){
+    const teamId = team_structures.value.find(node => node.myself_id === level)?.team_id;
+    const newTeam1 = {
+      team_id: teamId,
+      myself_id:Date.now(),
+      father_id: level,
+      node_name: inputNodeName.value,
+      is_deleted: 0
+    };
+    const newTeam2 = {
+      team_id: teamId,
+      father_id: level,
+      node_name: inputNodeName.value,
+      is_deleted: 0
+    };
+    team_structures.value.push(newTeam1);
+    changeTeam.value.push(newTeam2);
+    handleNodeAdd(input);
+    inputNodeName.value = '';
+  }
+}
+function showNodeDelete(node,input) {//删除
+  ElMessageBox.confirm(//弹窗
+    '是否确认删除此团队架构？',
+    '提示',
+    {
+      type: 'warning',
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+    }
+  ).then(() => {
+    const newTeam = {
+      team_id: node.team_id,
+      father_id: node.father_id,
+      node_name: node.node_name,
+      is_deleted: 1
+    };
+    changeTeam.value.push(newTeam);
+    node.is_deleted = 1;
+    updateFatherIds(node);
+    switch(input){
+      case 'input1':
+      showLevel2.value = false;
+      showLevel3.value = false;
+      showLevel4.value = false;
+        break;
+      case 'input2':
+      show2Node(node);
+        break;
+      case 'input3':
+      show3Node(node);
+        break;
+      case 'input4':
+      show4Node(node);
+        break;
+    }
+    ElMessage({//提示弹窗
+        type: 'success',
+        message: '已成功删除',
+      })
+  }).catch(() => {
+    ElMessage({//提示弹窗
+      message: '已取消删除。',
+      type: 'warning'
+    })
+  });
+}
+function updateFatherIds(node) {//更新
+  team_structures.value.forEach(team => {
+    if (team.father_id === node.myself_id) {
+      team.father_id = node.father_id;
+    }
+  });
+}
+function resetTeam(){//重置
+  team_structures.value = OldTeam_structures.value;
+}
+const saveTeam = async() => {//保存
+try{
+  const response = await putTeamNodeApi({team_id:selectedTeamId,team_structures:changeTeam});
+  console.log("后端响应为："+response.data);
+  ElMessage({
+    type:'success',
+    message: '已成功保存',
+  })
+}
+catch(error){
+  ElMessage.error('团队架构保存失败。')
+  console.error('Failed to update grid data:', error);
+}}
 
 onMounted(async() =>{
-  try {
-        const atoken = localStorage.getItem('atoken');
-        if (!atoken) {
-          ElMessage.error('未找到认证令牌。');
-          return; // 如果没有令牌，则不继续执行
+  getPowerApi({team_id:0})//获取第一个团队id
+    .then(data => {
+        console.log('后端响应:', data.data);
+        if(data.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
+        else{
+          first_teamid.value = data.data.data.first_teamid;
+          first_team_name.value = data.data.data.first_team_name;
+          selectedTeamId.value = first_teamid;
+          selectedTeamName.value = first_team_name;//优先显示用户第一个团队的信息
         }
-
-        const responseFirst = await getPowerApi({atoken});
-        first_teamid.value = responseFirst.data.first_teamid;
-        first_team_name.value = responseFirst.data.first_team_name;
-        selectedTeamId.value = first_teamid;
-        selectedTeamName.value = first_team_name;//优先显示用户第一个团队的信息
- 
-        const responseScecond = await getPowerApi({atoken , first_teamid});
-        urls.value = responseScecond.data.urls;
-        dropdownItems.value = responseScecond.data.teams;
-        level.value = responseScecond.data.level;
-
-        loadMore();
-      } catch (error) {
-        ElMessage.error('数据获取失败。');
-        console.error('Error fetching data:', error);
-      }
+  })
+  .catch(error => {
+    ElMessage.error('数据获取失败。');
+    console.error('Error fetching data:', error);
+  });
+  getPowerApi({team_id:first_teamid.value})//获取权限组和第一个团队的成员列表
+  .then(data => {
+        console.log('后端响应:', data.data);
+        if(data.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
+        else{
+          urls.value = data.data.data.urls;
+          dropdownItems.value = data.data.data.teams;
+          level.value = data.data.level;
+          //loadMore();
+        }
+  })
+  .catch(error => {
+    ElMessage.error('成员列表数据获取失败。');
+    console.error('Error fetching data:', error);
+  });
 })
 </script>
 
 <template>
-  <el-dialog v-model="teamManageVShow" width="800" style="cursor: default " center >
+  <!--团队架构管理-->
+  <el-dialog v-model="teamManageOptionShow" width="800" style="cursor: default " center >
     <template #title>
       <div class="custom-title">
         <el-icon><Tools /></el-icon>
         团队架构管理
       </div>
     </template>
-    <span>此处将显示指定团队的架构”的设备</span>
+    <span>此处将显示指定团队的架构</span>
     <hr>
     <!--团队下拉框-->
     <div class="header">
@@ -648,22 +653,120 @@ onMounted(async() =>{
             @mouseleave="hoverItem = null">
             <span>{{ item.team_name }}</span>
           </el-dropdown-item>
+          <el-dropdown-item v-if="showAddTeam" @click="toggleAddTeam">
+            <span>新增团队</span>
+          </el-dropdown-item>
+          <el-input
+            v-else
+            v-model="teamName"
+            style="width: 120px; margin-left: 5px;"
+            placeholder="请输入团队名称"
+            @keyup.enter="addTeam"
+          />
         </el-dropdown-menu>
       </template>
     </el-dropdown>
   </div>
-
     <!--团队架构-->
-    <div class="container">
-    <el-cascader-panel :options="teamStructure">
-    <template #default="{ node, data}">
-      <span>{{ data.label }}</span>
-      <span v-if="!node.isLeaf"> ({{ data.children.length }})</span>
-    </template>
-</el-cascader-panel>
+  <div class="bigBox">
+    <div class="smallBox first">
+      <div v-for="node in team_structures" :key="node.myself_id">
+        <div v-if="node.father_id == level1 && level1!=null && !node.is_deleted" class="nodeBox">
+            <el-button text @click="show2Node(node)" class="nodeTitle">
+                <span>{{ node.node_name }}</span>
+            </el-button>
+            <el-button text class="nodeDelete" @click="showNodeDelete(node,'input1')"><el-icon><Delete /></el-icon></el-button>
+        </div>
+      </div>
+      <div v-if="showInput1" class="inputBox">
+        <el-input
+        v-model="inputNodeName"
+        placeholder="请输入分组/职位名"
+        @keyup.enter="inputNode(level1,'input1')"
+        @blur="handleNodeAdd('input1')"
+      />
+      </div>
+      <el-button v-else text class="nodeAdd" @click="handleNodeAdd('input1')">
+        新增分组/职位
+        <el-icon class="nodeAddIcon"><Plus /></el-icon>
+      </el-button>
+    </div>
+    <div v-if="showLevel2" class="smallBox second">
+      <div v-for="node in team_structures" :key="node.myself_id">
+        <div v-if="node.father_id == level2 && level2!=null &&!node.is_deleted" class="nodeBox">
+            <el-button text @click="show3Node(node)" class="nodeTitle">
+                <span>{{ node.node_name }}</span>
+            </el-button>
+            <el-button text class="nodeDelete" @click="showNodeDelete(node,'input2')"><el-icon><Delete /></el-icon></el-button>
+        </div>
+      </div>
+      <div v-if="showInput2" class="inputBox">
+        <el-input
+        v-model="inputNodeName"
+        placeholder="请输入分组/职位名"
+        @keyup.enter="inputNode(level2,'input2')"
+        @blur="handleNodeAdd('input2')"
+      />
+      </div>
+      <el-button v-else-if="level2||(!level2&&level1)" text class="nodeAdd" @click="handleNodeAdd('input2')">
+        新增分组/职位
+        <el-icon class="nodeAddIcon"><Plus /></el-icon>
+      </el-button>
+    </div>
+    <div v-if="showLevel3" class="smallBox third">
+      <div v-for="node in team_structures" :key="node.myself_id" @click="show4Node(node)">
+        <div v-if="node.father_id == level3 && level3!=null &&!node.is_deleted" class="nodeBox">
+            <el-button text @click="show4Node(node)" class="nodeTitle">
+                <span>{{ node.node_name }}</span>
+            </el-button>
+            <el-button text class="nodeDelete" @click="showNodeDelete(node,'input3')"><el-icon><Delete /></el-icon></el-button>
+        </div>
+      </div>
+      <div v-if="showInput3" class="inputBox">
+        <el-input
+        v-model="inputNodeName"
+        placeholder="请输入分组/职位名"
+        @keyup.enter="inputNode(level3,'input3')"
+        @blur="handleNodeAdd('input3')"
+      />
+      </div>
+      <el-button v-else-if="level3||(!level3&&level2)" text class="nodeAdd" @click="handleNodeAdd('input3')">
+        新增分组/职位
+        <el-icon class="nodeAddIcon"><Plus /></el-icon>
+      </el-button>
+    </div>
+    <div v-if="showLevel4" class="smallBox forth">
+      <div v-for="node in team_structures" :key="node.myself_id">
+        <div v-if="node.father_id == level4 && level4!=null &&!node.is_deleted" class="nodeBox">
+            <el-button text class="nodeTitle">
+                <span>{{ node.node_name }}</span>
+            </el-button>
+            <el-button text class="nodeDelete" @click="showNodeDelete(node,'input4')"><el-icon><Delete /></el-icon></el-button>
+        </div>
+      </div>
+      <div v-if="showInput4" class="inputBox">
+        <el-input
+        v-model="inputNodeName"
+        placeholder="请输入分组/职位名"
+        @keyup.enter="inputNode(level4,'input4')"
+        @blur="handleNodeAdd('input4')"
+      />
+      </div>
+      <el-button v-else-if="level4||(!level4&&level3)" text class="nodeAdd" @click="handleNodeAdd('input4')">
+        新增分组/职位
+        <el-icon class="nodeAddIcon"><Plus /></el-icon>
+      </el-button>
+    </div>
   </div>
-  </el-dialog>
+  <!--重置 保存按钮-->
+  <template #footer>
+      <div class="buttonBox">
+        <el-button class="reset" @click="resetTeam">重置</el-button>
+        <el-button type="primary" class="save" @click="saveTeam">保存</el-button>
+      </div>
+    </template>
 
+  </el-dialog>
 
   <div class="box">
     <div class="box-header">
@@ -696,17 +799,15 @@ onMounted(async() =>{
             style="width: 120px; margin-left: 5px;"
             placeholder="请输入团队名称"
             @keyup.enter="addTeam"
-            ref="teamInput"
           />
         </el-dropdown-menu>
       </template>
     </el-dropdown>
     <div v-if="urls.length!=0" class="btn-group">
       <el-button type="info" plain class="btn1">
-        <span v-if="teamStrManage" class="btn-content" @click="handleTeamManage">团队架构管理</span>
-        <span v-else class="btn-content" @click="handleTeamView">团队架构查看</span>
+        <span class="btn-content" @click="handleTeamManage()">团队架构管理</span>
       </el-button>
-      <el-button v-if="addMember" type="primary" plain class="btn2" @click="handleAddUser(selectedTeamId)">
+      <el-button v-if="addMember" type="primary" plain class="btn2" @click="handleAddUser(selectedTeamId,selectedTeamName,level)">
         <span class="btn-content">新增用户</span>
       </el-button>
     </div>
@@ -807,15 +908,10 @@ font-size: 20px;
 }
 .delete {
   padding:5px;
-}
-.delete:hover {
-  color: red; 
+  color: rgb(228, 0, 0); 
 }
 .large-text-table {
   font-size: 18px; 
-}
-.large-text-table .el-table__body-wrapper::-webkit-scrollbar-track {
-  background-color: red; /* 滚动条轨道的颜色 */
 }
 p {
     text-align: center;
@@ -836,6 +932,9 @@ p {
 .custom-title {
   font-size: 2em;
   font-weight: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .teamTitle {
   align-content: center;
@@ -851,4 +950,67 @@ p {
 .container {
   margin:20px;
 }
+
+.bigBox {
+  margin:20px;
+  display: flex;
+  height: auto;
+  overflow: auto;
+}
+.bigBox::-webkit-scrollbar {
+  width: 4px;
+}
+.bigBox::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 10px;
+}
+.smallBox {
+  height:400px;
+  border:solid 2px #656161;
+  padding-top:10px;
+}
+.smallBox * {
+  text-align: left;
+}
+.nodeBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nodeDelete {
+  float: right;
+  color: rgb(228, 0, 0);
+}
+
+.nodeTitle {
+  width:120px;
+  justify-content: space-between;
+  color:#000000;
+}
+.nodeAdd {
+  margin-left:10px;
+}
+.inputBox {
+  width: 150px;
+  margin-left:20px;
+}
+.nodeAddIcon{
+  margin-left:18px;
+}
+.nodeAdd , .nodeTitle{
+  height: 40px; 
+  font-size: 18px;
+}
+
+/*按钮*/
+.buttonBox {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding-right: 20px;
+}
+
+
 </style>
