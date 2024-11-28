@@ -74,24 +74,66 @@ let intervalId = null; // 定时器 ID，用于定时检查更新
 const atoken = localStorage.getItem('atoken') || '';// 从 localStorage 获取用户令牌
 
 //获取当前页消息
-const fetchMessages = async (page = 1) => {
+const fetchMessages = async (page = 1,timestamp = 0) => {
   try {
-    const data = await getMessages(atoken, page, timestamp.value);
-    if (data.code === 200) {
-      if (data.data.messages && data.data.messages.length > 0) {
+    const atoken = localStorage.getItem('atoken'); // 从 localStorage 获取 atoken
+    console.log(atoken)
+    if (!atoken) {
+      console.error('未检测到 atoken，请登录后重试');
+      ElMessage.error('未检测到登录信息，请重新登录');
+      return;
+    }
+
+    const data = await getMessages(atoken, page, timestamp);// 调用 getMessages 接口
+    // 检查消息内容是否存在
+    console.log(data)
+    if (data && data.code === 200) {
+      if (data.data?.messages?.length > 0) {
         messages.value = data.data.messages.filter((msg) => msg.content);
         totalPages.value = data.data.total_pages || 1;
         totalMessages.value = data.data.total_pages * 5;
       } else {
+        // 没有消息时重置数据
         messages.value = [];
         totalPages.value = 1;
         totalMessages.value = 0;
+        ElMessage.info('当前没有消息');
       }
     } else {
-      console.error('消息请求失败:', data.message);
+      // 处理其他错误
+      handleApiError(data || {});
     }
   } catch (error) {
+    // 捕获请求错误
     console.error('消息请求错误:', error);
+    ElMessage.error('网络异常，请稍后重试');
+  }
+};
+// 错误处理函数
+const handleApiError = (data = {}) => {
+  const { code, message } = data;
+
+  // 对未定义或格式错误的数据提供默认处理
+  if (code === undefined) {
+    console.error('收到无效数据:', data);
+    ElMessage.error('发生未知错误');
+    return;
+  }
+
+  // 根据错误码处理不同情况
+  switch (code) {
+    case 60004:
+      ElMessage.error('后台出现错误，请稍后重试');
+      break;
+    case -20000:
+    case -20002:
+      ElMessage.error('登录信息已过期，请重新登录');
+      break;
+    case -20003:
+      ElMessage.error('程序出错，请联系开发人员');
+      break;
+    default:
+      ElMessage.error(message || '请求失败，请稍后重试');
   }
 };
 
@@ -101,6 +143,7 @@ const handlePageChange = async (page) => {
   await fetchMessages(page);
 };
 
+//标记多条消息为已读
 const markAllAsRead = async () => {
   const unreadMessages = messages.value.filter((msg) => !msg.is_read);
   const userMessageIds = unreadMessages.map((msg) => msg.user_message_id);
@@ -116,15 +159,24 @@ const markAllAsRead = async () => {
 
   try {
     const data = await markMessagesAsRead(userMessageIds);
-    if (data.code !== 200) {
+    if (data.code === 200) {
+      ElMessage.success('所有未读消息已成功标记为已读');
+    } else {
       throw new Error('后端返回错误');
     }
   } catch (error) {
     console.error('全部已读请求失败:', error);
     // 请求失败时恢复原始状态
-    previousStates.forEach(({ message, is_read }) => {
-      message.is_read = is_read;
+    previousStates.forEach((msg) => {
+      const original = messages.value.find((m) => m.user_message_id === msg.user_message_id);
+      if (original) Object.assign(original, msg); // 恢复原始状态
     });
+
+    if (error.type === 'timeout') {
+      ElMessage.error('请求超时，请稍后重试');
+    } else {
+      ElMessage.error('标记消息失败，请稍后重试');
+    }
   }
 };
 

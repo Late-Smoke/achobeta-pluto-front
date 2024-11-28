@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useLike } from './utils/useLike';
 import axios from 'axios';
 
 // 导入点赞前后的 SVG 图标
@@ -18,58 +19,36 @@ const initialLikeCount = ref(0);
 // 获取用户数据函数
 async function fetchUserData() {
   try {
-    const response = await axios.get('/api/GetMemberDetail', {
-      params: {
-        member_id: localStorage.getItem('userid'),
+    const response = await axios.get('/api/user-profile/details', {
+      headers: {
+        Authorization: `${localStorage.getItem('atoken')}`,
       },
+      timeout: 500, // 设置请求超时时间
     });
     if (response.data.code === 200) {
-      const data = response.data.data;
-      userData.value = data; // 保存用户数据
-      likeCount.value = data.likecount || 0; // 初始化点赞数
-      isLiked.value = data.isLiked || false; // 初始化点赞状态
+      userData.value = response.data.data; // 保存用户数据
+      likeCount.value = response.data.data.like_count || 0; // 初始化点赞数
+      isLiked.value = response.data.data.is_liked || false; // 初始化点赞状态
 
       // 保存初始状态
       initialIsLiked.value = isLiked.value;
       initialLikeCount.value = likeCount.value;
     } else {
-      console.error('获取个人中心用户数据失败');
+      ElMessage.error('获取个人中心用户数据失败');
     }
   } catch (error) {
-    console.error('Error fetching user data:', error);
-  }
+    console.error('请求用户数据出错:', error);
+    ElMessage.error('加载用户数据失败，请稍后重试');
 }
+};
 
 // 点赞切换逻辑
-async function toggleLike() {
-  // 本地立即切换状态
-  isLiked.value = !isLiked.value;
-  likeCount.value += isLiked.value ? 1 : -1;
-
-  try {
-    const response = await axios.put('/api/PutLikeCount', {
-      atoken: localStorage.getItem('atoken'),
-      member_id: localStorage.getItem('userid'),
-    });
-
-    if (response.data.code === 200) {
-      // 使用后端返回的最新点赞数
-      likeCount.value = response.data.likecount;
-    } else {
-      console.error('点赞请求失败');
-      rollbackToInitialState();
-    }
-  } catch (error) {
-    console.error('点赞请求出错:', error);
-    rollbackToInitialState();
-  }
-}
-
-// 回滚到初始状态函数
-function rollbackToInitialState() {
-  isLiked.value = initialIsLiked.value;
-  likeCount.value = initialLikeCount.value;
-}
+const { toggleLike, rollbackToInitialState } = useLike(
+  isLiked,
+  likeCount,
+  initialIsLiked,
+  initialLikeCount
+);
 
 // 页面加载时获取用户数据
 onMounted(() => {
@@ -107,11 +86,11 @@ onMounted(() => {
             <div class="info-row">
               <div>
                 <span>真实姓名</span>
-                <div>{{ userData.name || '未知' }}</div>
+                <div>{{ userData.name || '加载中...' }}</div>
               </div>
               <div>
                 <span>性别</span>
-                <div>{{ userData.sex || '未知' }}</div>
+                <div>{{ userData.sex || '加载中...' }}</div>
               </div>
               <div></div>
             </div>
@@ -120,11 +99,11 @@ onMounted(() => {
             <div class="info-row">
               <div>
                 <span>加入时间</span>
-                <div>{{ userData.create_date || '未知' }}</div>
+                <div>{{ userData.create_date || '加载中...' }}</div>
               </div>
               <div>
                 <span>所属团队/职位</span>
-                <div>{{ userData.strucet_name || '未知' }}</div>
+                <div>{{ userData.member_position || '加载中...' }}</div>
               </div>
               <div></div>
             </div>
@@ -133,15 +112,15 @@ onMounted(() => {
             <div class="info-row">
               <div>
                 <span>身份证号</span>
-                <div>{{ userData.idcard || '未知' }}</div>
+                <div>{{ userData.id_card || '加载中...' }}</div>
               </div>
               <div>
                 <span>手机号</span>
-                <div>{{ userData.phone_num || '未知' }}</div>
+                <div>{{ userData.phone_num || '加载中...' }}</div>
               </div>
               <div>
                 <span>邮箱</span>
-                <div>{{ userData.email || '未知' }}</div>
+                <div>{{ userData.email || '加载中...' }}</div>
               </div>
             </div>
 
@@ -149,15 +128,15 @@ onMounted(() => {
             <div class="info-row">
               <div>
                 <span>年级</span>
-                <div>{{ userData.grade || '未知' }}</div>
+                <div>{{ userData.grade || '加载中...' }}</div>
               </div>
               <div>
                 <span>专业</span>
-                <div>{{ userData.major || '未知' }}</div>
+                <div>{{ userData.major || '加载中...' }}</div>
               </div>
               <div>
                 <span>学号</span>
-                <div>{{ userData.student_id || '未知' }}</div>
+                <div>{{ userData.student_id || '加载中...' }}</div>
               </div>
             </div>
 
@@ -165,7 +144,7 @@ onMounted(() => {
             <div class="info-row">
               <div>
                 <span>实习、创业、就职经历</span>
-                <div>{{ userData.experience || '未知' }}</div>
+                <div>{{ userData.experience || '加载中...' }}</div>
               </div>
             </div>
 
@@ -173,16 +152,11 @@ onMounted(() => {
             <div class="info-row">
               <div>
                 <span>现状</span>
-                <div>{{ userData.status || '未知' }}</div>
+                <div>{{ userData.status || '加载中...' }}</div>
               </div>
             </div>
           </div>
         </el-scrollbar>
-
-        <!-- 右下角图标 -->
-        <div class="message-icon">
-          <img src="@/assets/icons/personal-center-message.svg" alt="消息图标" />
-        </div>
       </div>
     </div>
   </div>
@@ -242,23 +216,6 @@ onMounted(() => {
 
 .custom-scrollbar ::v-deep(.el-scrollbar__thumb:hover) {
   background: #607d8b; /* 鼠标悬停时滑块颜色 */
-}
-
-.info-box .message-icon {
-  position: absolute; /* 绝对定位 */
-  bottom: 0px; /* 距离底部 */
-  right: 0px; /* 距离右侧 */
-}
-
-.message-icon img {
-  width: 110px; /* 控制图标大小 */
-  opacity: 0.8; /* 轻微透明效果 */
-  transition: opacity 0.5s; /* 添加鼠标悬停效果 */
-}
-
-.message-icon img:hover {
-  opacity: 1; /* 悬停时变为不透明 */
-  cursor: pointer;
 }
 
 .header {

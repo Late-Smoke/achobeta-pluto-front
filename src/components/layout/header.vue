@@ -25,7 +25,7 @@ const handleLogout = async () => {
       router.replace('/login');
     } else {
       ElMessage.warning(result.message); // 警告提示
-      if (result.message.includes('登录已过期') || result.message.includes('无效')) {
+      if (result.code === -20000 || result.code === -20002) {
         clearLocalStorage();
         router.replace('/login');
       }
