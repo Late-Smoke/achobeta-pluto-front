@@ -10,8 +10,6 @@ declare module 'vue' {
     Aside: typeof import('./components/layout/aside.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
-    ElCard: typeof import('element-plus/es')['ElCard']
-    ElCascaderPanel: typeof import('element-plus/es')['ElCascaderPanel']
     ElContainer: typeof import('element-plus/es')['ElContainer']
     ElDialog: typeof import('element-plus/es')['ElDialog']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
@@ -25,21 +23,14 @@ declare module 'vue' {
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
     ElOption: typeof import('element-plus/es')['ElOption']
     ElPagination: typeof import('element-plus/es')['ElPagination']
-    ElProgress: typeof import('element-plus/es')['ElProgress']
     ElScrollbar: typeof import('element-plus/es')['ElScrollbar']
     ElSelect: typeof import('element-plus/es')['ElSelect']
-    ElPopover: typeof import('element-plus/es')['ElPopover']
     ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
-    ElTabPane: typeof import('element-plus/es')['ElTabPane']
-    ElTabs: typeof import('element-plus/es')['ElTabs']
     Header: typeof import('./components/layout/header.vue')['default']
     Layout: typeof import('./components/layout.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-  }
-  export interface ComponentCustomProperties {
-    vInfiniteScroll: typeof import('element-plus/es')['ElInfiniteScroll']
   }
 }
