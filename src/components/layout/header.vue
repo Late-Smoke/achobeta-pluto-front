@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router';
 import { ArrowDown } from '@element-plus/icons-vue';
 import { fetchNameApi, getDevicesApi, removeDeviceApi } from '@/axios/api/home'
+import { exitSystem } from '@/components/layout/utils/Logout'; // 引入 exitSystem 函数
 import dayjs from 'dayjs';
 
 const router = useRouter();
@@ -13,9 +14,34 @@ const navigateToPersonalCenter = () => {
 };
 
 //// 退出登录
-const handleLogout = () => {
-  console.log('执行登出操作');
-  router.push('/login');
+const handleLogout = async () => {
+  try {
+    // 调用 exitSystem 接口
+    const result = await exitSystem();
+    if (result.success) {
+      ElMessage.success(result.message); // 成功提示
+      clearLocalStorage();
+      // 跳转到登录页面，确保用户无法通过返回按钮回到原页面
+      router.replace('/login');
+    } else {
+      ElMessage.warning(result.message); // 警告提示
+      if (result.code === -20000 || result.code === -20002) {
+        clearLocalStorage();
+        router.replace('/login');
+      }
+    }
+  } catch (error) {
+    console.error('退出登录出错:', error);
+    ElMessage.error('退出失败，请稍后重试');
+  } 
+};
+// 清理本地存储
+const clearLocalStorage = () => {
+  localStorage.removeItem('atoken');
+  localStorage.removeItem('rtoken');
+  localStorage.removeItem('userid');
+  localStorage.removeItem('user_agent');
+  localStorage.removeItem('ip');
 };
   
 ////常用设备
@@ -88,35 +114,9 @@ const buttonStates= ref([]);
 const handlePageChange = (page) => {
   buttonStates.value = [];
   currentPage.value = page;
-  updateCurrentGridData();
+  updateCurrentGridData(currentPage);
 }
-
-//下线
-const offLine = ref([]);
-buttonStates.value = currentGridData.value.map(() => false);
-
-const handleOffLine = async(id, index) => {
-  console.log(index,id);
-  try{
-    const response = await removeDeviceApi({id});
-    console.log("后端响应：",response.data);
-    console.log(id);
-    if(response.data.message == '成功') {
-      offLine.value = true;
-      ElMessage({
-      message: '下线成功。',
-      type: 'success',
-    })
-      buttonStates.value[index] = true;
-  }
-    else ElMessage.error('下线失败。');
-
-  }catch(error){
-    ElMessage.error('下线失败。');
-    console.error('Error offline:', error);
-}}
-
-const updateCurrentGridData = async() => {
+const updateCurrentGridData = async(currentPage) => {
   try{
     const response = await getDevicesApi({page_number:currentPage.value,line_number:pageSize});
     currentGridData.value = response.data.data.devices;
