@@ -1,13 +1,27 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useNewUser } from '../utils/new-user';
 import axios from 'axios';
 
 // 导入点赞前后的 SVG 图标
 import hand1 from '@/assets/icons/personal-center-hand1.svg';
 import hand2 from '@/assets/icons/personal-center-hand2.svg';
 
+// 路由和逻辑方法
+const route = useRoute();
+const router = useRouter();
+
+const { 
+  userLevel,// 当前用户的权限级别
+  formData,// 响应式表单数据对象
+  initializeNewUser,// 初始化用户权限和团队信息
+  resetForm, // 重置表单逻辑
+  createTeamMember,// 保存数据逻辑
+  handleBack,// 返回按钮逻辑
+} = useNewUser(router);
+
 // 定义响应式变量
-const userData = ref({}); // 用户个人信息
 const likeCount = ref(0); // 点赞数
 const isLiked = ref(false); // 点赞状态
 
@@ -17,62 +31,45 @@ const initialLikeCount = ref(0);
 
 // 性别的选项值
 const selectedGender = ref("null"); // 默认值为 "null"
+// 选中的角色（初始化为无权限）
+const selectedRole = ref(0);
 
 // 管理权限的选项
 const roleOptions = ref([
   { label: '无权限', value: 0 },
-  { label: '普通管理员', value: 1 },
-  { label: '超级管理员', value: 2 },
+  { label: '普通管理员', value: 1 }
 ]);
-
-// 选中的角色（初始化为无权限）
-const selectedRole = ref(0);
-
-// 获取用户数据函数
-async function fetchUserData() {
-  try {
-    const response = await axios.get('/api/GetMemberDetail', {
-      params: {
-        userid: localStorage.getItem('userid'),
-      },
-    });
-    if (response.data.code === 200) {
-      const data = response.data.data;
-      userData.value = data;
-      likeCount.value = data.likecount || 0;
-      isLiked.value = data.isLiked || false;
-      initialIsLiked.value = isLiked.value;
-      initialLikeCount.value = likeCount.value;
-    } else {
-      console.error('获取个人中心用户数据失败');
-    }
-  } catch (error) {
-    console.error('Error fetching user data:', error);
-  }
-}
 
 // 点赞切换逻辑
 async function toggleLike() {
-  isLiked.value = !isLiked.value;
-  likeCount.value += isLiked.value ? 1 : -1;
-
-  try {
-    const response = await axios.put('/api/PutLikeCount', {
-      atoken: localStorage.getItem('atoken'),
-      userid: localStorage.getItem('userid'),
-    });
-
-    if (response.data.code === 200) {
-      likeCount.value = response.data.likecount;
-    } else {
-      console.error('点赞请求失败');
-      rollbackToInitialState();
-    }
-  } catch (error) {
-    console.error('点赞请求出错:', error);
-    rollbackToInitialState();
-  }
+  isLiked.value = !isLiked.value;// 切换点赞状态
+  likeCount.value += isLiked.value ? 1 : -1;// 更新点赞数
 }
+
+// 定义团队和职位的选项
+const teamPositionOptions = ref([
+  {
+    value: 'team1',
+    label: '团队 1',
+    children: [
+      { value: 'position1', label: '职位 1' },
+      { value: 'position2', label: '职位 2' ,
+      children: [
+      { value: 'position1', label: '职位 1' },
+      { value: 'position2', label: '职位 2' },
+    ],},
+    ],
+  }
+]);
+
+// 定义级联选择器的 props
+const teamPositionProps = ref({
+  multiple: true, // 启用多选
+  checkStrictly: true, // 允许父子独立选择
+});
+
+// 选中的团队/职位
+const selectedTeamPosition = ref([]);
 
 // 回滚到初始状态函数
 function rollbackToInitialState() {
@@ -80,10 +77,41 @@ function rollbackToInitialState() {
   likeCount.value = initialLikeCount.value;
 }
 
-// 页面加载时获取用户数据
-onMounted(() => {
-  fetchUserData();
+// 页面加载时执行
+onMounted(async () => {
+  const selectedTeamId = route.params.teamId; // 获取路由参数中的团队 ID
+  await initializeNewUser(selectedTeamId); // 初始化用户权限和团队信息
 });
+
+// 重置表单
+const resetUserData = async () => {
+  resetForm();// 调用封装的重置逻辑
+  selectedTeamPosition.value = []; // 清空团队和职位选中项
+  selectedRole.value = 0; // 重置管理权限
+  selectedGender.value = "null"; // 重置性别
+  likeCount.value = 0; // 重置点赞数
+  isLiked.value = false; // 重置点赞状态
+  await nextTick(); // 确保视图更新
+};
+
+// 保存表单
+const saveUserData = async () => {
+  if (!formData.value.phone_num) {
+    ElMessage.warning('请填写手机号码');
+    return;
+  }
+  // 点赞数和表单数据一并提交到后端
+  formData.value.likeCount = likeCount.value;
+  const success = await createTeamMember();// 保存数据到后端
+  if (success) {
+    ElMessage.success('数据保存成功');
+  }
+};
+
+// 返回按钮逻辑
+const handleBackClick = async () => {
+  await handleBack();// 调用封装的返回逻辑
+};
 </script>
 
 <template>
@@ -121,11 +149,11 @@ onMounted(() => {
             <div class="info-row">
               <div>
                 <span>真实姓名</span>
-                <el-input style="width: 240px" size="large"/>
+                <el-input v-model="formData.name" style="width: 240px" size="large"/>
               </div>
               <div>
                 <span>性别</span>
-                <el-select v-model="selectedGender" size="large" style="width: 130px">
+                <el-select v-model="formData.sex" size="large" style="width: 130px">
                   <el-option label="未选择" value="null" />
                   <el-option label="男" value="男"></el-option>
                   <el-option label="女" value="女"></el-option>
@@ -137,13 +165,23 @@ onMounted(() => {
             <div class="info-row">
               <div>
                 <span>加入时间</span>
-                <el-input style="width: 240px" size="large"/>
+                <el-input v-model="formData.create_date" style="width: 240px" size="large"/>
               </div>
               <div>
                 <span>所属团队/职位</span>
-                <p>你好</p>
+                <div class="m-4">
+                    <el-cascader 
+                      :options="teamPositionOptions" 
+                      :props="teamPositionProps" 
+                      clearable 
+                      v-model="selectedTeamPosition" 
+                      size="large" 
+                      :disabled="userLevel === 2" 
+                     />
+                </div>
               </div>
               <div>
+                <div>
                 <span>管理权限</span>
                 <el-select v-model="selectedRole" size="large" style="width: 205px">
                   <el-option
@@ -154,38 +192,39 @@ onMounted(() => {
                   />
                 </el-select>
               </div>
+              </div>
             </div>
 
             <div class="info-row">
               <div>
                 <span>身份证号</span>
-                <el-input style="width: 240px" size="large"/>
+                <el-input v-model="formData.id_card" style="width: 240px" size="large"/>
               </div>
               <div>
                 <div class="field-label">
                   <span>手机号码</span>
                   <span class="required">*</span>
                 </div>
-                <el-input style="width: 240px" size="large"/>
+                <el-input v-model="formData.phone_num" style="width: 240px" size="large"/>
               </div>
               <div>
                 <span>邮箱</span>
-                <el-input style="width: 240px" size="large"/>
+                <el-input v-model="formData.email" style="width: 240px" size="large"/>
               </div>
             </div>
 
             <div class="info-row">
               <div>
                 <span>年级</span>
-                <el-input style="width: 240px" size="large"/>
+                <el-input v-model="formData.grade" style="width: 240px" size="large"/>
               </div>
               <div>
                 <span>专业</span>
-                <el-input style="width: 240px" size="large"/>
+                <el-input v-model="formData.major" style="width: 240px" size="large"/>
               </div>
               <div>
                 <span>学号</span>
-                <el-input style="width: 240px" size="large"/>
+                <el-input v-model="formData.student_id" style="width: 240px" size="large"/>
               </div>
             </div>
 
@@ -193,7 +232,7 @@ onMounted(() => {
             <div class="info-row">
               <div style="grid-column: 1 / 4; text-align: left;">
                 <span>实习、创业、就职经历</span>
-                <el-input type="textarea" :rows="5"/>
+                <el-input v-model="formData.experience" type="textarea" :rows="5"/>
               </div>
             </div>
 
@@ -201,7 +240,7 @@ onMounted(() => {
             <div class="info-row">
               <div style="grid-column: 1 / 4; text-align: left;">
                 <span>现状</span>
-                <el-input type="textarea" :rows="4"/>
+                <el-input v-model="formData.status" type="textarea" :rows="4"/>
               </div>
             </div>
           </div>

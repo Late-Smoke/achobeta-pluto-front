@@ -16,6 +16,14 @@ const initialIsLiked = ref(false);
 const initialLikeCount = ref(0);
 
 const selectedGender = ref("null"); // 默认值为 "null"
+// 选中的角色（初始化为无权限）
+const selectedRole = ref(0);
+
+// 管理权限的选项
+const roleOptions = ref([
+  { label: '无权限', value: 0 },
+  { label: '普通管理员', value: 1 }
+]);
 
 // 获取用户数据函数
 async function fetchUserData() {
@@ -140,6 +148,19 @@ onMounted(() => {
                   <span>所属团队/职位</span>
                   <p>你好</p>
                 </div>
+                <div>
+                <div>
+                <span>管理权限</span>
+                <el-select v-model="selectedRole" size="large" style="width: 205px">
+                  <el-option
+                    v-for="option in roleOptions"
+                    :key="option.value"
+                    :label="option.label"
+                    :value="option.value"
+                  />
+                </el-select>
+              </div>
+              </div>
               </div>
   
               <!-- 第三行 -->

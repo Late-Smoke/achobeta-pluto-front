@@ -11,14 +11,14 @@ export function requestCaptcha(phoneInput, phoneError, updateCountdown) {
   const phoneNumber = phoneInput.value.toString();
 
   // 使用 POST 请求，将手机号放入请求体中
-  axios.post('/api/login/code', { phone: phoneNumber })
+  axios.post('/api/login/code', { phone: phoneNumber }, { timeout: 2000 })
     .then(response => {
       console.log("后端返回的数据:", response.data); // 打印后端的完整响应数据
 
       const data = response.data;
 
       // 根据后端返回的数据结构调整判断条件
-      if (data.Code === 200 && data.Data.Code === 20000) {
+      if (data.code === 20000) {
         // 如果请求成功，隐藏错误提示，并开始倒计时
         phoneError.style.display = 'none';
         const expirationTime = Date.now() + 60 * 1000;
@@ -27,14 +27,19 @@ export function requestCaptcha(phoneInput, phoneError, updateCountdown) {
       } else {
         // 如果请求不成功，显示错误提示
         phoneError.style.display = 'block';
-        phoneError.textContent = data.Message || '手机号不合法，请重新输入';
+        phoneError.textContent = data.message || '手机号不合法，请重新输入';//data.Message可能要修改
       }
     })
     .catch(error => {
       // 请求出错时的处理
       console.error('请求出错：', error);
-      phoneError.style.display = 'block';
-      phoneError.textContent = '请求验证码失败，请稍后重试';
+      if (error.code === 'ECONNABORTED') {
+        phoneError.style.display = 'block';
+        phoneError.textContent = '请求超时，请稍后重试';
+      } else {
+        phoneError.style.display = 'block';
+        phoneError.textContent = '请求验证码失败，请稍后重试';
+      }
     });
 }
 
