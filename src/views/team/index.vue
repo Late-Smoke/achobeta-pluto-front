@@ -611,6 +611,7 @@ onMounted(async() =>{
           urls.value = data.data.data.urls;
           dropdownItems.value = data.data.data.teams;
           level.value = data.data.level;
+          console.log("团队列表：",dropdownItems.value);
           //loadMore();
         }
   })
