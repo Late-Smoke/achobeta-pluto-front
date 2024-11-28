@@ -23,14 +23,29 @@ apiClient.interceptors.request.use((config) => {
 
 // 响应拦截器
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    // 检查 response.data 是否已经是一个对象
+    if (typeof response.data === 'object' && response.data!== null) {
+      // 如果是对象，直接返回
+      return response;
+    } else {
+      // 如果不是对象，尝试解析为 JSON
+      try {
+        response.data = JSON.parse(response.data);
+      } catch (e) {
+        // 如果解析失败，记录错误并返回原始数据
+        console.error('Error parsing JSON:', e);
+      }
+      return response;
+    }
+  },
   async (error: AxiosError) => {
     const { response, config } = error;
     let errorMessage;
 
     // 根据响应状态码处理不同的错误
     if (response) {
-      switch (response.status) {
+      switch (response.data) {
         case 400:
           errorMessage = '请求参数错误';
           break;
@@ -49,6 +64,8 @@ apiClient.interceptors.response.use(
           break;
         case 500:
           errorMessage = '服务器内部错误';
+        case -20000:
+          errorMessage = 'token过期';
           break;
         default:
           errorMessage = `服务器错误: ${response.status}`;
@@ -56,7 +73,7 @@ apiClient.interceptors.response.use(
     } else if (error.request) {
       errorMessage = '请求已发送，但没有收到响应';
     } else {
-      errorMessage = error.message || '请求错误';
+      errorMessage = '请求错误';
     }
 
     console.error('响应错误:', errorMessage);
