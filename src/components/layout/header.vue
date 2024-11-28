@@ -26,7 +26,7 @@ const deviceDialogVisible = ref(false);
 const showDeviceDialog = () => {
   deviceDialogVisible.value = true; // 显示对话框 骨架扇
   try {
-      updateCurrentGridData(currentPage);
+      updateCurrentGridData();
     } catch (error) {
       // 处理获取设备数据时发生的错误
       ElMessage.error('成员信息获取失败。')
@@ -46,11 +46,37 @@ const showDeviceDialog = () => {
   //   { device_name: '设备I', ip: '192.168.1.9', online_time: '2024-11-30T20:20:40.56+08:00' },
   //   { device_name: '设备J', ip: '192.168.1.10', online_time: '2024-11-31T20:21:40.56+08:00' }
   // ]);
-const currentGridData = ref([]);
+const currentGridData = ref([
+            {
+                "id": "1861038661370384384",
+                "ip": "127.0.0.1",
+                "online_time": "2024-11-25T21:26:07.944+08:00",
+                "device_name": ""
+            },
+            {
+                "id": "1861038723567718400",
+                "ip": "127.0.0.1",
+                "online_time": "2024-11-25T21:26:22.744+08:00",
+                "device_name": "山鸡14"
+            },
+            {
+                "id": "1861040091435110400",
+                "ip": "10.61.1.75",
+                "online_time": "2024-11-25T21:31:48.897+08:00",
+                "device_name": ""
+            },
+            {
+                "id": "1861040503244460032",
+                "ip": "127.0.0.1",
+                "online_time": "2024-11-25T21:33:27.056+08:00",
+                "device_name": ""
+            }
+        ]);
 for(let i = 0; i < currentGridData.value.length; i++){
       let time = currentGridData.value[i].online_time;
       currentGridData.value[i].online_time = dayjs(time).format('YYYY-MM-DD HH:mm:ss ');
     }
+const service_id = localStorage.getItem('service_id');//当前设备
 
 //分页
 const totalDevices = ref(10); // 假设总共有10台设备
@@ -62,13 +88,40 @@ const buttonStates= ref([]);
 const handlePageChange = (page) => {
   buttonStates.value = [];
   currentPage.value = page;
-  updateCurrentGridData(currentPage);
+  updateCurrentGridData();
 }
-const updateCurrentGridData = async(currentPage) => {
+
+//下线
+const offLine = ref([]);
+buttonStates.value = currentGridData.value.map(() => false);
+
+const handleOffLine = async(id, index) => {
+  console.log(index,id);
   try{
-    const response = await getDevicesApi({page_number:1,line_number:4});
+    const response = await removeDeviceApi({id});
+    console.log("后端响应：",response.data);
+    console.log(id);
+    if(response.data.message == '成功') {
+      offLine.value = true;
+      ElMessage({
+      message: '下线成功。',
+      type: 'success',
+    })
+      buttonStates.value[index] = true;
+  }
+    else ElMessage.error('下线失败。');
+
+  }catch(error){
+    ElMessage.error('下线失败。');
+    console.error('Error offline:', error);
+}}
+
+const updateCurrentGridData = async() => {
+  try{
+    const response = await getDevicesApi({page_number:currentPage.value,line_number:pageSize});
     currentGridData.value = response.data.data.devices;
     totalDevices.value = response.data.data.total;
+    buttonStates.value = currentGridData.value.map(() => false);
     console.log('后端响应内容:', response.data); // 打印后端响应内容
 
     for(let i = 0; i < currentGridData.value.length; i++){
@@ -79,43 +132,21 @@ const updateCurrentGridData = async(currentPage) => {
   catch(error){
     ElMessage.error('成员信息获取失败。');
     console.error('Error fetching devices:', error);
-}
-
-//下线
-  const currentName = ref('设备A');
-  buttonStates.value = currentGridData.value.map(() => false);
-  function handleClick(index) {
-      const atoken = localStorage.getItem('atoken');
-      removeDeviceApi(atoken)
-      .then(data => {
-        if(data.result.value){
-          ElMessage({
-          message: '下线成功。',
-          type: 'success',
-        })
-          buttonStates.value[index] = true;
-        }
-        else{
-          ElMessage.error('下线失败。');
-      }}).catch(error => {
-        ElMessage.error('下线失败。');
-        console.error('Error Offline devices', error);
-      });}
+}}
 
 ////挂载
   onMounted(async () => {
-    // 获取并赋值name
-    const atoken = localStorage.getItem('atoken');//从本地获取atoken
-    fetchNameApi(atoken)
-    .then(data => {
-        name.value = data.username; // 获取并赋值给 name
-    })
-    .catch(error => {
-      ElMessage.error('名字获取失败。');
-        console.error('Error fetching name:', error);
-    });
-    });
-  }
+  fetchNameApi()
+  .then(data => {
+    name.value = data.data.data.name;
+    console.log('后端响应:', data.data);
+  })
+  .catch(error => {
+    ElMessage.error('名字获取失败。');
+    console.error('Error fetching name:', error);
+  });
+})
+
 </script>
 
 <template>
@@ -131,7 +162,7 @@ const updateCurrentGridData = async(currentPage) => {
         <el-table-column label="操作" width="180">
         <template v-slot="scope">
           <el-button
-          v-if="scope.row.device_name == '设备A'"
+          v-if="scope.row.id == service_id"
             type="text"
             size="small"
             :disabled="true"
@@ -142,7 +173,7 @@ const updateCurrentGridData = async(currentPage) => {
               v-else-if="!buttonStates[scope.$index]"
               type="text"
               size="small"
-              @click="handleClick(scope.$index)"
+              @click="handleOffLine(scope.row.id,scope.$index)"
             >
               下线
             </el-button>

@@ -1,9 +1,16 @@
 import apiClient from '@/axios/axios'
+import { atoken , rtoken } from '@/axios/api/login'
 
-const atoken = localStorage.getItem('atoken');
+//const atoken = localStorage.getItem('atoken');
 //获取权限组 团队信息
 export function getPowerApi(params) {
-    return apiClient.get('https://api.example.com/data', { params });
+    return apiClient.get('/api/team/power',  {
+        params:params,
+        headers:
+        {
+            'Authorization': `${atoken}`, // 正确地将atoken作为请求头传递
+        }
+    } );
 }
 
 //删除团队成员
@@ -13,7 +20,13 @@ export function deleteTeamMemberApi(params) {
 
 //新建团队
 export function CreateTeamApi(data) {
-    return apiClient.put('https://api.example.com/data', data);
+    return apiClient.put('/api/team/structure/create',  {
+        data:data,
+        headers:
+        {
+            'Authorization': `${atoken}`, // 正确地将atoken作为请求头传递
+        }
+    } );
 }
 
 //查询指定团队成员信息

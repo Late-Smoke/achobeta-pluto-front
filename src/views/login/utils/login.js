@@ -45,7 +45,7 @@ export function login(phoneInput, captchaInput, captchaError, loginRemember) {
          // 存储必要的登录信息
          localStorage.setItem('atoken', responseData.atoken);    // 令牌
          if (remember && responseData.rtoken) localStorage.setItem('rtoken', responseData.rtoken); // 当用户勾选了且rtokrn存在时，刷新令牌
-         localStorage.setItem('service_id', responseData['service id']); // 业务id
+         localStorage.setItem('service_id', responseData['id']); // 业务id
          localStorage.setItem('user_agent', responseData.user_agent); // 用户代理信息
          localStorage.setItem('ip', responseData.ip); // IP地址
 

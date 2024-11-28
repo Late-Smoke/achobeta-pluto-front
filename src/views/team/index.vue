@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 // 跳转到新增用户页面
-const handleAddUser = (selectedTeamId) => {
+const handleAddUser = (selectedTeamId,selectedTeamName,level) => {
   router.push('/team/new-user'); // 跳转到新增用户页面的路由
 };
 
@@ -248,28 +248,35 @@ const selectTeam = (item) => {
 
 const toggleAddTeam = () => {
   showAddTeam.value = !showAddTeam.value;
-  if (!showAddTeam.value) {
-    // 聚焦到输入框
-    nextTick(() => {
-      if (this.$refs.teamInput) {
-        this.$refs.teamInput.focus();
-      }
-    });
-  }
+  // if (!showAddTeam.value) {
+  //   // 聚焦到输入框
+  //   nextTick(() => {
+  //     if (this.$refs.teamInput) {
+  //       this.$refs.teamInput.focus();
+  //     }
+  //   });
+  // }
 };
 
-const addTeam = () => {
-  if (teamName.value.trim()) {
-    const newTeam = { team_id: dropdownItems.value.length, team_name: teamName.value};
+const addTeam = async() => {
+  try{
+    if (teamName.value) {
+    const response = await CreateTeamApi({team_name:teamName});
+    console.log("后端响应为："+response.data);
+    const teamId = response.data.data.team_id;
+    const newTeam = { team_id: teamId, team_name: teamName.value};
     dropdownItems.value.push(newTeam);
     selectedTeamId.value = newTeam.team_id;
     selectedTeamName.value = newTeam.team_name;
     toggleAddTeam(); // 隐藏输入框，显示下拉菜单项
     teamName.value = ''; // 清空输入框
-    const response = CreateTeamApi({teamName});
-    if(response.message == "成功") ifCreateTeam.value = true;
+    ifCreateTeam.value = true;
   }
-};
+}
+  catch(error){
+    ElMessage.error('团队新增失败。');
+    console.error('Error adding new team:', error);
+}}
 //删除
 const ifDelete = ref(false);
 function showDelete(id) {
@@ -363,19 +370,18 @@ const team_structures = ref([
 ]);
 const OldTeam_structures = ref(team_structures);//旧团队架构管理
 const handleTeamManage = async() => {
-  first_teamid.value = 1;
-  first_team_name.value = 'AchoBeta 1.0';
-  ifCreateTeam.value = false;
   try{
     teamManageOptionShow.value = true;
-    const response = await getTeamStructureApi({team_id:selectedTeamId});
-    //测试用
-    // const team_id = 1859771705543626752;
-    // const user_id = 1859880540140736512;
-    // const response = await getTeamStructureApi({user_id,team_id});
-    team_structures.value = response.data.data.team_structures;
-    OldTeam_structures.value = response.data.data.team_structures;//备用
-    console.log("后端响应为："+response.data);
+    const response = await getTeamStructureApi({team_id:selectedTeamId.value});
+    console.log("后端响应为：",response.data);
+    if(response.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
+    else{
+      first_teamid.value = 1;
+      first_team_name.value = 'AchoBeta 1.0';
+      ifCreateTeam.value = false;
+      team_structures.value = response.data.data.team_structures;
+      OldTeam_structures.value = response.data.data.team_structures;//备用
+    }
 }
   catch(error){
     ElMessage.error('团队架构获取失败。');
@@ -383,6 +389,7 @@ const handleTeamManage = async() => {
 }}
 
 //权限组
+const level = ref(1);
 //超级管理员
 const urls = ref([1]);//测试期间为[1]
 const deleteMember = true;
@@ -581,30 +588,36 @@ catch(error){
 }}
 
 onMounted(async() =>{
-  try {
-        const atoken = localStorage.getItem('atoken');
-        if (!atoken) {
-          ElMessage.error('未找到认证令牌。');
-          return; // 如果没有令牌，则不继续执行
+  getPowerApi({team_id:0})//获取第一个团队id
+    .then(data => {
+        console.log('后端响应:', data.data);
+        if(data.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
+        else{
+          first_teamid.value = data.data.data.first_teamid;
+          first_team_name.value = data.data.data.first_team_name;
+          selectedTeamId.value = first_teamid;
+          selectedTeamName.value = first_team_name;//优先显示用户第一个团队的信息
         }
-
-        const responseFirst = await getPowerApi({atoken});
-        first_teamid.value = responseFirst.data.first_teamid;
-        first_team_name.value = responseFirst.data.first_team_name;
-        selectedTeamId.value = first_teamid;
-        selectedTeamName.value = first_team_name;//优先显示用户第一个团队的信息
- 
-        const responseScecond = await getPowerApi({atoken , first_teamid});
-        urls.value = responseScecond.data.urls;
-        dropdownItems.value = responseScecond.data.teams;
-        level.value = responseScecond.data.level;
-
-        loadMore();
-        processTreeNodes(treeData, 1);
-      } catch (error) {
-        ElMessage.error('数据获取失败。');
-        console.error('Error fetching data:', error);
-      }
+  })
+  .catch(error => {
+    ElMessage.error('数据获取失败。');
+    console.error('Error fetching data:', error);
+  });
+  getPowerApi({team_id:first_teamid.value})//获取权限组和第一个团队的成员列表
+  .then(data => {
+        console.log('后端响应:', data.data);
+        if(data.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
+        else{
+          urls.value = data.data.data.urls;
+          dropdownItems.value = data.data.data.teams;
+          level.value = data.data.level;
+          //loadMore();
+        }
+  })
+  .catch(error => {
+    ElMessage.error('成员列表数据获取失败。');
+    console.error('Error fetching data:', error);
+  });
 })
 </script>
 
@@ -649,7 +662,6 @@ onMounted(async() =>{
             style="width: 120px; margin-left: 5px;"
             placeholder="请输入团队名称"
             @keyup.enter="addTeam"
-            ref="teamInput"
           />
         </el-dropdown-menu>
       </template>
@@ -787,7 +799,6 @@ onMounted(async() =>{
             style="width: 120px; margin-left: 5px;"
             placeholder="请输入团队名称"
             @keyup.enter="addTeam"
-            ref="teamInput"
           />
         </el-dropdown-menu>
       </template>
@@ -796,7 +807,7 @@ onMounted(async() =>{
       <el-button type="info" plain class="btn1">
         <span class="btn-content" @click="handleTeamManage()">团队架构管理</span>
       </el-button>
-      <el-button v-if="addMember" type="primary" plain class="btn2" @click="handleAddUser(selectedTeamId)">
+      <el-button v-if="addMember" type="primary" plain class="btn2" @click="handleAddUser(selectedTeamId,selectedTeamName,level)">
         <span class="btn-content">新增用户</span>
       </el-button>
     </div>
