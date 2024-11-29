@@ -1,4 +1,13 @@
 import apiClient from '@/axios/axios'
 
-export const atoken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOjE4NjEzMzUwMzI1NzcxMzQ1OTIsInR5cGUiOiJhdG9rZW4iLCJleHAiOjE3MzI4MDQxMjgsImlzcyI6IjE4NjE5NjA0MDQ2NjY2ODMzOTIiLCJuYmYiOjE3MzI3NjA5Mjh9.5lmfjbhD6si4w8l6U1c4mLVOtxTVW2neQ3XaPLIXXkk";
-export const rtoken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOjE4NjEzMzUwMzI1NzcxMzQ1OTIsInR5cGUiOiJydG9rZW4iLCJleHAiOjE3MzUzNTI5MjgsImlzcyI6IjE4NjE5NjA0MDQ2NjY2ODMzOTIiLCJuYmYiOjE3MzI3NjA5Mjh9.i0TFTq8xndZxqWN0yltt7lhJnrru4JxtHHUHsTbzmNE";
+export function reflashRtokenApi(params) {
+    return apiClient.post('/api/common/rtoken',  {
+        body:params
+    } );
+}
+
+export function checkAutoLoginApi(params) {
+    return apiClient.post('/api/login/auto',  {
+        body:params
+    } );
+}

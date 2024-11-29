@@ -59,87 +59,67 @@ const showDeviceDialog = () => {
       console.error('Failed to update grid data:', error);
     }
   }
-  
-//const currentGridData = ref([
-  //   { device_name: '设备A', ip: '192.168.1.1', online_time: '2024-11-22T20:11:40.56+08:00' },
-  //   { device_name: '设备B', ip: '192.168.1.2', online_time: '2024-11-23T20:12:00.00+08:00' },
-  //   { device_name: '设备C', ip: '192.168.1.3', online_time: '2024-11-24T20:13:30.12+08:00' },
-  //   { device_name: '设备D', ip: '192.168.1.4', online_time: '2024-11-25T20:15:00.45+08:00' },
-  //   { device_name: '设备E', ip: '192.168.1.5', online_time: '2024-11-26T20:16:40.56+08:00' },
-  //   { device_name: '设备F', ip: '192.168.1.6', online_time: '2024-11-27T20:17:40.56+08:00' },
-  //   { device_name: '设备G', ip: '192.168.1.7', online_time: '2024-11-28T20:18:40.56+08:00' },
-  //   { device_name: '设备H', ip: '192.168.1.8', online_time: '2024-11-29T20:19:40.56+08:00' },
-  //   { device_name: '设备I', ip: '192.168.1.9', online_time: '2024-11-30T20:20:40.56+08:00' },
-  //   { device_name: '设备J', ip: '192.168.1.10', online_time: '2024-11-31T20:21:40.56+08:00' }
-  // ]);
-const currentGridData = ref([
-            {
-                "id": "1861038661370384384",
-                "ip": "127.0.0.1",
-                "online_time": "2024-11-25T21:26:07.944+08:00",
-                "device_name": ""
-            },
-            {
-                "id": "1861038723567718400",
-                "ip": "127.0.0.1",
-                "online_time": "2024-11-25T21:26:22.744+08:00",
-                "device_name": "山鸡14"
-            },
-            {
-                "id": "1861040091435110400",
-                "ip": "10.61.1.75",
-                "online_time": "2024-11-25T21:31:48.897+08:00",
-                "device_name": ""
-            },
-            {
-                "id": "1861040503244460032",
-                "ip": "127.0.0.1",
-                "online_time": "2024-11-25T21:33:27.056+08:00",
-                "device_name": ""
-            }
-        ]);
+const currentGridData = ref([]);
 for(let i = 0; i < currentGridData.value.length; i++){
       let time = currentGridData.value[i].online_time;
       currentGridData.value[i].online_time = dayjs(time).format('YYYY-MM-DD HH:mm:ss ');
     }
 const service_id = localStorage.getItem('service_id');//当前设备
-
+console.log('当前设备:',service_id);
 //分页
 const totalDevices = ref(10); // 假设总共有10台设备
-const pageSize = 4; // 开发阶段为3，后期更改为每页显示5台设备 
+const pageSize = 6; // 开发阶段为3，后期更改为每页显示5台设备 
 const currentPage = ref(1); // 当前页码
+
+//下线
+const handleOffLine = async (id,index) => {
+  try {
+    console.log('下线设备-设备ID:',id);
+    const response = await removeDeviceApi({id});
+    console.log('下线设备-后端响应内容:', response.data); // 打印后端响应内容
+    if(response.data.code === 20000){
+      ElMessage.success('下线成功。');
+      buttonStates.value[index] = true;
+      // updateCurrentGridData();
+    }}
+  catch(error){
+    ElMessage.error('下线失败。');
+    console.error('Error fetching devices:', error);
+  }
+}
 
 // 更新当前页数据
 const buttonStates= ref([]);
 const handlePageChange = (page) => {
   buttonStates.value = [];
   currentPage.value = page;
-  updateCurrentGridData(currentPage);
+  updateCurrentGridData();
 }
-const updateCurrentGridData = async(currentPage) => {
+const updateCurrentGridData = async() => {
   try{
-    const response = await getDevicesApi({page_number:currentPage.value,line_number:pageSize});
-    currentGridData.value = response.data.data.devices;
-    totalDevices.value = response.data.data.total;
-    buttonStates.value = currentGridData.value.map(() => false);
-    console.log('后端响应内容:', response.data); // 打印后端响应内容
-
-    for(let i = 0; i < currentGridData.value.length; i++){
-      let time = currentGridData.value[i].online_time;
-      currentGridData.value[i].online_time = dayjs(time).format('YYYY-MM-DD HH:mm:ss ');
-    }
-}
+    // const response = await getDevicesApi({page_number:currentPage.value,line_number:pageSize});
+    const response = await getDevicesApi({page_number:1,line_number:6});
+    console.log('更新常用设备列表-后端响应内容:', response.data); // 打印后端响应内容 
+      currentGridData.value = response.data.data.devices;
+      totalDevices.value = response.data.data.total;
+      buttonStates.value = currentGridData.value.map(() => false);
+      for(let i = 0; i < currentGridData.value.length; i++){
+        let time = currentGridData.value[i].online_time;
+        currentGridData.value[i].online_time = dayjs(time).format('YYYY-MM-DD HH:mm:ss ');
+        }}
   catch(error){
     ElMessage.error('成员信息获取失败。');
     console.error('Error fetching devices:', error);
 }}
 
 ////挂载
-  onMounted(async () => {
+onMounted(async () => {
   fetchNameApi()
   .then(data => {
-    name.value = data.data.data.name;
-    console.log('后端响应:', data.data);
+    console.log('获取用户姓名-后端响应:', data.data);
+    if(data.data.data)
+      name.value = data.data.data.name;
+    else ElMessage.error('名字获取失败。');
   })
   .catch(error => {
     ElMessage.error('名字获取失败。');
@@ -151,7 +131,6 @@ const updateCurrentGridData = async(currentPage) => {
 
 <template>
     <el-header class="header">
-      <div v-if="name">
       <el-dialog v-model="deviceDialogVisible" title="常用设备" width="800" style="cursor: default">
         <span>此处将显示所有您开启了“三十天内自动登录”的设备</span>
         <hr>
@@ -198,12 +177,13 @@ const updateCurrentGridData = async(currentPage) => {
     </el-dialog>
 
     <el-dropdown class="header-right" trigger="hover" placement="bottom-end">
-        <span class="el-dropdown-link" style="cursor: pointer;">
+        <span v-if="name" class="el-dropdown-link" style="cursor: pointer;">
         <span>欢迎回来，{{ name }}</span>
         <el-icon>
           <ArrowDown style="font-size: 20px; color: white;" />
         </el-icon>
       </span>
+      <span v-else>加载中...</span><!--后期改为骨架屏-->
       <template #dropdown>
         <el-dropdown-menu>
           <el-dropdown-item @click="navigateToPersonalCenter">
@@ -222,10 +202,6 @@ const updateCurrentGridData = async(currentPage) => {
       </template>
 
     </el-dropdown>
-  </div>
-  <div v-else>
-        <span>加载中...</span><!--后期改为骨架屏-->
-      </div>
   </el-header>
 </template>
 

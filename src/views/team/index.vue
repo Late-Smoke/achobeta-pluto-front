@@ -15,7 +15,7 @@ const handleViewDetail = (id, selectedTeamId) => {
 
 //需要后端传的时候加上指定团队成员信息数组的长度 所有关于allData长度的都要修改为allDataLength
 //const allDataLength = ref('');
-const allData = ref([
+let currentData = ref([
       {
         id:1,
         name: '张三',
@@ -197,52 +197,70 @@ const allData = ref([
         phone: '13800000005'
       }
     ]);
-const tableData = ref([]);
-const loading = ref(false);
-const pageSize = 9; // 每次加载的数据量
-let currentPage = 1;
+const pageSize = 10; // 每页显示的数据条数
+let currentPage = ref(1);//当前页面
+let totalPages = ref(1);//总数据条数
+
+const handlePageChange = (page) => {
+  currentPage.value = page;
+  updateCurrentData();
+}
+
+const updateCurrentData = async() => {
+  try{
+    const response = await getTeamMemberListApi({team_id:selectedTeamId.value,page:currentPage.value,perpage:pageSize});
+    console.log('传入的team_id为:',selectedTeamId.value);
+    console.log('更新团队成员列表-后端响应内容:', response.data); // 打印后端响应内容 
+      currentData.value = response.data.data.members;
+      totalPages.value = response.data.data.members.length;}
+  catch(error){
+    ElMessage.error('成员信息获取失败。');
+    console.error('Error fetching teamMembers:', error);
+}}
  
-const noMore = computed(() => currentPage * pageSize >= allData.value.length);
+// const noMore = computed(() => currentPage * pageSize >= allData.value.length);
  
-const loadMore = () => {
-  if (loading.value || noMore.value) return;
-  loading.value = true;
-  async() => {
-    const response = await getTeamMemberListApi({selectedTeamId, currentPage , pageSize});
-    tableData.value = response.members;
-    currentPage++;
-    loading.value = false;
-  }
-};
-loadMore();
+// const loadMore = () => {
+//   if (loading.value || noMore.value) return;
+//   loading.value = true;
+//   async() => {
+//     const response = await getTeamMemberListApi({selectedTeamId, currentPage , pageSize});
+//     tableData.value = response.members;
+//     currentPage++;
+//     loading.value = false;
+//   }
+// };
+// loadMore();
 
 //下拉框
-const selectedTeamId = ref(1);
-const selectedTeamName = ref('AchoBeta 1.0');
-const dropdownItems = ref([
-  { team_id: 1, team_name: 'AchoBeta 1.0'},
-  { team_id: 2, team_name: 'AchoBeta 2.0'},
-  { team_id: 3, team_name: 'AchoBeta 3.0'}
+let selectedTeamId = ref(1);
+let selectedTeamName = ref('AchoBeta 1.0');
+let dropdownItems = ref([
+  { id: 1, name: 'AchoBeta 1.0'},
+  { id: 2, name: 'AchoBeta 2.0'},
+  { id: 3, name: 'AchoBeta 3.0'}
 ]);
-const teamName = ref('');
-const showAddTeam = ref(true);
-const hoverItem = ref(null);
+let teamName = ref('');
+let showAddTeam = ref(true);
+let hoverItem = ref(null);
 //团队信息
-const first_teamid = ref(1);
-const first_team_name = ref('AchoBeta 1.0');
-const ifCreateTeam = ref(false);
+let first_teamid = ref(1);
+let first_team_name = ref('AchoBeta 1.0');
+let ifCreateTeam = ref(false);
 
 const selectTeam = (item) => {
   if (!item.isDisabled) {
-    selectedTeamId.value = item.team_id;
-    selectedTeamName.value = item.team_name;
+    selectedTeamId.value = item.id;
+    selectedTeamName.value = item.name;
+    currentPage.value = 1;
+    updateCurrentData();
     // 禁用已选择的团队
     dropdownItems.value = dropdownItems.value.map(i =>
-      i.team_id === item.team_id ? { ...i, isDisabled: true } : { ...i, isDisabled: false }
+      i.id === item.id ? { ...i, isDisabled: true } : { ...i, isDisabled: false }
     );
     // 隐藏输入框，显示下拉菜单项
     showAddTeam.value = true;
-    currentPage = 1;
+    currentPage.value = 1;
   }
 };
 
@@ -261,13 +279,14 @@ const toggleAddTeam = () => {
 const addTeam = async() => {
   try{
     if (teamName.value) {
+      console.log("teamName.value:",teamName.value);
     const response = await CreateTeamApi({team_name:teamName});
     console.log("后端响应为："+response.data);
-    const teamId = response.data.data.team_id;
-    const newTeam = { team_id: teamId, team_name: teamName.value};
+    const teamId = response.data.data.id;
+    const newTeam = { id: teamId, name: teamName.value};
     dropdownItems.value.push(newTeam);
-    selectedTeamId.value = newTeam.team_id;
-    selectedTeamName.value = newTeam.team_name;
+    selectedTeamId.value = newTeam.id;
+    selectedTeamName.value = newTeam.name;
     toggleAddTeam(); // 隐藏输入框，显示下拉菜单项
     teamName.value = ''; // 清空输入框
     ifCreateTeam.value = true;
@@ -389,25 +408,14 @@ const handleTeamManage = async() => {
 }}
 
 //权限组
-const level = ref(1);
-//超级管理员
-const urls = ref([1]);//测试期间为[1]
-const deleteMember = true;
-const addMember = true; 
+let urls = ref([]);
+let level = ref(1);
+let addNewTeam = ref(false);
+let TeamStrManage = ref(false);
+let deleteMember = ref(false);
+let addMember = ref(false);
 
-//管理员
-// const urls = ref([1]);//测试期间为[1]
-// const teamStrManage = false;
-// const deleteMember = true;
-// const addMember = true; 
-
-//普通用户
-// const urls = ref([]);//测试期间为[1]
-// const teamStrManage = false;
-// const deleteMember = false;
-// const addMember = false; 
-
-//为测试，将以下注掉，统一设为true
+// const addNewTeam = computed(() => urls.value.includes("/api/team/memberlist/create")); //新增团队
 // const TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
 // const deleteMember = computed(() => urls.value.includes("/api/team/memberlist/delete"));//删除团队成员
 // const addMember = computed(() => urls.value.includes("/api/team/memberlist/create"));//新增团队成员
@@ -588,32 +596,32 @@ catch(error){
 }}
 
 onMounted(async() =>{
-  getPowerApi({team_id:0})//获取第一个团队id
+  await getPowerApi({team_id:0})//获取第一个团队id
     .then(data => {
-        console.log('后端响应:', data.data);
+        console.log('获取第一个团队id-后端响应:',data.data);
         if(data.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
         else{
           first_teamid.value = data.data.data.first_teamid;
           first_team_name.value = data.data.data.first_team_name;
-          selectedTeamId.value = first_teamid;
-          selectedTeamName.value = first_team_name;//优先显示用户第一个团队的信息
+          selectedTeamId.value = first_teamid.value;
+          selectedTeamName.value = first_team_name.value;//优先显示用户第一个团队的信息
         }
   })
   .catch(error => {
     ElMessage.error('数据获取失败。');
     console.error('Error fetching data:', error);
   });
-  getPowerApi({team_id:first_teamid.value})//获取权限组和第一个团队的成员列表
+  await getPowerApi({team_id:first_teamid.value})//获取权限组和团队列表
   .then(data => {
-        console.log('后端响应:', data.data);
-        if(data.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
-        else{
-          urls.value = data.data.data.urls;
-          dropdownItems.value = data.data.data.teams;
-          level.value = data.data.level;
-          console.log("团队列表：",dropdownItems.value);
-          //loadMore();
-        }
+    console.log('获取权限组和团队列表-后端响应:', data.data);
+    urls.value = data.data.data.urls;
+    dropdownItems.value = data.data.data.teams;
+    level.value = data.data.level;
+    addNewTeam = computed(() => urls.value.includes("/api/team/memberlist/create")); //新增团队
+    TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
+    deleteMember = computed(() => urls.value.includes("/api/team/memberlist/delete"));//删除团队成员
+    addMember = computed(() => urls.value.includes("/api/team/memberlist/create"));//新增团队成员
+    updateCurrentData();
   })
   .catch(error => {
     ElMessage.error('成员列表数据获取失败。');
@@ -647,12 +655,12 @@ onMounted(async() =>{
         <el-dropdown-menu>
           <el-dropdown-item
             v-for="item in dropdownItems"
-            :key="item.team_id"
-            :class="{ 'is-disabled': item.team_id === selectedTeamId }"
+            :key="item.id"
+            :class="{ 'is-disabled': item.id === selectedTeamId }"
             @click.stop="selectTeam(item)"
             @mouseenter="hoverItem = item"
             @mouseleave="hoverItem = null">
-            <span>{{ item.team_name }}</span>
+            <span>{{ item.name }}</span>
           </el-dropdown-item>
           <el-dropdown-item v-if="showAddTeam" @click="toggleAddTeam">
             <span>新增团队</span>
@@ -784,14 +792,15 @@ onMounted(async() =>{
         <el-dropdown-menu>
           <el-dropdown-item
             v-for="item in dropdownItems"
-            :key="item.team_id"
-            :class="{ 'is-disabled': item.team_id === selectedTeamId }"
+            :key="item.id"
+            :class="{ 'is-disabled': item.id === selectedTeamId }"
             @click.stop="selectTeam(item)"
             @mouseenter="hoverItem = item"
             @mouseleave="hoverItem = null">
-            <span>{{ item.team_name }}</span>
+            <span>{{ item.name }}</span>
           </el-dropdown-item>
-          <el-dropdown-item v-if="showAddTeam" @click="toggleAddTeam">
+          <div v-if="addNewTeam">
+            <el-dropdown-item v-if="showAddTeam" @click="toggleAddTeam">
             <span>新增团队</span>
           </el-dropdown-item>
           <el-input
@@ -801,11 +810,13 @@ onMounted(async() =>{
             placeholder="请输入团队名称"
             @keyup.enter="addTeam"
           />
+          </div>
+
         </el-dropdown-menu>
       </template>
     </el-dropdown>
-    <div v-if="urls.length!=0" class="btn-group">
-      <el-button type="info" plain class="btn1">
+    <div v-if="urls!=0" class="btn-group">
+      <el-button v-if="TeamStrManage" type="info" plain class="btn1">
         <span class="btn-content" @click="handleTeamManage()">团队架构管理</span>
       </el-button>
       <el-button v-if="addMember" type="primary" plain class="btn2" @click="handleAddUser(selectedTeamId,selectedTeamName,level)">
@@ -814,7 +825,7 @@ onMounted(async() =>{
     </div>
     </div>
     <div class="box-team" v-infinite-scroll="loadMore" infinite-scroll-disabled="loading || noMore" infinite-scroll-distance="10" style="cursor: default">
-      <el-table :data="allData" stripe style="width: 100%"  height="550px" class="large-text-table">
+      <el-table :data="currentData" stripe style="width: 100%"  height="550px" class="large-text-table">
           <el-table-column prop="name" label="姓名"/>
           <el-table-column prop="group" label="组别"/>
           <el-table-column prop="grade" label="年级"/>
@@ -831,8 +842,13 @@ onMounted(async() =>{
             </template>
           </el-table-column>
       </el-table>
-      <p v-if="loading">Loading...</p>
-      <p v-if="noMore">No more data</p>
+      <!--分页-->
+      <el-pagination
+      layout="prev, pager, next"
+      :total="totalPages"
+      :page-size="pageSize"
+      @current-change="handlePageChange"
+    />
     </div> 
   </div>
 </template>

@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { requestCaptcha, updateCountdown, resetGetCodeButton } from './utils/captcha.js';
+import router from '@/router';
+import { checkAutoLoginApi } from '@/axios/api/login'
 import { login } from './utils/login.js';
 
 const phoneInput = ref(null);
@@ -12,6 +14,20 @@ const loginRemember = ref(false);
 
 // 在页面加载时启动倒计时检查
 onMounted(() => {
+  const rtoken = localStorage.getItem('rtoken');
+  checkAutoLoginApi({rtoken}).then((response) => {
+    console.log("自动登录-后端响应:",response.data)
+    if (response.data.code === 20000) {
+      // 自动登录成功，跳转到主页
+      router.push('/home');
+    } else {
+      // 自动登录失败，显示登录弹窗
+      ElMessage.error('登录已过期，请重新登录！')
+    }
+  }).catch((error) => {
+    // 处理请求错误
+    console.error('Failed to check auto login:', error);
+  });
   updateCountdown(getCodeButton.value, () => resetGetCodeButton(getCodeButton.value));
 });
 

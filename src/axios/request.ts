@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import apiClient from './axios'
+import { reflashRtokenApi } from '@/axios/api/login'
 
 interface PendingTask {
   config: AxiosRequestConfig;
@@ -13,8 +14,9 @@ let queue: PendingTask[] = [];
 // 请求拦截器
 apiClient.interceptors.request.use((config) => {
   const atoken = localStorage.getItem('atoken');
+  // console.log("请求拦截器的atoken:",atoken)
   if (atoken) {
-    config.headers['Authorization'] = `Bearer ${atoken}`;
+    config.headers['Authorization'] = `${atoken}`;
   }
   return config;
 }, (error) => {
@@ -23,21 +25,19 @@ apiClient.interceptors.request.use((config) => {
 
 // 响应拦截器
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => {
-    // 检查 response.data 是否已经是一个对象
-    if (typeof response.data === 'object' && response.data!== null) {
-      // 如果是对象，直接返回
-      return response;
-    } else {
-      // 如果不是对象，尝试解析为 JSON
-      try {
-        response.data = JSON.parse(response.data);
-      } catch (e) {
-        // 如果解析失败，记录错误并返回原始数据
-        console.error('Error parsing JSON:', e);
-      }
-      return response;
+ (response: AxiosResponse) => {
+  if (typeof response.data === 'object' && response.data!== null) {
+    // 如果是对象，直接返回
+    return response;
+  } else {
+    // 如果不是对象，尝试解析为 JSON
+    try {
+      response.data = JSON.parse(response.data);
+    } catch (e) {
+      // 如果解析失败，记录错误并返回原始数据
+      console.error('Error parsing JSON:', e);
     }
+    return response;}
   },
   async (error: AxiosError) => {
     const { response, config } = error;
@@ -89,13 +89,13 @@ async function handleAuthRefresh(error: AxiosError) {
   }
 
   refreshing = true;
-  queue = []; // 清空之前的队列，因为我们要开始新的刷新过程
+  queue = [];
 
   try {
     const res = await RefreshToken();
-    if (res.status === 200) {
+    if (res.status === 20000) {
       // 令牌刷新成功，重试队列中的请求
-      const authHeader = { 'Authorization': `Bearer ${res.data.atoken}` };
+      const authHeader = { 'Authorization': `${res.data.atoken}` };
       queue.forEach(pendingTask => {
         const { config, resolve, reject } = pendingTask;
         config.headers = { ...config.headers, ...authHeader }; // 更新令牌-
@@ -121,11 +121,8 @@ async function handleAuthRefresh(error: AxiosError) {
 // 刷新atoken
 async function RefreshToken() {
   try {
-    const res = await apiClient.get('/refresh', { // 根据后端API修改URL
-      params: {
-        atoken:localStorage.getItem('atoken') // 从本地存储获取刷新令牌
-      }
-    });
+    const rtoken = localStorage.getItem('rtoken');
+    const res = await reflashRtokenApi(rtoken);
     // 更新本地存储中的访问令牌和刷新令牌
     localStorage.setItem('atoken', res.data.atoken);
     localStorage.setItem('rtokrn', res.data.rtoken);

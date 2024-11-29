@@ -7,7 +7,7 @@ const upcoming_overdue_task_count = ref('0');
 const overdue_task_count = ref('0');
 
 onMounted(async () => {
-    getProgressApi({'force-update':false})
+    await getProgressApi({'force-update':false})
     .then(data => {
       console.log('后端响应:', data.data);
       if(data.data.data == null){
@@ -15,8 +15,8 @@ onMounted(async () => {
       }
       else{
         total_task_count.value = data.data.data.total_task_count;
-        incomplete_task_count.value = data.data.data.incomplete_task_count;
-        upcoming_overdue_task_count.value = data.data.data.upcoming_overdue_task_count;
+        incomplete_task_count.value = data.data.data.unfinished_task_count;
+        upcoming_overdue_task_count.value = data.data.data.will_overdue_task_count;
         overdue_task_count.value = data.data.data.overdue_task_count;
       }
   })
