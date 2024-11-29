@@ -32,8 +32,12 @@ const handleApiError = (data) => {
   }
 };
 // 获取消息
-export const getMessages = async (atoken, page, timestamp) => {
+export const getMessages = async (atoken, page, timestamp=0) => {
   const axiosInstance = createAxiosInstance(500); // 设置超时时间
+  
+  // 打印 atoken
+  console.log('getMessages - atoken:', atoken);
+
   try {
     const response = await axiosInstance.get('/api/message/get', {
       params: { page, timestamp },// Query 参数
@@ -47,52 +51,56 @@ export const getMessages = async (atoken, page, timestamp) => {
       return { code: -1, message: '没有收到服务器响应' };
     }
 
-    if (data.code === 200) {
-      return data;
+    if (response.data.code === 20000) {
+      return response.data;
     } else {
-      handleApiError(data);
-      return data;
+      handleApiError(response.data);
+      return { code: response.data.code, data: { messages: [], total_pages: 0 } }; // 提供默认值
     }
-  } catch (error) {
+  }catch (error) {
     console.error('请求失败:', error);
-    
-    // 更详细的错误处理
-    if (error.response) {
-      handleApiError(error.response.data);
-      return error.response.data;
-    } else if (error.request) {
-      console.error('无响应', error.request);
-      ElMessage.error('网络连接失败');
-      return { code: -1, message: '网络连接失败' };
-    } else {
-      console.error('请求错误', error.message);
-      ElMessage.error('请求发生错误');
-      return { code: -1, message: '请求发生错误' };
-    }
+    handleApiError({ code: -1, message: '请求失败' });
+    return { code: -1, data: { messages: [], total_pages: 0 } }; // 返回默认值以避免报错
   }
 };
 
 // 标记单条消息为已读
 export const markMessageAsRead = async (userMessageId) => {
+  console.log('标记为已读的 userMessageId:', userMessageId); // 打印传入的 userMessageId
+  
   const axiosInstance = createAxiosInstance(2000); // 设置默认超时时间
   try {
-    const response = await axiosInstance.post('/api/message/markread', {
-      user_message_id: userMessageId,
-    });
+    const response = await axiosInstance.post(
+      '/api/message/markread',
+      { user_message_id: userMessageId },
+      {
+        headers: {
+          'Content-Type': 'application/json', // 明确设置为 JSON 格式
+        },
+      }
+    );    
 
-    if (response.data.code === 200) {
+    console.log(response.data)
+    if (response.data.code === 20000) {
       return response.data;
     } else {
       console.error('标记消息为已读失败:', response.data.message || '未知错误');
       throw new Error(response.data.message || '标记失败');
     }
   } catch (error) {
-    if (error.code === 'ECONNABORTED') {
-      console.error('请求超时: 标记消息为已读接口超时未响应');
+    if (error.response) {
+      // 请求已发送且后端返回错误状态码
+      console.error('服务器返回错误:', error.response.data.message || '未知错误');
+      throw new Error(error.response.data.message || '请求失败');
+    } else if (error.code === 'ECONNABORTED') {
+      // 请求超时
+      console.error('请求超时: 标记消息为已读接口未响应');
+      throw new Error('请求超时，请稍后重试');
     } else {
-      console.error('标记消息为已读失败:', error);
+      // 其他错误
+      console.error('请求失败:', error.message || '未知错误');
+      throw new Error(error.message || '请求失败');
     }
-    throw error;
   }
 };
 

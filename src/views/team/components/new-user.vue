@@ -1,33 +1,20 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted,nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useNewUser } from '../utils/new-user';
 import axios from 'axios';
-
-// 导入点赞前后的 SVG 图标
-import hand1 from '@/assets/icons/personal-center-hand1.svg';
-import hand2 from '@/assets/icons/personal-center-hand2.svg';
 
 // 路由和逻辑方法
 const route = useRoute();
 const router = useRouter();
 
 const { 
-  userLevel,// 当前用户的权限级别
   formData,// 响应式表单数据对象
   initializeNewUser,// 初始化用户权限和团队信息
   resetForm, // 重置表单逻辑
   createTeamMember,// 保存数据逻辑
   handleBack,// 返回按钮逻辑
 } = useNewUser(router);
-
-// 定义响应式变量
-const likeCount = ref(0); // 点赞数
-const isLiked = ref(false); // 点赞状态
-
-// 保存初始状态的变量
-const initialIsLiked = ref(false);
-const initialLikeCount = ref(0);
 
 // 性别的选项值
 const selectedGender = ref("null"); // 默认值为 "null"
@@ -40,58 +27,78 @@ const roleOptions = ref([
   { label: '普通管理员', value: 1 }
 ]);
 
-// 点赞切换逻辑
-async function toggleLike() {
-  isLiked.value = !isLiked.value;// 切换点赞状态
-  likeCount.value += isLiked.value ? 1 : -1;// 更新点赞数
-}
-
 // 定义团队和职位的选项
-const teamPositionOptions = ref([
-  {
-    value: 'team1',
-    label: '团队 1',
-    children: [
-      { value: 'position1', label: '职位 1' },
-      { value: 'position2', label: '职位 2' ,
-      children: [
-      { value: 'position1', label: '职位 1' },
-      { value: 'position2', label: '职位 2' },
-    ],},
-    ],
-  }
-]);
-
-// 定义级联选择器的 props
+const teamPositionOptions = ref([]); // 初始化为空数组
 const teamPositionProps = ref({
-  multiple: true, // 启用多选
-  checkStrictly: true, // 允许父子独立选择
+  multiple: true,
+  checkStrictly: true,
 });
 
 // 选中的团队/职位
 const selectedTeamPosition = ref([]);
 
-// 回滚到初始状态函数
-function rollbackToInitialState() {
-  isLiked.value = initialIsLiked.value;
-  likeCount.value = initialLikeCount.value;
-}
+// 写死的团队 ID 和名称
+const hardcodedTeamId = '1862014568058851328';
+// 获取团队职位数据
+// const fetchTeamStructure = async (teamId) => {
+const fetchTeamStructure = async () => {
+  try {
+    const token = localStorage.getItem('atoken'); // 获取本地存储的 token
+    const response = await axios.get('/api/team/structure/collection', {
+      params: { team_id: hardcodedTeamId },
+      headers: {
+        Authorization: token,
+      },
+    });
+    
+    console.log(response)
+    if (response.data.code === 20000) {
+      const teamStructures = response.data.data.team_structures || [];
+
+      // 根据返回的数据生成选项
+      const teamOptions = teamStructures.map((item) => ({
+        value: item.myself_id,
+        label: item.node_name,
+      }));
+
+      // 添加一级选项
+      teamPositionOptions.value = [
+        {
+          value: hardcodedTeamId,// 使用写死的团队 ID
+          label: route.params.teamName || '未知团队', // 选中的团队名称
+          children: teamOptions,
+        },
+      ];
+    }else if (response.data.code === 20403) {
+      ElMessage.error('权限不足，无法获取团队架构');
+    } else {
+      ElMessage.error('加载团队职位数据失败');
+    }
+  } catch (error) {
+    ElMessage.error('加载团队职位数据失败，请稍后重试');
+    console.error('获取团队结构失败:', error);
+  }
+};
 
 // 页面加载时执行
 onMounted(async () => {
   const selectedTeamId = route.params.teamId; // 获取路由参数中的团队 ID
-  await initializeNewUser(selectedTeamId); // 初始化用户权限和团队信息
+  const selectedTeamName = route.params.teamName; // 获取团队名称
+  await initializeNewUser(selectedTeamId,selectedTeamName); // 初始化用户权限和团队信息
+  await fetchTeamStructure(selectedTeamId); // 加载团队职位数据
 });
 
 // 重置表单
 const resetUserData = async () => {
   resetForm();// 调用封装的重置逻辑
+  // const selectedTeamId = route.params.teamId;
+  // const selectedTeamName = route.params.teamName;
+
   selectedTeamPosition.value = []; // 清空团队和职位选中项
   selectedRole.value = 0; // 重置管理权限
   selectedGender.value = "null"; // 重置性别
-  likeCount.value = 0; // 重置点赞数
-  isLiked.value = false; // 重置点赞状态
   await nextTick(); // 确保视图更新
+  await initializeNewUser(selectedTeamId, selectedTeamName);
 };
 
 // 保存表单
@@ -100,13 +107,18 @@ const saveUserData = async () => {
     ElMessage.warning('请填写手机号码');
     return;
   }
-  // 点赞数和表单数据一并提交到后端
-  formData.value.likeCount = likeCount.value;
   const success = await createTeamMember();// 保存数据到后端
   if (success) {
     ElMessage.success('数据保存成功');
   }
 };
+
+// const initializePage = async () => {
+//   const selectedTeamId = route.params.teamId;
+//   const selectedTeamName = route.params.teamName;
+//   await initializeNewUser(selectedTeamId, selectedTeamName);
+//   await fetchTeamStructure(selectedTeamId);
+// };
 
 // 返回按钮逻辑
 const handleBackClick = async () => {
@@ -128,10 +140,6 @@ const handleBackClick = async () => {
         <div class="action-section">
           <el-button type="info" @click="resetUserData" class="reset-button">重置</el-button>
           <el-button type="primary" @click="saveUserData" class="save-button">保存</el-button>
-          <button @click="toggleLike" class="like-button">
-            <img :src="isLiked ? hand2 : hand1" alt="点赞图标" class="like-icon" />
-            <span class="like-count">{{ likeCount }}</span>
-          </button>
         </div>
       </div>
 
@@ -176,7 +184,6 @@ const handleBackClick = async () => {
                       clearable 
                       v-model="selectedTeamPosition" 
                       size="large" 
-                      :disabled="userLevel === 2" 
                      />
                 </div>
               </div>
@@ -341,26 +348,6 @@ const handleBackClick = async () => {
   height: 35px;
   width: 80px;
   margin-right: 15px;
-}
-
-.like-button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border: none;
-  background: none;
-  cursor: pointer;
-}
-
-.like-icon {
-  width: 40px;
-  height: 40px;
-}
-
-.like-count {
-  margin-top: 4px;
-  font-size: 1em;
-  color: #333;
 }
 
 .info-box {

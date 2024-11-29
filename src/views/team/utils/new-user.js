@@ -3,7 +3,6 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { ref } from 'vue';
 
 export const useNewUser = (router) => {
-  const userLevel = ref(0); // 用户权限级别
   const formData = ref({
     name: '',
     sex: 'null',
@@ -19,49 +18,30 @@ export const useNewUser = (router) => {
     member_position: [], // 团队及职位信息
   });
 
+  // 级联选择器相关变量
+  const selectedTeamPosition = ref([]);
+  const selectedRole = ref(0);
+
   // 用于跟踪表单是否被修改
   const isFormModified = ref(false);
 
   /**
-   * 初始化用户信息，获取权限级别
+   * 初始化用户信息
    */
-  const initializeNewUser = async (selectedTeamId) => {
-    try {
-      const response = await axios.get('http://127.0.0.1:8080/api/team/power', {
-        params: {
-          atoken: localStorage.getItem('atoken'),
-          team_id: selectedTeamId,
-        },
-      });
-
-      if (response.data.code === 200) {
-        const data = response.data.data;
-        userLevel.value = data.level; // 设置用户权限级别
-
-        // 初始化团队与职位信息
-        formData.value.member_position = [
-          {
-            team_id: selectedTeamId,
-            team_name: data.teams.find((team) => team.id === selectedTeamId)?.name || '未分配团队',
-            position_node: [],
-            level: 1, // 默认级别
-          },
-        ];
-      } else {
-        ElMessage.error('获取权限信息失败');
-      }
-    } catch (error) {
-      console.error('Error fetching user power:', error);
-      ElMessage.error('获取权限信息时发生错误');
-    }
+  const initializeNewUser = async (selectedTeamId,selectedTeamName) => {
+    formData.value.member_position = [
+      {
+        team_id: selectedTeamId,
+        team_name: selectedTeamName || '未知团队', // 从外部传入团队名称
+        position_node: [],
+      },
+    ];
   };
 
-  /**
+    /**
    * 重置表单数据
    */
-    const selectedTeamPosition = ref([]);
-  const selectedRole = ref(0);
-  const resetForm = () => {
+  const resetForm = async (selectedTeamId, selectedTeamName) => {
     formData.value = {
       name: '',
       sex: 'null',
@@ -79,6 +59,9 @@ export const useNewUser = (router) => {
     selectedTeamPosition.value = []; // 清空级联选择器选中值
     selectedRole.value = 0; // 重置管理权限
     isFormModified.value = false;
+
+    // 重新初始化团队信息
+    await initializeNewUser(selectedTeamId, selectedTeamName);
   };
 
   /**
@@ -90,25 +73,29 @@ export const useNewUser = (router) => {
       return false;
     }
 
-    // 根据权限设置成员数据
-  const memberData = {
-    ...formData.value,
-    member_position: userLevel.value === 3 ? selectedTeamPosition.value : [],
-    role: userLevel.value === 3 ? selectedRole.value : undefined,
-  };
+    // 同步级联选择器值到表单
+    formData.value.member_position = selectedTeamPosition.value;
 
     try {
-      const response = await axios.post('http://127.0.0.1:8080/api/team/memberlist/create', {
-        ...memberData,
-        atoken: localStorage.getItem('atoken'),
+      const response = await axios.post('/api/team/memberlist/create', {
+        ...formData.value,
+        role: selectedRole.value,
+      },
+      {
+        headers: {
+          Authorization: `${atoken}`, // 将 atoken 放在请求头中
+        },
       });
 
+      console.log(response.data)
       if (response.data.code === 200) {
         ElMessage.success('创建成员成功');
         isFormModified.value = false;
         return true;
       } else if (response.data.code === 403) {
         ElMessage.error('权限不足');
+      } else if (response.data.code === 10001) {
+        ElMessage.error(response.data.message || '参数无效，请检查输入');
       } else {
         ElMessage.error('创建成员失败');
       }
@@ -152,24 +139,20 @@ export const useNewUser = (router) => {
     }
   };
 
-  /**
-   * 标记表单为已修改
-   */
-  const updateFormModified = () => {
+  // 自动监听表单修改
+  watch(formData, () => {
     isFormModified.value = true;
-  };
+  }, { deep: true });
 
   return {
-    userLevel,
     formData,
-    selectedTeamPosition, // 导出这些状态
+    selectedTeamPosition, 
     selectedRole,
     isFormModified,
     initializeNewUser,
     resetForm,
     createTeamMember,
     handleBack,
-    updateFormModified,
   };
 };
 

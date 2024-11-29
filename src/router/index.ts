@@ -30,7 +30,7 @@ const constantRoutes = [
         name: 'team',
       },
       {
-        path: 'team/new-user',
+        path: 'team/new-user/:teamId/:teamName',
         component: () => import('@/views/team/components/new-user.vue'),
         name: 'NewUser',
       },
