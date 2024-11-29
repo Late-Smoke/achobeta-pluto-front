@@ -6,7 +6,9 @@ const router = useRouter();
 
 // 跳转到新增用户页面
 const handleAddUser = (selectedTeamId,selectedTeamName) => {
-  router.push('/team/new-user'); // 跳转到新增用户页面的路由
+  router.push({
+    path: `/team/new-user/${selectedTeamId}/${selectedTeamName}`,
+  }); // 跳转到新增用户页面的路由
 };
 
 const handleViewDetail = (id, selectedTeamId,level) => {

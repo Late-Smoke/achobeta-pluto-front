@@ -7,6 +7,7 @@
 
     <!-- 消息列表 -->
     <ul class="message-list">
+      <template v-if="Array.isArray(messages) && messages.length > 0">
       <li
         v-for="message in messages"
         :key="message.user_message_id"
@@ -28,7 +29,8 @@
           </span>
         </div>
       </li>
-      <p v-if="messages.length === 0" class="no-data-text">暂无信息</p>
+    </template>
+    <p v-else>暂无信息</p>
     </ul>
 
     <!-- 分页控件 -->
@@ -36,8 +38,8 @@
       <el-pagination
         background
         layout="prev, pager, next"
-        :total="totalMessages"
-        :page-size="5"
+        :total="totalPages * messagesPerPage"
+        :page-size="messagesPerPage"
         :current-page.sync="currentPage"
         @current-change="handlePageChange"
       />
@@ -66,7 +68,7 @@ import { getMessages, markMessageAsRead, markMessagesAsRead } from '../utils/mes
 const messages = ref([]); // 当前页的消息列表
 const currentPage = ref(1); // 当前页码
 const totalPages = ref(1); // 总页数
-const totalMessages = ref(0); // 消息总数
+const messagesPerPage = 5; // 每页消息数（前端分页控件）
 const showModal = ref(false); // 控制弹框显示状态
 const modalContent = ref(''); // 弹框中的消息内容
 const timestamp = ref(0); // 用于增量更新的时间戳
@@ -77,36 +79,50 @@ const atoken = localStorage.getItem('atoken') || '';// 从 localStorage 获取�
 const fetchMessages = async (page = 1,timestamp = 0) => {
   try {
     const atoken = localStorage.getItem('atoken'); // 从 localStorage 获取 atoken
-    console.log(atoken)
+    console.log('Fetched atoken:', atoken);
+
     if (!atoken) {
-      console.error('未检测到 atoken，请登录后重试');
       ElMessage.error('未检测到登录信息，请重新登录');
       return;
     }
 
     const data = await getMessages(atoken, page, timestamp);// 调用 getMessages 接口
-    // 检查消息内容是否存在
-    console.log(data)
-    if (data && data.code === 200) {
-      if (data.data?.messages?.length > 0) {
-        messages.value = data.data.messages.filter((msg) => msg.content);
-        totalPages.value = data.data.total_pages || 1;
-        totalMessages.value = data.data.total_pages * 5;
-      } else {
-        // 没有消息时重置数据
-        messages.value = [];
-        totalPages.value = 1;
-        totalMessages.value = 0;
-        ElMessage.info('当前没有消息');
+    console.log('后端返回的数据:', data);
+
+    if (data && data.code === 20000) {
+      // 验证后端返回的 messages 是否是数组
+      const fetchedMessages = Array.isArray(data.data?.messages)
+        ? data.data.messages
+        : []; // 如果不是数组，设置为空
+        console.log('fetchedMessages:', fetchedMessages);
+
+        if (!Array.isArray(fetchedMessages)) {
+        console.error('后端返回的 messages 不是数组:', fetchedMessages);
+        throw new Error('后端返回的 messages 数据格式错误');
       }
+
+      // 确保 `is_read` 转换为布尔值
+      messages.value = fetchedMessages
+        .filter(msg => typeof msg === 'object' && msg.user_message_id && msg.content) // 过滤无效数据
+        .map(msg => ({
+          ...msg,
+          is_read: msg.is_read === 1, // 确保 `is_read` 为布尔值
+  }));
+
+  // 日志输出验证
+console.log('messages.value after processing:', messages.value);
+
+      // 更新分页信息
+      totalPages.value = Number(data.data?.total_pages) || 1;
+      currentPage.value = page;
+      timestamp.value = Math.max(...(messages.value.map((msg) => msg.received_at) || []), 0);
     } else {
       // 处理其他错误
+      console.error('后端返回的 code 非 20000:', data);
       handleApiError(data || {});
     }
+
   } catch (error) {
-    // 捕获请求错误
-    console.error('消息请求错误:', error);
-    ElMessage.error('网络异常，请稍后重试');
   }
 };
 // 错误处理函数
@@ -114,7 +130,7 @@ const handleApiError = (data = {}) => {
   const { code, message } = data;
 
   // 对未定义或格式错误的数据提供默认处理
-  if (code === undefined) {
+  if (!code) {
     console.error('收到无效数据:', data);
     ElMessage.error('发生未知错误');
     return;
@@ -133,14 +149,20 @@ const handleApiError = (data = {}) => {
       ElMessage.error('程序出错，请联系开发人员');
       break;
     default:
+    console.error('未知错误:', message || '请求失败');
       ElMessage.error(message || '请求失败，请稍后重试');
   }
 };
 
 //翻页时重新获取数据
 const handlePageChange = async (page) => {
-  currentPage.value = page;
-  await fetchMessages(page);
+  try {
+    console.log('切换到页面:', page);
+    currentPage.value = page; // 更新当前页码
+    await fetchMessages(page); // 获取对应页码的数据
+  } catch (error) {
+    console.error('页面切换错误:', error);
+  }
 };
 
 //标记多条消息为已读
@@ -159,16 +181,13 @@ const markAllAsRead = async () => {
 
   try {
     const data = await markMessagesAsRead(userMessageIds);
-    if (data.code === 200) {
-      ElMessage.success('所有未读消息已成功标记为已读');
-    } else {
-      throw new Error('后端返回错误');
-    }
+    if (data.code !== 20000) throw new Error('后端返回错误');
+    ElMessage.success('所有未读消息已成功标记为已读');
   } catch (error) {
     console.error('全部已读请求失败:', error);
     // 请求失败时恢复原始状态
     previousStates.forEach((msg) => {
-      const original = messages.value.find((m) => m.user_message_id === msg.user_message_id);
+      const original = messages.value.find((m) => m.user_message_id === msg.message.user_message_id);
       if (original) Object.assign(original, msg); // 恢复原始状态
     });
 
@@ -185,19 +204,23 @@ const handleMessageClick = async (message) => {
   try {
     modalContent.value = message.content;// 展示消息内容
     showModal.value = true;// 打开消息详情弹框
+
     if (!message.is_read) {
       const previousState = message.is_read; // 保存原始状态
       message.is_read = true; // 乐观更新：立即标记为已读
 
       try {
         await markMessageAsRead(message.user_message_id); // 调用后端接口
+        message.is_read = true; // 本地更新状态
       } catch (error) {
-        console.error('标记消息为已读失败:', error);
+        console.error('标记消息为已读失败:', error.message || '未知错误');
         message.is_read = previousState; // 恢复原始状态
+        ElMessage.error(error.message || '标记消息为已读失败');
       }
     }
   } catch (error) {
     console.error('展示消息失败:', error);
+    ElMessage.error(error.message || '操作失败，请稍后重试');
   }
 };
 
@@ -298,6 +321,15 @@ onUnmounted(() => {
   height: 8px;
   background-color: red; /* 未读标记为红点 */
   border-radius: 50%;
+  display: inline-block; /* 默认占用空间 */
+}
+
+.message-item .unread-dot {
+  display: inline-block;
+}
+
+.message-item:empty .unread-dot {
+  display: none; /* 没有内容时隐藏红点 */
 }
 
 .message-content {
