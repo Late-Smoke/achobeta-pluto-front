@@ -36,6 +36,8 @@ export function login(phoneInput, captchaInput, captchaError, loginRemember) {
           
          // 存储必要的登录信息
          localStorage.setItem('atoken', responseData.atoken);    // 令牌
+         const atoken = localStorage.getItem('atoken'); // 从 localStorage 获取令牌
+         console.log(atoken); // 打印令牌
          if (remember && responseData.rtoken) localStorage.setItem('rtoken', responseData.rtoken); // 当用户勾选了且rtokrn存在时，刷新令牌
          localStorage.setItem('service_id', responseData.id); // 业务id
          localStorage.setItem('user_agent', responseData.user_agent); // 用户代理信息

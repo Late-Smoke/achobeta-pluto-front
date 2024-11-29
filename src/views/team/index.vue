@@ -5,11 +5,13 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 // 跳转到新增用户页面
-const handleAddUser = (selectedTeamId,selectedTeamName,level) => {
-  router.push('/team/new-user'); // 跳转到新增用户页面的路由
+const handleAddUser = (selectedTeamId,selectedTeamName) => {
+  router.push({
+    path: `/team/new-user/${selectedTeamId}/${selectedTeamName}`,
+  }); // 跳转到新增用户页面的路由
 };
 
-const handleViewDetail = (id, selectedTeamId) => {
+const handleViewDetail = (id, selectedTeamId,level) => {
   router.push(`/team/detail/${id}`); // 跳转到带有用户ID的详情页
 };
 
