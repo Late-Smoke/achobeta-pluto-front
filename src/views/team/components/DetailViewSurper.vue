@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router';
 import axios from 'axios';
 
 defineProps({
-  id: { type: String, default: '' },
+  id: { type: Number, default: '' },
   teamId: { type: String, default: '' },
   teamName: { type: String, default: '' },
   level: { type: [String, Number], default: '' },

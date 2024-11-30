@@ -3,7 +3,6 @@ import { getPowerApi, deleteTeamMemberApi, CreateTeamApi ,getTeamMemberListApi, 
 import { faTruckMedical } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'vue-router';
 const router = useRouter();
-const userId = ref();
 // 跳转到新增用户页面
 const handleAddUser = (selectedTeamId,selectedTeamName) => {
   router.push({
@@ -12,8 +11,6 @@ const handleAddUser = (selectedTeamId,selectedTeamName) => {
 };
 
 const handleViewDetail = (id) => {
-  userId.value = id;
-
   // 根据 level 决定跳转的页面
   const targetPath = level.value === 1 
     ? '/team/detail-com' // 如果 level 为 1，则跳转到 DetailViewCom 页面
@@ -24,7 +21,8 @@ const handleViewDetail = (id) => {
     query: {
       teamId: selectedTeamId.value,
       teamName: selectedTeamName.value,
-      level: level.value
+      level: level.value,
+      id: id
     }
   });
   console.log('跳转路径:', `${targetPath}/${id}`, '查询参数:', {
@@ -48,10 +46,10 @@ const updateCurrentData = async() => {
   try{
     const response = await getTeamMemberListApi({team_id:selectedTeamId.value,page:currentPage.value,perpage:pageSize});
     console.log('传入的team_id为:',selectedTeamId.value);
-    console.log('更新团队成员列表-后端响应内容:', response.data); // 打印后端响应内容 
-      currentData.value = response.data.data.members;
-      console.log('长度',response.data.data.total);
-      if(currentData.value) totalPages.value = response.data.data.total;//可能会出错
+    console.log('更新团队成员列表-后端响应内容:', response.data);
+    currentData.value = response.data.data.members;
+    console.log('长度',response.data.data.total);
+    if(currentData.value) totalPages.value = response.data.data.total;
     else totalPages.value = 0;}
   catch(error){
     ElMessage.error('成员信息获取失败。');
@@ -147,22 +145,21 @@ function showDelete(id) {
         type: 'success',
         message: '已成功删除',
       })
-  }).catch(() => {
-    ElMessage({
-      message: '已取消删除。',
-      type: 'warning'
-    })
-  });
+  })
 }
 const handleDelete = async(id) =>{
   const teamId = selectedTeamId.value;
   console.log("memberid:",id,"teamId:",teamId,"teamName:",selectedTeamName.value);
-  const response = await deleteTeamMemberApi(teamId,id);
-  console.log("删除-后端响应为：",response.data);
-  //if(response.data.code == 20000) 
-  ifDelete.value = true;
-  updateCurrentData();
-}
+  try{
+    const response = await deleteTeamMemberApi(teamId,id);
+    console.log("删除-后端响应为：",response.data);
+    ifDelete.value = true;
+    updateCurrentData();
+  }
+  catch(error){
+    ElMessage.error('删除失败。');
+    console.error('Error deleting teamMember:', error);
+}}
 
 //团队架构查看和管理跳转
 const teamManageOptionShow = ref(false);//团队架构管理
@@ -310,11 +307,6 @@ function showNodeDelete(node,input) {//删除
         type: 'success',
         message: '已成功删除',
       })
-  }).catch(() => {
-    ElMessage({//提示弹窗
-      message: '已取消删除。',
-      type: 'warning'
-    })
   });
 }
 function updateFatherIds(node) {//更新
@@ -339,12 +331,6 @@ function resetTeam(){//重置
     type:'success',
     message: '已成功重置',
   });})
-  .catch(() => {
-    ElMessage({//提示弹窗
-      message: '已取消重置。',
-      type: 'warning'
-    })
-  });
 }
 const saveTeam = async() => {//保存
 try{
@@ -364,61 +350,64 @@ catch(error){
   console.error('Failed to update grid data:', error);
 }}
 
-const getRight = async() => {
-  await getPowerApi({team_id:first_teamid.value})//获取权限组和团队列表
-  .then(data => {
+const getRight = async() => {//获取权限组和团队列表
+  try{
+    const data = await getPowerApi({team_id:first_teamid.value})//获取权限组和团队列表
     console.log('获取权限组和团队列表-后端响应:', data.data);
     urls.value = data.data.data.urls;
     dropdownItems.value = data.data.data.teams;
     level.value = data.data.level;
-    addNewTeam = computed(() => urls.value.includes("/api/team/structure/create")); //新增团队
-    TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
-    deleteMember = computed(() => urls.value.includes("/api/team/memberlist/delete"));//删除团队成员
-    addMember = computed(() => urls.value.includes("/api/team/memberlist/create"));//新增团队成员
+    if(urls.value){
+      addNewTeam = computed(() => urls.value.includes("/api/team/structure/create")); //新增团队
+      TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
+      deleteMember = computed(() => urls.value.includes("/api/team/memberlist/delete"));//删除团队成员
+      addMember = computed(() => urls.value.includes("/api/team/memberlist/create"));//新增团队成员
+    }  
     updateCurrentData();
-  })
-  .catch(error => {
+  }
+  catch(error){
     ElMessage.error('成员列表数据获取失败。');
     console.error('Error fetching data:', error);
-  });
+  };
 }
-
-onMounted(async() =>{
-  console.log('rtoken:',localStorage.getItem('rtoken'));
-  console.log('atoken:',localStorage.getItem('atoken'));
-  await getPowerApi({team_id:0})//获取第一个团队id
-    .then(data => {
-        console.log('获取第一个团队id-后端响应:',data.data);
-        if(data.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
-        else{
-          first_teamid.value = data.data.data.first_teamid;
-          first_team_name.value = data.data.data.first_team_name;
-          selectedTeamId.value = first_teamid.value;
-          selectedTeamName.value = first_team_name.value;//优先显示用户第一个团队的信息
-        }
-  })
-  .catch(error => {
+const getFirstTeam = async() => {
+  try{
+    console.log('rtoken:',localStorage.getItem('rtoken'));
+    console.log('atoken:',localStorage.getItem('atoken'));
+    const data = await getPowerApi({team_id:0})//获取第一个团队id
+    console.log('获取第一个团队id-后端响应:',data.data);
+    if(data.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
+    else{
+      first_teamid.value = data.data.data.first_teamid;
+      first_team_name.value = data.data.data.first_team_name;
+      selectedTeamId.value = first_teamid.value;
+      selectedTeamName.value = first_team_name.value;//优先显示用户第一个团队的信息
+    }
+  }
+  catch(error){
     ElMessage.error('数据获取失败。');
     console.error('Error fetching data:', error);
-  });
-  //getFirstTeam();
-  await getPowerApi({team_id:first_teamid.value})//获取权限组和团队列表
-  .then(data => {
-    console.log('获取权限组和团队列表-后端响应:', data.data);
-    urls.value = data.data.data.urls;
-    dropdownItems.value = data.data.data.teams;
-    level.value = data.data.data.level;
-    addNewTeam = computed(() => urls.value.includes("/api/team/structure/create")); //新增团队
-    TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
-    deleteMember = computed(() => urls.value.includes("/api/team/memberlist/delete"));//删除团队成员
-    addMember = computed(() => urls.value.includes("/api/team/memberlist/create"));//新增团队成员
-    updateCurrentData();
-  })
-  .catch(error => {
-    ElMessage.error('成员列表数据获取失败。');
+  };
+}
+onMounted(async() =>{
+  try{
+    console.log('rtoken:',localStorage.getItem('rtoken'));
+    console.log('atoken:',localStorage.getItem('atoken'));
+    const data = await getPowerApi({team_id:0})//获取第一个团队id
+    console.log('获取第一个团队id-后端响应:',data.data);
+    if(data.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
+    else{
+      first_teamid.value = data.data.data.first_teamid;
+      first_team_name.value = data.data.data.first_team_name;
+      selectedTeamId.value = first_teamid.value;
+      selectedTeamName.value = first_team_name.value;//优先显示用户第一个团队的信息
+    }
+  }
+  catch(error){
+    ElMessage.error('数据获取失败。');
     console.error('Error fetching data:', error);
-  });
-  //getRight();
+  };
+  getRight();
 })
 </script>
 
@@ -454,6 +443,7 @@ onMounted(async() =>{
             @mouseleave="hoverItem = null">
             <span>{{ item.name }}</span>
           </el-dropdown-item>
+          <div v-if="addNewTeam">
           <el-dropdown-item v-if="showAddTeam" @click="toggleAddTeam">
             <span>新增团队</span>
           </el-dropdown-item>
@@ -464,6 +454,7 @@ onMounted(async() =>{
             placeholder="请输入团队名称"
             @keyup.enter="addTeam"
           />
+        </div>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
