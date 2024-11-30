@@ -35,9 +35,6 @@ const handleApiError = (data) => {
 export const getMessages = async (atoken, page, timestamp=0) => {
   const axiosInstance = createAxiosInstance(500); // 设置超时时间
   
-  // 打印 atoken
-  console.log('getMessages - atoken:', atoken);
-
   try {
     const response = await axiosInstance.get('/api/message/get', {
       params: { page, timestamp },// Query 参数
@@ -105,25 +102,37 @@ export const markMessageAsRead = async (userMessageId) => {
 };
 
 // 标记多条消息为已读
-export const markMessagesAsRead = async (userMessageIds) => {
-  const axiosInstance = createAxiosInstance(5000); // 设置超时时间
+export const markMessagesAsRead = async () => {
+  const atoken = localStorage.getItem('atoken'); // 从本地存储获取 atoken
+  if (!atoken) {
+    throw new Error('登录信息缺失，请重新登录');
+  }
+
+  const axiosInstance = axios.create({
+    timeout: 2000, // 设置超时时间
+    headers: {
+      Authorization: `${atoken}`, // 将 atoken 放入请求头
+    },
+  });
+
   try {
-    const response = await axiosInstance.post('/api/message/markread', {
-      user_message_id: userMessageIds,
+    const response = await axiosInstance.post('/api/message/markread-all', {
     });
 
-    if (response.data.code === 200) {
+    console.log('全部已读',response)
+    if (response.data && response.data.code === 20000) {
       return response.data;
     } else {
       console.error('标记消息为已读失败:', response.data.message || '未知错误');
-      throw new Error(response.data.message || '标记失败');
+      throw new Error(response.data?.message || '标记失败');
     }
   } catch (error) {
     if (error.code === 'ECONNABORTED') {
       console.error('请求超时: 标记多条消息为已读接口超时未响应');
+      throw new Error('请求超时，请稍后重试');
     } else {
       console.error('标记多条消息为已读失败:', error);
+      throw new Error(error.message || '请求失败');
     }
-    throw error;
   }
 };

@@ -36,7 +36,7 @@ const constantRoutes = [
       },
       {
         path: '/team/detail/:id', 
-        component: () => import('@/views/team/components/DetailView.vue'),
+        component: () => import('@/views/team/components/DetailViewSurper.vue'),
         name: 'DetailView',
       },    
       {

@@ -18,15 +18,16 @@ export function useLike(isLiked, likeCount, initialIsLiked, initialLikeCount) {
       // 向新接口发送 PUT 请求
       const response = await axios.put(
         '/api/user-profile/like',
-        {}, // 空数据，因为请求数据在 headers 中
+        {}, // 空对象表示没有请求体内容
         {
           headers: {
             Authorization: `${localStorage.getItem('atoken')}`,
           },
-          timeout: 500, // 设置请求超时时间
+          timeout: 2000, // 设置请求超时时间
         });
 
-      if (response.data.code === 200) {
+        console.log('点赞',response)
+      if (response.data.code === 20000) {
         // 更新点赞数为服务器返回的数据
         likeCount.value = response.data.data.like_count;
       } else {

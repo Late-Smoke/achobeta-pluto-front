@@ -22,7 +22,7 @@ export function login(phoneInput, captchaInput, captchaError, loginRemember) {
     })
     .then(response => {
       const data = response.data;
-      console.log('后端响应内容:', data); // 打印后端响应内容
+      console.log('登录按钮:', data); // 打印后端响应内容
 
       if (data.code === 20000) { 
         const responseData = data.data;
@@ -36,8 +36,6 @@ export function login(phoneInput, captchaInput, captchaError, loginRemember) {
           
          // 存储必要的登录信息
          localStorage.setItem('atoken', responseData.atoken);    // 令牌
-         const atoken = localStorage.getItem('atoken'); // 从 localStorage 获取令牌
-         console.log(atoken); // 打印令牌
          if (remember && responseData.rtoken) localStorage.setItem('rtoken', responseData.rtoken); // 当用户勾选了且rtokrn存在时，刷新令牌
          localStorage.setItem('service_id', responseData.id); // 业务id
          localStorage.setItem('user_agent', responseData.user_agent); // 用户代理信息

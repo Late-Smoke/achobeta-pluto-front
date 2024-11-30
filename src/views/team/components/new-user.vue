@@ -38,7 +38,7 @@ const teamPositionProps = ref({
 const selectedTeamPosition = ref([]);
 
 // 写死的团队 ID 和名称
-const hardcodedTeamId = '1862014568058851328';
+const hardcodedTeamId = '824567004096';
 // 获取团队职位数据
 // const fetchTeamStructure = async (teamId) => {
 const fetchTeamStructure = async () => {
@@ -51,7 +51,7 @@ const fetchTeamStructure = async () => {
       },
     });
     
-    console.log(response)
+    console.log('获取团队职位数据',response)
     if (response.data.code === 20000) {
       const teamStructures = response.data.data.team_structures || [];
 
@@ -91,9 +91,8 @@ onMounted(async () => {
 // 重置表单
 const resetUserData = async () => {
   resetForm();// 调用封装的重置逻辑
-  // const selectedTeamId = route.params.teamId;
-  // const selectedTeamName = route.params.teamName;
-
+  const selectedTeamId = route.params.teamId;
+  const selectedTeamName = route.params.teamName;
   selectedTeamPosition.value = []; // 清空团队和职位选中项
   selectedRole.value = 0; // 重置管理权限
   selectedGender.value = "null"; // 重置性别
@@ -173,7 +172,7 @@ const handleBackClick = async () => {
             <div class="info-row">
               <div>
                 <span>加入时间</span>
-                <el-input v-model="formData.create_date" style="width: 240px" size="large"/>
+                <el-input v-model="formData.create_date" placeholder="YYYY/MM/DD" style="width: 240px" size="large"/>
               </div>
               <div>
                 <span>所属团队/职位</span>

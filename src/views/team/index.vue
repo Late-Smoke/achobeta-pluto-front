@@ -11,9 +11,26 @@ const handleAddUser = (selectedTeamId,selectedTeamName) => {
   }); // 跳转到新增用户页面的路由
 };
 
-const handleViewDetail = (id, selectedTeamId,level) => {
-  router.push(`/team/detail/${id}`); // 跳转到带有用户ID的详情页
+//const handleViewDetail = (id, selectedTeamId, level) => { 
+  const handleViewDetail = (id, level = '1') => {
+  if (!id) {
+    console.error('缺少必要的 id 参数');
+    return;
+  }
+
+  const selectedTeamId = '824567004096'; // 固定的 selectedTeamId
+  console.log('跳转参数:', { id, selectedTeamId, level });
+
+  const targetPath = `/team/detail/${id}/${level}`;
+  console.log('跳转路径:', targetPath);
+
+  router.push(targetPath).catch((err) => {
+    if (err.name !== 'NavigationDuplicated') {
+      console.error('路由跳转错误:', err);
+    }
+  });
 };
+
 
 //需要后端传的时候加上指定团队成员信息数组的长度 所有关于allData长度的都要修改为allDataLength
 //const allDataLength = ref('');

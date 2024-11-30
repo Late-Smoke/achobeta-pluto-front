@@ -30,7 +30,7 @@
         </div>
       </li>
     </template>
-    <p v-else>暂无信息</p>
+    <p v-else class="no-data-text">暂无信息</p>
     </ul>
 
     <!-- 分页控件 -->
@@ -168,7 +168,16 @@ const handlePageChange = async (page) => {
 //标记多条消息为已读
 const markAllAsRead = async () => {
   const unreadMessages = messages.value.filter((msg) => !msg.is_read);
-  const userMessageIds = unreadMessages.map((msg) => msg.user_message_id);
+
+  if (messages.value.length === 0) {
+    ElMessage.info('暂无消息');
+    return;
+  }
+
+  if (unreadMessages.length === 0) {
+    ElMessage.info('所有消息已是已读状态');
+    return;
+  }
 
   // 保存原始状态
   const previousStates = unreadMessages.map((msg) => ({
@@ -180,7 +189,7 @@ const markAllAsRead = async () => {
   unreadMessages.forEach((msg) => (msg.is_read = true));
 
   try {
-    const data = await markMessagesAsRead(userMessageIds);
+    const data = await markMessagesAsRead();
     if (data.code !== 20000) throw new Error('后端返回错误');
     ElMessage.success('所有未读消息已成功标记为已读');
   } catch (error) {
@@ -389,6 +398,7 @@ onUnmounted(() => {
   text-align: center;
   color: gray;
   font-size: 3em;
+  font-weight: 500; 
   margin-top: 20px;
 }
 

@@ -49,6 +49,10 @@ export function requestCaptcha(phoneInput, phoneError, updateCountdown) {
  * @param {Function} resetGetCodeButton - 重置获取验证码按钮的回调函数
  */
 export function updateCountdown(getCodeButton, resetGetCodeButton) {
+  if (!getCodeButton) {
+    console.error('updateCountdown: getCodeButton is null or undefined');
+    return;
+  }
   const expirationTime = localStorage.getItem('captchaExpirationTime');
   if (expirationTime) {
     const timeRemaining = Math.floor((expirationTime - Date.now()) / 1000);
@@ -70,6 +74,10 @@ export function updateCountdown(getCodeButton, resetGetCodeButton) {
  * @param {HTMLButtonElement} getCodeButton - 获取验证码按钮
  */
 export function resetGetCodeButton(getCodeButton) {
+  if (!getCodeButton) {
+    console.error('resetGetCodeButton: getCodeButton is null or undefined');
+    return; // 如果按钮不存在，直接退出
+  }
   getCodeButton.disabled = false;
   getCodeButton.textContent = '重新获取';
   localStorage.removeItem('captchaExpirationTime');
