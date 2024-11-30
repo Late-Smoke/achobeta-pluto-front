@@ -8,12 +8,8 @@ import apiClient from '@/axios/axios'
 import hand1 from '@/assets/icons/personal-center-hand1.svg';
 import hand2 from '@/assets/icons/personal-center-hand2.svg';
 
-// 路由和逻辑方法
-const route = useRoute();
-const router = useRouter();
-
-const props = defineProps({
-  id: { type: String, default: '' },
+defineProps({
+  id: { type: Number, default: '' },
   teamId: { type: String, default: '' },
   teamName: { type: String, default: '' },
   level: { type: [String, Number], default: '' },
