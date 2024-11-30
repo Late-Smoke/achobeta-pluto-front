@@ -8,11 +8,11 @@ const router = useRouter();
 const handleAddUser = (selectedTeamId,selectedTeamName) => {
   router.push({
     path: `/team/new-user/${selectedTeamId}/${selectedTeamName}`,
-  }); // 跳转到新增用户页面的路由
+  }); // 跳转到新增用户页面的路由 
 };
 
 const handleViewDetail = (id, selectedTeamId,level) => {
-  router.push(`/team/detail/${id}`); // 跳转到带有用户ID的详情页
+  router.push(`/team/detail/${id}/${selectedTeamId}/${level}`); // 跳转到带有用户ID的详情页
 };
 
 let currentData = ref([]);
