@@ -10,10 +10,13 @@ export function useLike(isLiked, likeCount, initialIsLiked, initialLikeCount) {
 
   // 点赞切换函数
   async function toggleLike() {
-    // 本地立即切换状态
+    const previousState = isLiked.value; // 保存当前状态
+    const previousCount = likeCount.value;
+
+    // 本地乐观更新
     isLiked.value = !isLiked.value;
     likeCount.value += isLiked.value ? 1 : -1;
-
+          
     try {
       // 向新接口发送 PUT 请求
       const response = await axios.put(
@@ -30,15 +33,20 @@ export function useLike(isLiked, likeCount, initialIsLiked, initialLikeCount) {
       if (response.data.code === 20000) {
         // 更新点赞数为服务器返回的数据
         likeCount.value = response.data.data.like_count;
+        isLiked.value = response.data.data.like_count > 0;
+        // 强制刷新响应式
+        console.log('点赞成功:', isLiked.value, likeCount.value);
       } else {
+        isLiked.value = previousState;
+        likeCount.value = previousCount;
         console.error('点赞请求失败');
         ElMessage.error('点赞失败，请稍后重试');
-        rollbackToInitialState();
       }
     } catch (error) {
+      isLiked.value = previousState;
+      likeCount.value = previousCount;
       console.error('点赞请求出错:', error);
       ElMessage.error('网络错误，点赞失败');
-      rollbackToInitialState();
     }
   }
 

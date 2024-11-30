@@ -471,10 +471,12 @@ onMounted(async() =>{
     urls.value = data.data.data.urls;
     dropdownItems.value = data.data.data.teams;
     level.value = data.data.data.level;
+    if(urls.value){
     addNewTeam = computed(() => urls.value.includes("/api/team/structure/create")); //新增团队
     TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
     deleteMember = computed(() => urls.value.includes("/api/team/memberlist/delete"));//删除团队成员
     addMember = computed(() => urls.value.includes("/api/team/memberlist/create"));//新增团队成员
+    }
     updateCurrentData();
   })
   .catch(error => {

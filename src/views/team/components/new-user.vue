@@ -108,13 +108,6 @@ const saveUserData = async () => {
   }
 };
 
-// const initializePage = async () => {
-//   const selectedTeamId = route.params.teamId;
-//   const selectedTeamName = route.params.teamName;
-//   await initializeNewUser(selectedTeamId, selectedTeamName);
-//   await fetchTeamStructure(selectedTeamId);
-// };
-
 // 返回按钮逻辑
 const handleBackClick = async () => {
   await handleBack();// 调用封装的返回逻辑
@@ -168,7 +161,7 @@ const handleBackClick = async () => {
             <div class="info-row">
               <div>
                 <span>加入时间</span>
-                <el-input v-model="formData.create_date" placeholder="YYYY/MM/DD" style="width: 240px" size="large"/>
+                <el-input v-model="formData.create_date" placeholder="YYYY-MM-DD" style="width: 240px" size="large"/>
               </div>
               <div>
                 <span>所属团队/职位</span>

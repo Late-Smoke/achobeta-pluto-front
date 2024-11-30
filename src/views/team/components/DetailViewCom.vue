@@ -1,14 +1,15 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import axios from 'axios';
+import apiClient from '@/axios/axios'
 
-const route = useRoute();
-const userId = route.params.id; // 获取用户 ID
-const teamId = route.query.teamId; // 获取 teamId
-const teamName = route.query.teamName; // 获取 teamName
-const level = route.query.level; // 获取 level
-console.log(userId, teamId, teamName, level); // 打印这些参数
+const props = defineProps({
+  id: { type: String, default: '' },
+  teamId: { type: String, default: '' },
+  teamName: { type: String, default: '' },
+  level: { type: [String, Number], default: '' },
+});
+console.log('接收到的参数:', props.id, props.teamId, props.teamName, props.level);
 
 // 导入点赞前后的 SVG 图标
 import hand1 from '@/assets/icons/personal-center-hand1.svg';
@@ -19,26 +20,16 @@ const userData = ref({}); // 用户个人信息
 const likeCount = ref(0); // 点赞数
 const isLiked = ref(false); // 点赞状态
 
-// 保存初始状态的变量
-const initialIsLiked = ref(false);
-const initialLikeCount = ref(0);
-
 // 获取用户数据函数
 async function fetchUserData() {
   try {
-    const atoken = localStorage.getItem('atoken');
-    if (!atoken) {
-      ElMessage.error('登录信息缺失，请重新登录');
-      return;
-    }
-
-    const response = await axios.get('/api/user-profile/details', {
-      headers: {
-        Authorization: `${atoken}`,
-      },
-      timeout: 2000, // 设置请求超时时间
+    const response = await apiClient.get('/api/user-profile/details', {
+        params: { member_id: props.id }, // 使用 props.id 作为参数
     });
-    console.log('用户数据:', response);
+    console.log('获取用户数据:', response);
+
+    const { code, message, data } = response.data;
+
     if (response.data.code === 20000) {
       const data = response.data.data;
 
@@ -53,32 +44,83 @@ async function fetchUserData() {
       }
 
       userData.value = data; // 保存用户数据
-      likeCount.value = data.like_count || 0; // 初始化点赞数
-      isLiked.value = data.is_liked || false; // 初始化点赞状态
-
-      // 保存初始状态
-      initialIsLiked.value = isLiked.value;
-      initialLikeCount.value = likeCount.value;
+      likeCount.value = data.like_count; // 初始化点赞数
+      isLiked.value = data.is_liked === 1; // 根据后端返回初始化点赞状态
+    } else if (code === 10001) {
+      ElMessage.error('参数无效，请检查输入');
+    } else if (code === 40014) {
+      ElMessage.error('用户不存在');
+    } else if (code === 40013) {
+      ElMessage.error('用户查询失败');
     } else {
-      ElMessage.error('获取个人中心用户数据失败');
+      ElMessage.error(`未知错误：${message}`);
     }
   } catch (error) {
-    console.error('请求用户数据出错:', error);
+    console.error('获取用户数据失败:', error);
     ElMessage.error('加载用户数据失败，请稍后重试');
-}
+  }
 };
 
 // 点赞切换逻辑
-// const { toggleLike, rollbackToInitialState } = useLike(
-//   isLiked,
-//   likeCount,
-//   initialIsLiked,
-//   initialLikeCount
-// );
+async function toggleLike() {
+  // 本地立即切换状态
+  const originalLiked = isLiked.value;
+  const originalLikeCount = likeCount.value;
+
+  isLiked.value = !isLiked.value;
+  likeCount.value += isLiked.value ? 1 : -1;
+
+  try {
+    const response = await apiClient.put('/api/team/membermsg/like', {
+        member_id: Number(props.id), // Body 参数
+    });
+
+    const { code, message, data } = response.data;
+
+    console.log('点赞请求:', response.data);
+    if (code === 20000) {
+      likeCount.value = data.like_count || 0; // 更新点赞数为后端返回的值
+    } else {
+      console.error('点赞请求失败:', message);
+      // 如果后端返回非成功状态，恢复原始状态
+      isLiked.value = originalLiked;
+      likeCount.value = originalLikeCount;
+
+     // 根据返回的具体错误码，提示用户
+      handleLikeError(code, message);
+    }
+  } catch (error) {
+    console.error('点赞请求失败:', error);
+    // 恢复原始状态
+    isLiked.value = originalLiked;
+    likeCount.value = originalLikeCount;
+    ElMessage.error('网络错误，请稍后重试');
+  }
+}
+// 错误处理函数
+function handleLikeError(code, message) {
+  switch (code) {
+    case 10001:
+      ElMessage.error('参数无效，请联系管理员');
+      break;
+    case 60003:
+    case 20013:
+      ElMessage.error('操作被锁定，请稍后再试');
+      break;
+    case 40014:
+      ElMessage.error('用户不存在，请检查用户信息');
+      break;
+    case 40013:
+      ElMessage.error('用户查询失败，请稍后重试');
+      break;
+    default:
+      ElMessage.error(message || '未知错误，请稍后重试');
+  }
+}
 
 // 页面加载时获取用户数据
 onMounted(() => {
-//   fetchUserData();
+   fetchUserData();
 });
 
 // 时间格式化工具函数
@@ -96,7 +138,7 @@ function formatDate(isoDate) {
     <!-- 外层容器 -->
     <div class="content-wrapper">
       <div class="header">
-        <el-icon class="back-icon" @click="$router.push('/home')">
+        <el-icon class="back-icon" @click="$router.push('/team')">
           <ArrowLeftBold />
         </el-icon>
         <div class="title-with-icon">

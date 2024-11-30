@@ -45,13 +45,13 @@ async function fetchUserData() {
         }).join('；'); // 使用分号分隔多个团队
       }
 
-      userData.value = data; // 保存用户数据
-      likeCount.value = data.like_count || 0; // 初始化点赞数
-      isLiked.value = data.is_liked || false; // 初始化点赞状态
+      // 初始化点赞数（不覆盖本地状态）
+      likeCount.value = data.like_count || 0;
+      isLiked.value = data.like_count > 0;
 
-      // 保存初始状态
       initialIsLiked.value = isLiked.value;
       initialLikeCount.value = likeCount.value;
+      console.log('用户数据加载成功:', isLiked.value, likeCount.value);
     } else {
       ElMessage.error('获取个人中心用户数据失败');
     }
