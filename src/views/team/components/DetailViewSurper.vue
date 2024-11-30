@@ -3,20 +3,17 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 
+defineProps({
+  id: { type: String, default: '' },
+  teamId: { type: String, default: '' },
+  teamName: { type: String, default: '' },
+  level: { type: [String, Number], default: '' },
+});
+console.log('接收到的参数:', { id, teamId, teamName, level });
+
 // 导入点赞前后的 SVG 图标
 import hand1 from '@/assets/icons/personal-center-hand1.svg';
 import hand2 from '@/assets/icons/personal-center-hand2.svg';
-
-const route = useRoute();
-// 获取传递的参数
-const id = route.params.id; // 从路径参数获取 id
-const selectedTeamId = 824567004096; 
-const level = 1;
-console.log('路由参数:', {
-  id: id,
-  selectedTeamId: selectedTeamId,
-  level: level,
-});
 
 // 定义响应式变量
 const userData = ref({}); // 用户个人信息

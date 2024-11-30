@@ -5,7 +5,7 @@ import { ref } from 'vue';
 export const useNewUser = (router) => {
   const formData = ref({
     name: '',
-    sex: 'null',
+    sex: '',
     create_date: '',
     id_card: '',
     phone_num: '', // 必填
@@ -25,13 +25,32 @@ export const useNewUser = (router) => {
   // 用于跟踪表单是否被修改
   const isFormModified = ref(false);
 
+   // 深度清理对象中的 null 值，将 null 转为空字符串
+   const cleanRequestData = (data) => {
+    const fieldsToNullify = ['id_card', 'email', 'student_id']; // 特定字段列表
+    if (Array.isArray(data)) {
+      return data.map((item) => cleanRequestData(item));
+    } else if (data && typeof data === 'object') {
+      const cleanedData = {};
+      for (const key in data) {
+        if (fieldsToNullify.includes(key)) {
+          cleanedData[key] = data[key] ? data[key] : null; // 如果未填写，则设置为 null
+        } else {
+          cleanedData[key] = data[key] === null || data[key] === undefined ? '' : cleanRequestData(data[key]); // 其他字段为空字符串
+        }
+      }
+      return cleanedData;
+    }
+    return data;
+  };
+  
   /**
    * 初始化用户信息
    */
   const initializeNewUser = async (selectedTeamId,selectedTeamName) => {
     formData.value.member_position = [
       {
-        team_id: 824567004096,//写死团队id先,后面改为selectedTeamId
+        team_id: selectedTeamId,//写死团队id先,后面改为selectedTeamId
         team_name: selectedTeamName || '未知团队', // 从外部传入团队名称
         position_node: [],
       },
@@ -44,7 +63,7 @@ export const useNewUser = (router) => {
   const resetForm = async (selectedTeamId, selectedTeamName) => {
     formData.value = {
       name: '',
-      sex: 'null',
+      sex: '',
       create_date: '',
       id_card: '',
       phone_num: '',
@@ -92,23 +111,27 @@ export const useNewUser = (router) => {
     formData.value.member_position = selectedTeamPosition.value.map((item) => ({
       team_id: item.team_id,
       team_name: item.team_name,
-      position_node: item.position_node || [],
+      position_node: item.position_node.map((node) => ({
+        position_id: node.position_id,
+        position_name: node.position_name,
+      })),
       level: item.level || 1,
     }));
 
+    // 构建请求参数，过滤掉 null 值
+    const requestData = cleanRequestData({
+      ...formData.value,
+      role: selectedRole.value,
+    });
+
      // 打印用户输入的参数
-  console.log('用户输入的参数:', {
-    ...formData.value,
-    role: selectedRole.value,
-  });
+  console.log('用户输入的参数:',requestData);
   
     try {
       // 从本地存储中获取 atoken
       const atoken = localStorage.getItem('atoken');
-      const response = await axios.post('/api/team/memberlist/create', {
-        ...formData.value,
-        role: selectedRole.value,
-      },
+      const response = await axios.post('/api/team/memberlist/create', 
+        requestData,
       {
         headers: {
           Authorization: `${atoken}`, // 将 atoken 放在请求头中
