@@ -33,10 +33,15 @@ export const useNewUser = (router) => {
     } else if (data && typeof data === 'object') {
       const cleanedData = {};
       for (const key in data) {
-        if (fieldsToNullify.includes(key)) {
-          cleanedData[key] = data[key] ? data[key] : null; // 如果未填写，则设置为 null
+        if (key === 'member_position' && data[key] === null) {
+          cleanedData[key] = null; // 保持 member_position 为 null
+        } else if (fieldsToNullify.includes(key)) {
+          cleanedData[key] = data[key] ? data[key] : null; // 特定字段设置为 null
         } else {
-          cleanedData[key] = data[key] === null || data[key] === undefined ? '' : cleanRequestData(data[key]); // 其他字段为空字符串
+          cleanedData[key] =
+            data[key] === null || data[key] === undefined
+              ? ''
+              : cleanRequestData(data[key]); // 其他字段转为空字符串
         }
       }
       return cleanedData;
@@ -48,14 +53,16 @@ export const useNewUser = (router) => {
    * 初始化用户信息
    */
   const initializeNewUser = async (selectedTeamId,selectedTeamName) => {
-    formData.value.member_position = [
-      {
-        team_id: selectedTeamId,//写死团队id先,后面改为selectedTeamId
-        team_name: selectedTeamName || '未知团队', // 从外部传入团队名称
-        position_node: [],
-      },
-    ];
-  };
+    formData.value.member_position = selectedTeamId
+    ? [
+        {
+          team_id: selectedTeamId,
+          team_name: selectedTeamName || '未知团队',
+          position_node: [],
+        },
+      ]
+    : null; // 未选择团队时设置为 null
+};
 
     /**
    * 重置表单数据
@@ -73,7 +80,7 @@ export const useNewUser = (router) => {
       student_id: '',
       experience: '',
       status: '',
-      member_position: [], 
+      member_position: null, 
     };
     selectedTeamPosition.value = []; // 清空级联选择器选中值
     selectedRole.value = 0; // 重置管理权限
@@ -108,15 +115,17 @@ export const useNewUser = (router) => {
     }
 
     // 同步级联选择器值到表单
-    formData.value.member_position = selectedTeamPosition.value.map((item) => ({
-      team_id: item.team_id,
-      team_name: item.team_name,
-      position_node: item.position_node.map((node) => ({
-        position_id: node.position_id,
-        position_name: node.position_name,
-      })),
-      level: item.level || 1,
-    }));
+    formData.value.member_position = selectedTeamPosition.value.length
+    ? selectedTeamPosition.value.map((item) => ({
+        team_id: item.team_id,
+        team_name: item.team_name,
+        position_node: item.position_node.map((node) => ({
+          position_id: node.position_id,
+          position_name: node.position_name,
+        })),
+        level: item.level || 1,
+      }))
+    : null; // 如果没有选择团队，则设置为 null
 
     // 构建请求参数，过滤掉 null 值
     const requestData = cleanRequestData({
@@ -133,8 +142,7 @@ export const useNewUser = (router) => {
       const response = await axios.post('/api/team/memberlist/create', 
         requestData,
       {
-        headers: {
-          Authorization: `${atoken}`, // 将 atoken 放在请求头中
+        headers: { Authorization: `${atoken}`, // 将 atoken 放在请求头中
         },
       }
       );
