@@ -35,7 +35,7 @@ const handleViewDetail = (id) => {
 };
 
 let currentData = ref([]);
-const pageSize = 10; // 每页显示的数据条数
+const pageSize = 6; // 每页显示的数据条数
 let currentPage = ref(1);//当前页面
 let totalPages = ref(1);//总数据条数
 
@@ -50,7 +50,8 @@ const updateCurrentData = async() => {
     console.log('传入的team_id为:',selectedTeamId.value);
     console.log('更新团队成员列表-后端响应内容:', response.data); // 打印后端响应内容 
       currentData.value = response.data.data.members;
-      if(currentData.value) totalPages.value = response.data.data.members.length;
+      console.log('长度',response.data.data.length);
+      if(currentData.value) totalPages.value = response.data.length;//可能会出错
     else totalPages.value = 0;}
   catch(error){
     ElMessage.error('成员信息获取失败。');
@@ -128,12 +129,11 @@ function showDelete(id) {
   ).then(() => {
     //调用接口
     handleDelete(id);
-    if(ifDelete.value){
+    console.log(ifDelete.value);
       ElMessage({
         type: 'success',
         message: '已成功删除',
-      })}
-    else ElMessage.error('删除失败！');
+      })
   }).catch(() => {
     ElMessage({
       message: '已取消删除。',
