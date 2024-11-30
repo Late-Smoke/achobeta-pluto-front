@@ -73,9 +73,10 @@ const toggleAddTeam = () => {
 const addTeam = async() => {
   try{
     if (teamName.value) {
-      console.log("teamName.value:",teamName.value);
-    const response = await CreateTeamApi({team_name:teamName.value});
-    console.log("新增团队-后端响应为：",response.data);
+      console.log("teamName:",teamName.value);
+      const team_name = teamName.value;
+      const response = await CreateTeamApi(team_name);
+      console.log("新增团队-后端响应为：",response.data);
     if(response.data.code === 20000) {
       ElMessage({
       type:'success',
@@ -123,10 +124,11 @@ function showDelete(id) {
 }
 const handleDelete = async(id) =>{
   const teamId = selectedTeamId.value;
-  console.log("memberid:",id,"teamId:",teamId);
+  console.log("memberid:",id,"teamId:",teamId,"teamName:",selectedTeamName.value);
   const response = await deleteTeamMemberApi(teamId,id);
   console.log("删除-后端响应为：",response.data);
-  if(response.data.code == 20000) ifDelete.value = true;
+  //if(response.data.code == 20000) 
+  ifDelete.value = true;
   updateCurrentData();
 }
 
@@ -449,7 +451,7 @@ onMounted(async() =>{
     console.log('获取权限组和团队列表-后端响应:', data.data);
     urls.value = data.data.data.urls;
     dropdownItems.value = data.data.data.teams;
-    level.value = data.data.level;
+    level.value = data.data.data.level;
     addNewTeam = computed(() => urls.value.includes("/api/team/structure/create")); //新增团队
     TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
     deleteMember = computed(() => urls.value.includes("/api/team/memberlist/delete"));//删除团队成员

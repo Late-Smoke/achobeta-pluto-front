@@ -26,19 +26,19 @@ apiClient.interceptors.request.use((config) => {
 // 响应拦截器
 apiClient.interceptors.response.use(
  (response: AxiosResponse) => {
-  if (typeof response.data === 'object' && response.data!== null) {
-    // 如果是对象，直接返回
-    return response;
-  } else {
-    // 如果不是对象，尝试解析为 JSON
-    try {
-      response.data = JSON.parse(response.data);
-    } catch (e) {
-      // 如果解析失败，记录错误并返回原始数据
-      console.error('Error parsing JSON:', e);
-    }
-    return response;}
-  // return response;
+  // if (typeof response.data === 'object' && response.data!== null) {
+  //   // 如果是对象，直接返回
+  //   return response;
+  // } else {
+  //   // 如果不是对象，尝试解析为 JSON
+  //   try {
+  //     response.data = JSON.parse(response.data);
+  //   } catch (e) {
+  //     // 如果解析失败，记录错误并返回原始数据
+  //     console.error('Error parsing JSON:', e);
+  //   }
+  //   return response;}
+  return response;
   },
   async (error: AxiosError) => {
     const { response, config } = error;
