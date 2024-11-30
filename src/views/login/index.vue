@@ -13,9 +13,10 @@ const getCodeButton = ref(null);
 const loginRemember = ref(false);
 
 // 在页面加载时启动倒计时检查
-onMounted(() => {
+onMounted(async() => {
   const rtoken = localStorage.getItem('rtoken');
-  checkAutoLoginApi({rtoken}).then((response) => {
+  console.log("自动登录-前端获取的rtoken:",rtoken);
+  await checkAutoLoginApi({token:rtoken}).then((response) => {
     console.log("自动登录-后端响应:",response.data)
     if (response.data.code === 20000) {
       // 自动登录成功，跳转到主页

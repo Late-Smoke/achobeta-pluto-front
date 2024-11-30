@@ -77,6 +77,8 @@ export const useNewUser = (router) => {
     formData.value.member_position = selectedTeamPosition.value;
 
     try {
+      // 从本地存储中获取 atoken
+      const atoken = localStorage.getItem('atoken');
       const response = await axios.post('/api/team/memberlist/create', {
         ...formData.value,
         role: selectedRole.value,

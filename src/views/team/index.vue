@@ -15,190 +15,7 @@ const handleViewDetail = (id, selectedTeamId,level) => {
   router.push(`/team/detail/${id}`); // 跳转到带有用户ID的详情页
 };
 
-//需要后端传的时候加上指定团队成员信息数组的长度 所有关于allData长度的都要修改为allDataLength
-//const allDataLength = ref('');
-let currentData = ref([
-      {
-        id:1,
-        name: '张三',
-        group: 'A组',
-        grade: '大二',
-        major: '计算机科学与技术',
-        present: '在读',
-        phone: '13800000001'
-      },
-      {
-        id:2,
-        name: '李四',
-        group: 'B组',
-        grade: '大三',
-        major: '软件工程',
-        present: '实习',
-        phone: '13800000002'
-      },
-      {
-        id:3,
-        name: '王五',
-        group: 'C组',
-        grade: '大四',
-        major: '信息安全',
-        present: '毕业',
-        phone: '13800000003'
-      },
-      {
-        id:4,
-        name: '赵六',
-        group: 'D组',
-        grade: '研究生',
-        major: '人工智能',
-        present: '在读',
-        phone: '13800000004'
-      },
-      {
-        id:5,
-        name: '孙七',
-        group: 'E组',
-        grade: '博士生',
-        major: '计算机科学与技术',
-        present: '在读',
-        phone: '13800000005'
-      },
-      {
-        id:6,
-        name: '张三',
-        group: 'A组',
-        grade: '大二',
-        major: '计算机科学与技术',
-        present: '在读',
-        phone: '13800000001'
-      },
-      {
-        id:7,
-        name: '李四',
-        group: 'B组',
-        grade: '大三',
-        major: '软件工程',
-        present: '实习',
-        phone: '13800000002'
-      },
-      {
-        id:8,
-        name: '王五',
-        group: 'C组',
-        grade: '大四',
-        major: '信息安全',
-        present: '毕业',
-        phone: '13800000003'
-      },
-      {
-        id:9,
-        name: '赵六',
-        group: 'D组',
-        grade: '研究生',
-        major: '人工智能',
-        present: '在读',
-        phone: '13800000004'
-      },
-      {
-        id:10,
-        name: '孙七',
-        group: 'E组',
-        grade: '博士生',
-        major: '计算机科学与技术',
-        present: '在读',
-        phone: '13800000005'
-      },
-      {
-        id:11,
-        name: '张三',
-        group: 'A组',
-        grade: '大二',
-        major: '计算机科学与技术',
-        present: '在读',
-        phone: '13800000001'
-      },
-      {
-        id:12,
-        name: '李四',
-        group: 'B组',
-        grade: '大三',
-        major: '软件工程',
-        present: '实习',
-        phone: '13800000002'
-      },
-      {
-        id:13,
-        name: '王五',
-        group: 'C组',
-        grade: '大四',
-        major: '信息安全',
-        present: '毕业',
-        phone: '13800000003'
-      },
-      {
-        id:14,
-        name: '赵六',
-        group: 'D组',
-        grade: '研究生',
-        major: '人工智能',
-        present: '在读',
-        phone: '13800000004'
-      },
-      {
-        id:15,
-        name: '孙七',
-        group: 'E组',
-        grade: '博士生',
-        major: '计算机科学与技术',
-        present: '在读',
-        phone: '13800000005'
-      },
-      {
-        id:16,
-        name: '张三',
-        group: 'A组',
-        grade: '大二',
-        major: '计算机科学与技术',
-        present: '在读',
-        phone: '13800000001'
-      },
-      {
-        id:17,
-        name: '李四',
-        group: 'B组',
-        grade: '大三',
-        major: '软件工程',
-        present: '实习',
-        phone: '13800000002'
-      },
-      {
-        id:18,
-        name: '王五',
-        group: 'C组',
-        grade: '大四',
-        major: '信息安全',
-        present: '毕业',
-        phone: '13800000003'
-      },
-      {
-        id:19,
-        name: '赵六',
-        group: 'D组',
-        grade: '研究生',
-        major: '人工智能',
-        present: '在读',
-        phone: '13800000004'
-      },
-      {
-        id:20,
-        name: '孙七',
-        group: 'E组',
-        grade: '博士生',
-        major: '计算机科学与技术',
-        present: '在读',
-        phone: '13800000005'
-      }
-    ]);
+let currentData = ref([]);
 const pageSize = 10; // 每页显示的数据条数
 let currentPage = ref(1);//当前页面
 let totalPages = ref(1);//总数据条数
@@ -214,34 +31,17 @@ const updateCurrentData = async() => {
     console.log('传入的team_id为:',selectedTeamId.value);
     console.log('更新团队成员列表-后端响应内容:', response.data); // 打印后端响应内容 
       currentData.value = response.data.data.members;
-      totalPages.value = response.data.data.members.length;}
+      if(currentData.value) totalPages.value = response.data.data.members.length;
+    else totalPages.value = 0;}
   catch(error){
     ElMessage.error('成员信息获取失败。');
     console.error('Error fetching teamMembers:', error);
 }}
- 
-// const noMore = computed(() => currentPage * pageSize >= allData.value.length);
- 
-// const loadMore = () => {
-//   if (loading.value || noMore.value) return;
-//   loading.value = true;
-//   async() => {
-//     const response = await getTeamMemberListApi({selectedTeamId, currentPage , pageSize});
-//     tableData.value = response.members;
-//     currentPage++;
-//     loading.value = false;
-//   }
-// };
-// loadMore();
 
 //下拉框
-let selectedTeamId = ref(1);
-let selectedTeamName = ref('AchoBeta 1.0');
-let dropdownItems = ref([
-  { id: 1, name: 'AchoBeta 1.0'},
-  { id: 2, name: 'AchoBeta 2.0'},
-  { id: 3, name: 'AchoBeta 3.0'}
-]);
+let selectedTeamId = ref(0);
+let selectedTeamName = ref('');
+let dropdownItems = ref([]);
 let teamName = ref('');
 let showAddTeam = ref(true);
 let hoverItem = ref(null);
@@ -268,31 +68,27 @@ const selectTeam = (item) => {
 
 const toggleAddTeam = () => {
   showAddTeam.value = !showAddTeam.value;
-  // if (!showAddTeam.value) {
-  //   // 聚焦到输入框
-  //   nextTick(() => {
-  //     if (this.$refs.teamInput) {
-  //       this.$refs.teamInput.focus();
-  //     }
-  //   });
-  // }
 };
 
 const addTeam = async() => {
   try{
     if (teamName.value) {
       console.log("teamName.value:",teamName.value);
-    const response = await CreateTeamApi({team_name:teamName});
-    console.log("后端响应为："+response.data);
-    const teamId = response.data.data.id;
-    const newTeam = { id: teamId, name: teamName.value};
-    dropdownItems.value.push(newTeam);
-    selectedTeamId.value = newTeam.id;
-    selectedTeamName.value = newTeam.name;
+    const response = await CreateTeamApi({team_name:teamName.value});
+    console.log("新增团队-后端响应为：",response.data);
+    if(response.data.code === 20000) {
+      ElMessage({
+      type:'success',
+      message: '已成功新增',
+    })
+    getRight();
     toggleAddTeam(); // 隐藏输入框，显示下拉菜单项
     teamName.value = ''; // 清空输入框
-    ifCreateTeam.value = true;
   }
+  else {
+    ElMessage.error('团队新增失败。');
+  }}
+  showAddTeam.value = true;
 }
   catch(error){
     ElMessage.error('团队新增失败。');
@@ -312,10 +108,12 @@ function showDelete(id) {
   ).then(() => {
     //调用接口
     handleDelete(id);
-    ElMessage({
+    if(ifDelete.value){
+      ElMessage({
         type: 'success',
         message: '已成功删除',
-      })
+      })}
+    else ElMessage.error('删除失败！');
   }).catch(() => {
     ElMessage({
       message: '已取消删除。',
@@ -323,10 +121,13 @@ function showDelete(id) {
     })
   });
 }
-function handleDelete(id){
-  console.log("执行了接口");
-  const response = deleteTeamMemberApi({id,selectedTeamId});
-  if(response.message == '删除成功') ifDelete.value = true;
+const handleDelete = async(id) =>{
+  const teamId = selectedTeamId.value;
+  console.log("memberid:",id,"teamId:",teamId);
+  const response = await deleteTeamMemberApi(teamId,id);
+  console.log("删除-后端响应为：",response.data);
+  if(response.data.code == 20000) ifDelete.value = true;
+  updateCurrentData();
 }
 
 //团队架构查看和管理跳转
@@ -389,19 +190,19 @@ const team_structures = ref([
     "is_deleted": 0
 }
 ]);
-const OldTeam_structures = ref(team_structures);//旧团队架构管理
+const OldTeam_structures = ref([]);//旧团队架构管理
 const handleTeamManage = async() => {
   try{
     teamManageOptionShow.value = true;
     const response = await getTeamStructureApi({team_id:selectedTeamId.value});
-    console.log("后端响应为：",response.data);
+    console.log("团队架构-后端响应为：",response.data);
     if(response.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
     else{
-      first_teamid.value = 1;
-      first_team_name.value = 'AchoBeta 1.0';
-      ifCreateTeam.value = false;
+      // first_teamid.value = 1;
+      // first_team_name.value = 'AchoBeta 1.0';
+      // ifCreateTeam.value = false;
       team_structures.value = response.data.data.team_structures;
-      OldTeam_structures.value = response.data.data.team_structures;//备用
+      OldTeam_structures.value = response.data.data.team_structures.slice();
     }
 }
   catch(error){
@@ -416,44 +217,9 @@ let addNewTeam = ref(false);
 let TeamStrManage = ref(false);
 let deleteMember = ref(false);
 let addMember = ref(false);
-
-// const addNewTeam = computed(() => urls.value.includes("/api/team/memberlist/create")); //新增团队
-// const TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
-// const deleteMember = computed(() => urls.value.includes("/api/team/memberlist/delete"));//删除团队成员
-// const addMember = computed(() => urls.value.includes("/api/team/memberlist/create"));//新增团队成员
-
 //团队架构
-// const team_structures = ref([
-// {
-//     "team_id": 1859771705543626752,
-//     "myself_id": 1859871969764184064,
-//     "father_id": 1859771706189549568,
-//     "node_name": "测试设计组",
-//     "is_deleted": 0
-// },
-// {
-//     "team_id": 1859771705543626752,
-//     "myself_id": 1859871970129088512,
-//     "father_id": 1859771706189549568,
-//     "node_name": "测试财务组",
-//     "is_deleted": 0
-// },
-// {
-//     "team_id": 1859771705543626752,
-//     "myself_id": 1859871970519158784,
-//     "father_id": 1859771706189549568,
-//     "node_name": "测试研发组",
-//     "is_deleted": 0
-// },
-// {
-//     "team_id": 1859771705543626752,
-//     "myself_id": 1859871970892451840,
-//     "father_id": 1859771706189549568,
-//     "node_name": "测试团队负责人",
-//     "is_deleted": 0
-// }
-// ]);
-const root_id = team_structures.value.find(node => node.father_id === 1)?.myself_id;//根节点id
+//const root_id = team_structures.value.find(node => node.father_id === 1)?.myself_id;//根节点id
+const root_id = 824713004096;
 const showLevel2 = ref(false);//展示目录面
 const showLevel3 = ref(false);
 const showLevel4 = ref(false);
@@ -504,7 +270,8 @@ function handleNodeAdd(input){//新增按钮和输入框间的切换
   //showInput.value = !showInput.value;
 }
 const inputNodeName = ref('');
-const changeTeam = ref([]);
+const addTeamNode = ref([]);
+const deleteTeamNode = ref([]);
 function inputNode(level,input) {//新增
   if(inputNodeName.value){
     const teamId = team_structures.value.find(node => node.myself_id === level)?.team_id;
@@ -522,14 +289,14 @@ function inputNode(level,input) {//新增
       is_deleted: 0
     };
     team_structures.value.push(newTeam1);
-    changeTeam.value.push(newTeam2);
+    addTeamNode.value.push(newTeam2);
     handleNodeAdd(input);
     inputNodeName.value = '';
   }
 }
 function showNodeDelete(node,input) {//删除
   ElMessageBox.confirm(//弹窗
-    '是否确认删除此团队架构？',
+    '是否确认删除此分组/职位？',
     '提示',
     {
       type: 'warning',
@@ -543,9 +310,12 @@ function showNodeDelete(node,input) {//删除
       node_name: node.node_name,
       is_deleted: 1
     };
-    changeTeam.value.push(newTeam);
+    deleteTeamNode.value.push(newTeam);
     node.is_deleted = 1;
     updateFatherIds(node);
+    const brotherNumber = team_structures.value.filter(item => item.father_id === node.father_id && item.is_deleted === 0).length;
+    const children = team_structures.value.filter(item => item.father_id === node.myself_id && item.is_deleted === 0).length;
+    if(brotherNumber === 0 && children === 0)
     switch(input){
       case 'input1':
       showLevel2.value = false;
@@ -581,23 +351,83 @@ function updateFatherIds(node) {//更新
   });
 }
 function resetTeam(){//重置
+  ElMessageBox.confirm(//弹窗
+    '是否确认重置此团队架构？',
+    '提示',
+    {
+      type: 'warning',
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+    }
+  ).then(() => {
   team_structures.value = OldTeam_structures.value;
+  ElMessage({
+    type:'success',
+    message: '已成功重置',
+  });})
+  .catch(() => {
+    ElMessage({//提示弹窗
+      message: '已取消重置。',
+      type: 'warning'
+    })
+  });
 }
 const saveTeam = async() => {//保存
 try{
-  const response = await putTeamNodeApi({team_id:selectedTeamId,team_structures:changeTeam});
-  console.log("后端响应为："+response.data);
+  const response1 = await putTeamNodeApi({team_structures:addTeamNode.value});
+  console.log("保存结点-后端响应为：",response1.data);
+  const response2 = await putTeamNodeApi({team_id:selectedTeamId.value,team_structures:deleteTeamNode.value});
+  console.log("删除结点-后端响应为：",response2.data);
+  if(response1.data.code === 20000 && response2.data.code === 20000)
   ElMessage({
     type:'success',
     message: '已成功保存',
   })
+  else ElMessage.error('团队架构保存失败。');
 }
 catch(error){
   ElMessage.error('团队架构保存失败。')
   console.error('Failed to update grid data:', error);
 }}
 
+const getFirstTeam = async() => {
+  await getPowerApi({team_id:0})//获取第一个团队id
+    .then(data => {
+        console.log('获取第一个团队id-后端响应:',data.data);
+        if(data.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
+        else{
+          first_teamid.value = data.data.data.first_teamid;
+          first_team_name.value = data.data.data.first_team_name;
+          selectedTeamId.value = first_teamid.value;
+          selectedTeamName.value = first_team_name.value;//优先显示用户第一个团队的信息
+        }
+  }).catch(error => {
+    ElMessage.error('数据获取失败。');
+    console.error('Error fetching data:', error);
+})}
+
+const getRight = async() => {
+  await getPowerApi({team_id:first_teamid.value})//获取权限组和团队列表
+  .then(data => {
+    console.log('获取权限组和团队列表-后端响应:', data.data);
+    urls.value = data.data.data.urls;
+    dropdownItems.value = data.data.data.teams;
+    level.value = data.data.level;
+    addNewTeam = computed(() => urls.value.includes("/api/team/structure/create")); //新增团队
+    TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
+    deleteMember = computed(() => urls.value.includes("/api/team/memberlist/delete"));//删除团队成员
+    addMember = computed(() => urls.value.includes("/api/team/memberlist/create"));//新增团队成员
+    updateCurrentData();
+  })
+  .catch(error => {
+    ElMessage.error('成员列表数据获取失败。');
+    console.error('Error fetching data:', error);
+  });
+}
+
 onMounted(async() =>{
+  console.log('rtoken:',localStorage.getItem('rtoken'));
+  console.log('atoken:',localStorage.getItem('atoken'));
   await getPowerApi({team_id:0})//获取第一个团队id
     .then(data => {
         console.log('获取第一个团队id-后端响应:',data.data);
@@ -613,13 +443,14 @@ onMounted(async() =>{
     ElMessage.error('数据获取失败。');
     console.error('Error fetching data:', error);
   });
+  //getFirstTeam();
   await getPowerApi({team_id:first_teamid.value})//获取权限组和团队列表
   .then(data => {
     console.log('获取权限组和团队列表-后端响应:', data.data);
     urls.value = data.data.data.urls;
     dropdownItems.value = data.data.data.teams;
     level.value = data.data.level;
-    addNewTeam = computed(() => urls.value.includes("/api/team/memberlist/create")); //新增团队
+    addNewTeam = computed(() => urls.value.includes("/api/team/structure/create")); //新增团队
     TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
     deleteMember = computed(() => urls.value.includes("/api/team/memberlist/delete"));//删除团队成员
     addMember = computed(() => urls.value.includes("/api/team/memberlist/create"));//新增团队成员
@@ -629,6 +460,7 @@ onMounted(async() =>{
     ElMessage.error('成员列表数据获取失败。');
     console.error('Error fetching data:', error);
   });
+  //getRight();
 })
 </script>
 
@@ -800,6 +632,7 @@ onMounted(async() =>{
             @mouseenter="hoverItem = item"
             @mouseleave="hoverItem = null">
             <span>{{ item.name }}</span>
+            
           </el-dropdown-item>
           <div v-if="addNewTeam">
             <el-dropdown-item v-if="showAddTeam" @click="toggleAddTeam">

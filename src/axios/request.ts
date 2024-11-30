@@ -38,6 +38,7 @@ apiClient.interceptors.response.use(
       console.error('Error parsing JSON:', e);
     }
     return response;}
+  // return response;
   },
   async (error: AxiosError) => {
     const { response, config } = error;
