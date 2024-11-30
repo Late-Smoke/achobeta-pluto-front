@@ -103,17 +103,17 @@ export const useNewUser = (router) => {
   });
   
     try {
-      const response = await axios.post(
-        '/api/team/memberlist/create',
-        {
-          ...formData.value,
-          role: selectedRole.value,
+      // 从本地存储中获取 atoken
+      const atoken = localStorage.getItem('atoken');
+      const response = await axios.post('/api/team/memberlist/create', {
+        ...formData.value,
+        role: selectedRole.value,
+      },
+      {
+        headers: {
+          Authorization: `${atoken}`, // 将 atoken 放在请求头中
         },
-        {
-          headers: {
-            Authorization: `${atoken}`, 
-          },
-        }
+      }
       );
 
       console.log('新增用户保存',response)

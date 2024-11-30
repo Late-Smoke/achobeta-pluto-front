@@ -3,7 +3,6 @@ import { ref, onMounted,nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useNewUser } from '../utils/new-user';
 import axios from 'axios';
-
 // 路由和逻辑方法
 const route = useRoute();
 const router = useRouter();
