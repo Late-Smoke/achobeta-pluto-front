@@ -50,8 +50,8 @@ const updateCurrentData = async() => {
     console.log('传入的team_id为:',selectedTeamId.value);
     console.log('更新团队成员列表-后端响应内容:', response.data); // 打印后端响应内容 
       currentData.value = response.data.data.members;
-      console.log('长度',response.data.data.length);
-      if(currentData.value) totalPages.value = response.data.length;//可能会出错
+      console.log('长度',response.data.data.total);
+      if(currentData.value) totalPages.value = response.data.data.total;//可能会出错
     else totalPages.value = 0;}
   catch(error){
     ElMessage.error('成员信息获取失败。');
