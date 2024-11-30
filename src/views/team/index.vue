@@ -3,7 +3,7 @@ import { getPowerApi, deleteTeamMemberApi, CreateTeamApi ,getTeamMemberListApi, 
 import { faTruckMedical } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'vue-router';
 const router = useRouter();
-
+const userId = ref();
 // 跳转到新增用户页面
 const handleAddUser = (selectedTeamId,selectedTeamName) => {
   router.push({
@@ -11,8 +11,27 @@ const handleAddUser = (selectedTeamId,selectedTeamName) => {
   }); // 跳转到新增用户页面的路由
 };
 
-const handleViewDetail = (id, selectedTeamId,level) => {
-  router.push(`/team/detail/${id}`); // 跳转到带有用户ID的详情页
+const handleViewDetail = (id) => {
+  userId.value = id;
+
+  // 根据 level 决定跳转的页面
+  const targetPath = level.value === 1 
+    ? '/team/detail-com' // 如果 level 为 1，则跳转到 DetailViewCom 页面
+    : '/team/detail-super'; // 如果 level 为 2 或 3，则跳转到 DetailViewSurper 页面
+
+  router.push({
+    path: `${targetPath}/${id}`, // 使用动态路径
+    query: {
+      teamId: selectedTeamId.value,
+      teamName: selectedTeamName.value,
+      level: level.value
+    }
+  });
+  console.log('跳转路径:', `${targetPath}/${id}`, '查询参数:', {
+  teamId: selectedTeamId.value,
+  teamName: selectedTeamName.value,
+  level: level.value,
+});
 };
 
 let currentData = ref([]);
@@ -39,8 +58,8 @@ const updateCurrentData = async() => {
 }}
 
 //下拉框
-let selectedTeamId = ref(0);
-let selectedTeamName = ref('');
+const selectedTeamId = ref(0);
+const selectedTeamName = ref('');
 let dropdownItems = ref([]);
 let teamName = ref('');
 let showAddTeam = ref(true);
@@ -212,7 +231,7 @@ const handleTeamManage = async() => {
 
 //权限组
 let urls = ref([]);
-let level = ref(1);
+const level = ref(1);
 let addNewTeam = ref(false);
 let TeamStrManage = ref(false);
 let deleteMember = ref(false);
@@ -449,7 +468,7 @@ onMounted(async() =>{
     console.log('获取权限组和团队列表-后端响应:', data.data);
     urls.value = data.data.data.urls;
     dropdownItems.value = data.data.data.teams;
-    level.value = data.data.level;
+    level.value = data.data.data.level;
     addNewTeam = computed(() => urls.value.includes("/api/team/structure/create")); //新增团队
     TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
     deleteMember = computed(() => urls.value.includes("/api/team/memberlist/delete"));//删除团队成员
@@ -669,7 +688,7 @@ onMounted(async() =>{
           <el-table-column prop="phone" label="联系方式"/>
           <el-table-column label="操作" width="auto">
             <template v-slot="scope">
-              <el-button type="text" @click="handleViewDetail(scope.row.id, selectedTeamId)">查看详情</el-button>
+              <el-button type="text" @click="handleViewDetail(scope.row.id)">查看详情</el-button>
               <el-button v-if="deleteMember" type="text" @click="showDelete(scope.row.id)" class="delete">
                 <el-icon><DeleteFilled /></el-icon>
                 删除

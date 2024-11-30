@@ -35,10 +35,27 @@ const constantRoutes = [
         name: 'NewUser',
       },
       {
-        path: '/team/detail/:id', 
+        path: '/team/detail-com/:id',
+        component: () => import('@/views/team/components/DetailViewCom.vue'),
+        name: 'DetailViewCom',
+        props: route => ({
+          id: route.params.id,
+          teamId: route.query.teamId,
+          teamName: route.query.teamName,
+          level: route.query.level
+        })
+      },
+      {
+        path: '/team/detail-super/:id',
         component: () => import('@/views/team/components/DetailViewSurper.vue'),
-        name: 'DetailView',
-      },    
+        name: 'DetailViewSurper',
+        props: route => ({
+          id: route.params.id,
+          teamId: route.query.teamId,
+          teamName: route.query.teamName,
+          level: route.query.level
+        })
+      },
       {
         path: 'personal-center', // 新增个人中心路由
         component: () => import('@/views/personal-center/index.vue'),

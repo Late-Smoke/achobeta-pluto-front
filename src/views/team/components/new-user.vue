@@ -36,15 +36,12 @@ const teamPositionProps = ref({
 // 选中的团队/职位
 const selectedTeamPosition = ref([]);
 
-// 写死的团队 ID 和名称
-const hardcodedTeamId = '824567004096';
 // 获取团队职位数据
-// const fetchTeamStructure = async (teamId) => {
-const fetchTeamStructure = async () => {
+const fetchTeamStructure = async (teamId) => {
   try {
     const token = localStorage.getItem('atoken'); // 获取本地存储的 token
     const response = await axios.get('/api/team/structure/collection', {
-      params: { team_id: hardcodedTeamId },
+      params: { team_id: teamId },
       headers: {
         Authorization: token,
       },
@@ -63,7 +60,7 @@ const fetchTeamStructure = async () => {
       // 添加一级选项
       teamPositionOptions.value = [
         {
-          value: hardcodedTeamId,// 使用写死的团队 ID
+          value: teamId,
           label: route.params.teamName || '未知团队', // 选中的团队名称
           children: teamOptions,
         },
