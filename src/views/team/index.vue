@@ -35,7 +35,7 @@ const handleViewDetail = (id) => {
 };
 
 let currentData = ref([]);
-const pageSize = 6; // 每页显示的数据条数
+const pageSize = 2; // 每页显示的数据条数
 let currentPage = ref(1);//当前页面
 let totalPages = ref(1);//总数据条数
 
@@ -68,9 +68,22 @@ let hoverItem = ref(null);
 //团队信息
 let first_teamid = ref(1);
 let first_team_name = ref('AchoBeta 1.0');
-let ifCreateTeam = ref(false);
-
-const selectTeam = (item) => {
+const selectTeam = (item) => {//团队架构
+  if (!item.isDisabled) {
+    selectedTeamId.value = item.id;
+    selectedTeamName.value = item.name;
+    currentPage.value = 1;
+    handleTeamManage();
+    // 禁用已选择的团队
+    dropdownItems.value = dropdownItems.value.map(i =>
+      i.id === item.id ? { ...i, isDisabled: true } : { ...i, isDisabled: false }
+    );
+    // 隐藏输入框，显示下拉菜单项
+    showAddTeam.value = true;
+    currentPage.value = 1;
+  }
+};
+const selectTeamMember = (item) => {//团队成员列表
   if (!item.isDisabled) {
     selectedTeamId.value = item.id;
     selectedTeamName.value = item.name;
@@ -153,64 +166,7 @@ const handleDelete = async(id) =>{
 
 //团队架构查看和管理跳转
 const teamManageOptionShow = ref(false);//团队架构管理
-const team_structures = ref([
-  {
-    "team_id": 1859771705543626752,
-    "myself_id": 1859771706189549568,
-    "father_id": 1,
-    "node_name": "根节点",
-    "is_deleted": 0
-  },
-{
-    "team_id": 1859771705543626752,
-    "myself_id": 5,
-    "father_id": 1859771706189549568,
-    "node_name": "测试设计组",//如何做到当名字过长不出错
-    "is_deleted": 0
-},
-{
-    "team_id": 1859771705543626752,
-    "myself_id": 1.1,
-    "father_id": 5,
-    "node_name": "设计组",
-    "is_deleted": 0
-},
-{
-    "team_id": 1859771705543626752,
-    "myself_id": 1.11,
-    "father_id": 1.1,
-    "node_name": "设计组的小弟",
-    "is_deleted": 0
-},
-{
-    "team_id": 1859771705543626752,
-    "myself_id": 2.1,
-    "father_id": 2,
-    "node_name": "财务组",
-    "is_deleted": 0
-},
-{
-    "team_id": 1859771705543626752,
-    "myself_id": 2,
-    "father_id": 1859771706189549568,
-    "node_name": "测试财务组",
-    "is_deleted": 0
-},
-{
-    "team_id": 1859771705543626752,
-    "myself_id": 3,
-    "father_id": 1859771706189549568,
-    "node_name": "测试研发组",
-    "is_deleted": 0
-},
-{
-    "team_id": 1859771705543626752,
-    "myself_id": 4,
-    "father_id": 1859771706189549568,
-    "node_name": "团队负责人",
-    "is_deleted": 0
-}
-]);
+const team_structures = ref([]);
 const OldTeam_structures = ref([]);//旧团队架构管理
 const handleTeamManage = async() => {
   try{
@@ -219,9 +175,6 @@ const handleTeamManage = async() => {
     console.log("团队架构-后端响应为：",response.data);
     if(response.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
     else{
-      // first_teamid.value = 1;
-      // first_team_name.value = 'AchoBeta 1.0';
-      // ifCreateTeam.value = false;
       team_structures.value = response.data.data.team_structures;
       OldTeam_structures.value = response.data.data.team_structures.slice();
     }
@@ -410,22 +363,6 @@ catch(error){
   ElMessage.error('团队架构保存失败。')
   console.error('Failed to update grid data:', error);
 }}
-
-const getFirstTeam = async() => {
-  await getPowerApi({team_id:0})//获取第一个团队id
-    .then(data => {
-        console.log('获取第一个团队id-后端响应:',data.data);
-        if(data.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
-        else{
-          first_teamid.value = data.data.data.first_teamid;
-          first_team_name.value = data.data.data.first_team_name;
-          selectedTeamId.value = first_teamid.value;
-          selectedTeamName.value = first_team_name.value;//优先显示用户第一个团队的信息
-        }
-  }).catch(error => {
-    ElMessage.error('数据获取失败。');
-    console.error('Error fetching data:', error);
-})}
 
 const getRight = async() => {
   await getPowerApi({team_id:first_teamid.value})//获取权限组和团队列表
@@ -649,7 +586,7 @@ onMounted(async() =>{
             v-for="item in dropdownItems"
             :key="item.id"
             :class="{ 'is-disabled': item.id === selectedTeamId }"
-            @click.stop="selectTeam(item)"
+            @click.stop="selectTeamMember(item)"
             @mouseenter="hoverItem = item"
             @mouseleave="hoverItem = null">
             <span>{{ item.name }}</span>
@@ -683,11 +620,11 @@ onMounted(async() =>{
     <div class="box-team" v-infinite-scroll="loadMore" infinite-scroll-disabled="loading || noMore" infinite-scroll-distance="10" style="cursor: default">
       <el-table :data="currentData" stripe style="width: 100%"  height="550px" class="large-text-table">
           <el-table-column prop="name" label="姓名"/>
-          <el-table-column prop="group" label="组别"/>
+          <el-table-column prop="positions" label="组别"/>
           <el-table-column prop="grade" label="年级"/>
           <el-table-column prop="major" label="专业"/>
-          <el-table-column prop="present" label="现状"/>
-          <el-table-column prop="phone" label="联系方式"/>
+          <el-table-column prop="status" label="现状"/>
+          <el-table-column prop="phone_num" label="联系方式"/>
           <el-table-column label="操作" width="auto">
             <template v-slot="scope">
               <el-button type="text" @click="handleViewDetail(scope.row.id)">查看详情</el-button>
