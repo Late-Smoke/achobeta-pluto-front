@@ -17,9 +17,9 @@ export function deleteTeamMemberApi(team_id,member_id) {
 //     return apiClient.delete(url);
 // }
 //新建团队
-export function CreateTeamApi(data) {
+export function CreateTeamApi(team_name) {
     return apiClient.post('/api/team/structure/create',  {
-        body:data
+        team_name:team_name
     } );
 }
 
@@ -32,7 +32,6 @@ export function getTeamMemberListApi(params) {
 
 //获取指定团队全部架构
 export function getTeamStructureApi(params) {
-    const atoken = localStorage.getItem('atoken');
     return apiClient.get('/api/team/structure/collection',  {
         params:params
     } );
@@ -40,9 +39,7 @@ export function getTeamStructureApi(params) {
 
 //保存团队架构
 export function putTeamNodeApi(data) {
-    return apiClient.put('/api/team/structure/change',  {
-        data:data
-    } );
+    return apiClient.put('/api/team/structure/change', data);
 }
 
 

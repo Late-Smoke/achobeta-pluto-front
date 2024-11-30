@@ -16,7 +16,7 @@ const loginRemember = ref(false);
 onMounted(async() => {
   const rtoken = localStorage.getItem('rtoken');
   console.log("自动登录-前端获取的rtoken:",rtoken);
-  await checkAutoLoginApi({token:rtoken}).then((response) => {
+  await checkAutoLoginApi(rtoken).then((response) => {
     console.log("自动登录-后端响应:",response.data)
     if (response.data.code === 20000) {
       // 自动登录成功，跳转到主页

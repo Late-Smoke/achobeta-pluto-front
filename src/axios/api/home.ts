@@ -31,9 +31,7 @@ export function removeDeviceApi(params) {
 
 ////项目进度
 export function getProgressApi(params) {
-    return apiClient.get('/api/feishu/get',  {
-        params:params
-    } );
+    return apiClient.get('/api/feishu/get',  {params:params} );
 }
 
 ////更新atoken
