@@ -49,9 +49,7 @@ html, body {
 input[type="text"],
 input[type="email"],
 input[type="password"] {
-  height: auto!important;
-  line-height: normal!important;
-  padding: 0.5rem 0.75rem!important;
+  border: none !important;
 }
 
 
