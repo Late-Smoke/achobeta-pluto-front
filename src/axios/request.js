@@ -4,7 +4,7 @@ import { reflashRtokenApi } from '@/axios/api/login';
 let refreshing = false;
 let queue = [];
 // 修改全局 baseURL
-axios.defaults.baseURL = 'http://117.72.97.101:8085';
+// axios.defaults.baseURL = 'http://117.72.97.101:8085'
 // 请求拦截器
 apiClient.interceptors.request.use((config) => {
     const atoken = localStorage.getItem('atoken');
