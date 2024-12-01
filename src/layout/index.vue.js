@@ -1,11 +1,5 @@
 /* __placeholder__ */
-//import LayoutAside from '@/components/layout/aside.vue';
-//import LayoutHeader from '@/components/layout/header.vue';
 const { defineProps, defineSlots, defineEmits, defineExpose, defineModel, defineOptions, withDefaults, } = await import('vue');
-//import LayoutAside from '@/components/layout/aside.vue';
-//import LayoutHeader from '@/components/layout/header.vue';
-const LayoutAside = '@/components/layout/aside.vue';
-const LayoutHeader = '@/components/layout/header.vue';
 const __VLS_fnComponent = (await import('vue')).defineComponent({});
 ;
 let __VLS_functionalComponentProps;
@@ -154,10 +148,7 @@ function __VLS_template() {
     let __VLS_defineComponent;
     const __VLS_internalComponent = __VLS_defineComponent({
         setup() {
-            return {
-                LayoutAside: LayoutAside,
-                LayoutHeader: LayoutHeader,
-            };
+            return {};
         },
     });
 }

@@ -13,7 +13,11 @@ import '@fortawesome/fontawesome-free/js/all.js';
 import 'normalize.css';
 import '@/assets/styles/common.scss';
 import '@/axios/request';
+import LayoutAside from '@/components/layout/aside.vue';
+import LayoutHeader from '@/components/layout/header.vue';
 const app = createApp(App);
+app.component('LayoutAside', LayoutAside);
+app.component('LayoutHeader', LayoutHeader);
 app.use(pinia);
 app.use(router);
 app.use(ElementPlus); // 注册 Element Plus
