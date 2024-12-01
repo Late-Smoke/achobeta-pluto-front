@@ -6,21 +6,6 @@ import {
 
 const routers = [
   {
-    path: '/',
-    icon: Odometer,
-    name: '一级菜单',
-    children: [
-      {
-        path: '/dashboard',
-        name: '公告板'
-      },
-      {
-        path: '/hello',
-        name: 'hello'
-      }
-    ]
-  },
-  {
     icon: SwitchButton,
     path: '/login',
     name: '登录'
