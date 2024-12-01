@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { ref } from 'vue';
+import { ref , watch , toRaw ,nextTick} from 'vue';
 
 export const useNewUser = (router) => {
   const formData = ref({
@@ -25,23 +25,18 @@ export const useNewUser = (router) => {
   // 用于跟踪表单是否被修改
   const isFormModified = ref(false);
 
-   // 深度清理对象中的 null 值，将 null 转为空字符串
-   const cleanRequestData = (data) => {
-    const fieldsToNullify = ['id_card', 'email', 'student_id']; // 特定字段列表
+   // 深度清理对象中的 null 值
+  const cleanRequestData = (data) => {
+    const fieldsToNullify = ['id_card', 'email', 'student_id'];
     if (Array.isArray(data)) {
       return data.map((item) => cleanRequestData(item));
     } else if (data && typeof data === 'object') {
       const cleanedData = {};
       for (const key in data) {
-        if (key === 'member_position' && data[key] === null) {
-          cleanedData[key] = null; // 保持 member_position 为 null
-        } else if (fieldsToNullify.includes(key)) {
-          cleanedData[key] = data[key] ? data[key] : null; // 特定字段设置为 null
+        if (fieldsToNullify.includes(key)) {
+          cleanedData[key] = data[key] ? data[key] : null;
         } else {
-          cleanedData[key] =
-            data[key] === null || data[key] === undefined
-              ? ''
-              : cleanRequestData(data[key]); // 其他字段转为空字符串
+          cleanedData[key] = data[key] === null || data[key] === undefined ? '' : data[key];
         }
       }
       return cleanedData;
@@ -49,20 +44,21 @@ export const useNewUser = (router) => {
     return data;
   };
   
-  /**
-   * 初始化用户信息
-   */
-  const initializeNewUser = async (selectedTeamId,selectedTeamName) => {
-    formData.value.member_position = selectedTeamId
-    ? [
-        {
-          team_id: selectedTeamId,
-          team_name: selectedTeamName || '未知团队',
-          position_node: [],
-        },
-      ]
-    : null; // 未选择团队时设置为 null
-};
+  const initializeNewUser = async (selectedTeamId, selectedTeamName) => {
+    const defaultPosition = {
+      team_id: selectedTeamId || null,
+      team_name: selectedTeamName || null,
+      position_node: [], // 默认空职位列表
+    };
+    formData.value.member_position = selectedTeamId ? [defaultPosition] : [];
+    selectedTeamPosition.value = selectedTeamId
+      ? [{
+          value: selectedTeamId,
+          label: selectedTeamName || null,
+          children: [],
+        }]
+      : [];
+  };
 
     /**
    * 重置表单数据
@@ -80,7 +76,7 @@ export const useNewUser = (router) => {
       student_id: '',
       experience: '',
       status: '',
-      member_position: null, 
+      member_position: [], 
     };
     selectedTeamPosition.value = []; // 清空级联选择器选中值
     selectedRole.value = 0; // 重置管理权限
@@ -102,112 +98,75 @@ export const useNewUser = (router) => {
   };
 
   /**
-   * 创建团队成员
-   */
-  const createTeamMember = async () => {
+ * 创建团队成员
+ * @param {Array} memberPosition - 来自第一段代码的职位数据
+ */
+  const createTeamMember = async (memberPosition = null) => {
     if (!validateForm()) return false;
-
+  
     const atoken = localStorage.getItem('atoken');
-    console.log(atoken)
     if (!atoken) {
       ElMessage.error('未检测到登录信息，请重新登录');
       return false;
     }
-
-    // 同步级联选择器值到表单
-    formData.value.member_position = selectedTeamPosition.value.length
-    ? selectedTeamPosition.value.map((item) => ({
-        team_id: item.team_id,
-        team_name: item.team_name,
-        position_node: item.position_node.map((node) => ({
-          position_id: node.position_id,
-          position_name: node.position_name,
-        })),
-        level: item.level || 1,
-      }))
-      : null; // 如果没有选择团队
-
-    // 构建请求参数，过滤掉 null 值
+  
+    const formattedPositionData = (memberPosition || formData.value.member_position).map((position) => ({
+      team_id: Number(position.team_id) || null,
+      team_name: position.team_name || null,
+      position_node: position.position_node?.map((node) => ({
+        position_id: Number(node.position_id) || null,
+        position_name: node.position_name || null,
+      })) || [],
+      level: position.level || 1,
+    }));
+  
     const requestData = cleanRequestData({
       ...formData.value,
-      role: selectedRole.value,
-      team_id: selectedTeamPosition.value.length ? selectedTeamPosition.value[0].team_id : null, // 从选择的团队中获取团队ID
+      team_id: formattedPositionData.length > 0 ? Number(formattedPositionData[0].team_id) : null, // 从第一个 member_position 提取 team_id
+      member_position: formattedPositionData,
     });
-
-     // 打印用户输入的参数
-  console.log('用户输入的参数:',requestData);
+  
+    console.log('发送到后端的请求数据:', requestData);
   
     try {
-      // 从本地存储中获取 atoken
-      const atoken = localStorage.getItem('atoken');
-      const response = await axios.post('/api/team/memberlist/create', 
-        requestData,
-      {
-        headers: { Authorization: `${atoken}`, // 将 atoken 放在请求头中
-        },
-      }
-      );
+      const response = await axios.post('/api/team/memberlist/create', requestData, {
+        headers: { Authorization: atoken },
+      });
+  
+      console.log('后端返回的请求数据:', response);
 
-      console.log('新增用户保存',response)
       if (response.data.code === 20000) {
         ElMessage.success('创建成员成功');
         isFormModified.value = false;
         return true;
-      } else if (response.data.code === 20403) {
-        ElMessage.error('权限不足');
-      } else if (response.data.code === 10001) {
-        ElMessage.error(response.data.message || '参数无效，请检查输入');
       } else {
-        ElMessage.error('创建成员失败');
+        ElMessage.error(response.data.message || '创建成员失败');
       }
     } catch (error) {
-      if (error.response) {
-        ElMessage.error(error.response.data.message || '请求失败，请稍后重试');
-      } else if (error.code === 'ECONNABORTED') {
-        ElMessage.error('请求超时，请稍后重试');
-      } else {
-        ElMessage.error('创建成员失败，请稍后重试');
-      }
+      ElMessage.error(error.response?.data?.message || '请求失败，请稍后重试');
     }
     return false;
   };
-
-  /**
-   * 处理返回按钮点击事件
-   */
-  const handleBack = async () => {
-    if (isFormModified.value) {
-      try {
-        const result = await ElMessageBox.confirm(
-          '是否保存修改？',
-          '提示',
-          {
-            confirmButtonText: '保存',
-            cancelButtonText: '不保存',
-            type: 'warning',
-          }
-        );
-
-        if (result) {
-          const success = await createTeamMember();
-          if (success) {
-            router.push('/team'); // 保存后跳转
-          }
-        } else {
-            router.push('/team'); // 不保存直接跳转
-        }
-      } catch (error) {
-        // 用户取消了弹窗
-        router.push('/team');
-      }
-    } else {
-        router.push('/team');
-    }
-  };
-
-  // 自动监听表单修改
+  
   watch(formData, () => {
     isFormModified.value = true;
+  }, { deep: true });
+
+  watch(selectedTeamPosition, (newValue) => {
+    console.log('级联选择器选中的值 (原始):', JSON.stringify(toRaw(newValue), null, 2)); // 打印原始数据
+    formData.value.member_position = newValue.map((item) => {
+      const positionNode = item.children?.map((node) => ({
+        position_id: node.value || null,
+        position_name: node.label || null,
+      })) || [];
+      return {
+        team_id: item.value || null,
+        team_name: item.label || null,
+        position_node: positionNode,
+        level: 1,
+      };
+    });
+    console.log('生成的 member_position 数据 (原始):', JSON.stringify(toRaw(formData.value.member_position), null, 2));
   }, { deep: true });
 
   return {
@@ -218,7 +177,6 @@ export const useNewUser = (router) => {
     initializeNewUser,
     resetForm,
     createTeamMember,
-    handleBack,
   };
 };
 

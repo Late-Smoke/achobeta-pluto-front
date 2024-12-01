@@ -42,9 +42,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://117.72.97.101:8085', // 后端服务器地址
-        //target:'http://10.61.220.204:8080',
-        //target:'http://47.239.233.134:8085',
+        target: 'http://117.72.97.101:8085', // 服务器地址(新)
+        // target:'http://10.61.220.204:8080',
+        // target:'http://47.239.233.134:8085',// 服务器地址（旧）
         changeOrigin: true, // 允许代理修改请求来源，解决跨域问题
       },
     },

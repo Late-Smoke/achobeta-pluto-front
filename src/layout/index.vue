@@ -1,7 +1,4 @@
 <script lang="ts" setup>
-//import LayoutAside from '@/components/layout/aside.vue';
-//import LayoutHeader from '@/components/layout/header.vue';
-
 const LayoutAside = '@/components/layout/aside.vue';
 const LayoutHeader = '@/components/layout/header.vue';
 </script>
