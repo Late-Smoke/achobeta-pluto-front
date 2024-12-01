@@ -125,12 +125,13 @@ export const useNewUser = (router) => {
         })),
         level: item.level || 1,
       }))
-    : null; // 如果没有选择团队，则设置为 null
+      : null; // 如果没有选择团队
 
     // 构建请求参数，过滤掉 null 值
     const requestData = cleanRequestData({
       ...formData.value,
       role: selectedRole.value,
+      team_id: selectedTeamPosition.value.length ? selectedTeamPosition.value[0].team_id : null, // 从选择的团队中获取团队ID
     });
 
      // 打印用户输入的参数
