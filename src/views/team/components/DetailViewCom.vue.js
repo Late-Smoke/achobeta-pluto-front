@@ -2,6 +2,10 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import apiClient from '@/axios/axios';
+import _ from 'lodash'; // 引入 lodash
+// 导入点赞前后的 SVG 图标
+import hand1 from '@/assets/icons/personal-center-hand1.svg';
+import hand2 from '@/assets/icons/personal-center-hand2.svg';
 const { defineProps, defineSlots, defineEmits, defineExpose, defineModel, defineOptions, withDefaults, } = await import('vue');
 const props = defineProps({
     id: { type: String, default: '' },
@@ -10,9 +14,6 @@ const props = defineProps({
     level: { type: [String, Number], default: '' },
 });
 console.log('接收到的参数:', props.id, props.teamId, props.teamName, props.level);
-// 导入点赞前后的 SVG 图标
-import hand1 from '@/assets/icons/personal-center-hand1.svg';
-import hand2 from '@/assets/icons/personal-center-hand2.svg';
 // 定义响应式变量
 const userData = ref({}); // 用户个人信息
 const likeCount = ref(0); // 点赞数
@@ -36,9 +37,9 @@ async function fetchUserData() {
                     return `${team.team_name}（${positions}）`; // 输出格式：团队名（职位1，职位2）
                 }).join('；'); // 使用分号分隔多个团队
             }
-            userData.value = data; // 保存用户数据
-            likeCount.value = data.like_count; // 初始化点赞数
-            isLiked.value = data.is_liked === 1; // 根据后端返回初始化点赞状态
+            userData.value = data;
+            likeCount.value = data.like_count || 0;
+            isLiked.value = data.is_liked === 1;
         }
         else if (code === 10001) {
             ElMessage.error('参数无效，请检查输入');
@@ -60,7 +61,7 @@ async function fetchUserData() {
 }
 ;
 // 点赞切换逻辑
-async function toggleLike() {
+const handleLike = async () => {
     // 本地立即切换状态
     const originalLiked = isLiked.value;
     const originalLikeCount = likeCount.value;
@@ -91,7 +92,9 @@ async function toggleLike() {
         likeCount.value = originalLikeCount;
         ElMessage.error('网络错误，请稍后重试');
     }
-}
+};
+// 防抖处理
+const toggleLike = _.debounce(handleLike, 1000); // 防抖时间为 1000 毫秒
 // 错误处理函数
 function handleLikeError(code, message) {
     switch (code) {

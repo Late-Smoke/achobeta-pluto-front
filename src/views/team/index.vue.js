@@ -31,7 +31,7 @@ const handleViewDetail = (id) => {
     });
 };
 let currentData = ref([]);
-const pageSize = 6; // 每页显示的数据条数
+const pageSize = 5; // 每页显示的数据条数
 let currentPage = ref(1); //当前页面
 let totalPages = ref(1); //总数据条数
 const handlePageChange = (page) => {
@@ -76,6 +76,9 @@ const selectTeam = (item) => {
         // 隐藏输入框，显示下拉菜单项
         showAddTeam.value = true;
         currentPage.value = 1;
+        showLevel2.value = false;
+        showLevel3.value = false;
+        showLevel4.value = false;
     }
 };
 const selectTeamMember = (item) => {
@@ -182,7 +185,6 @@ let TeamStrManage = ref(false);
 let deleteMember = ref(false);
 let addMember = ref(false);
 //团队架构
-//const root_id = team_structures.value.find(node => node.father_id === 1)?.myself_id;//根节点id
 const root_id = ref(0);
 const showLevel2 = ref(false); //展示目录面
 const showLevel3 = ref(false);
@@ -267,6 +269,7 @@ function showNodeDelete(node, input) {
     }).then(() => {
         const newTeam = {
             team_id: node.team_id,
+            myself_id: node.myself_id,
             father_id: node.father_id,
             node_name: node.node_name,
             is_deleted: 1
@@ -322,15 +325,20 @@ function resetTeam() {
 }
 const saveTeam = async () => {
     try {
+        console.log('新增结点:', addTeamNode.value);
+        console.log('删除结点:', deleteTeamNode.value);
         const response1 = await putTeamNodeApi({ team_id: selectedTeamId.value, team_structures: addTeamNode.value });
         console.log("保存结点-后端响应为：", response1.data);
         const response2 = await putTeamNodeApi({ team_id: selectedTeamId.value, team_structures: deleteTeamNode.value });
         console.log("删除结点-后端响应为：", response2.data);
-        if (response1.data.code === 20000 && response2.data.code === 20000)
+        if (response1.data.code === 20000 && response2.data.code === 20000) {
             ElMessage({
                 type: 'success',
                 message: '已成功保存',
             });
+            addTeamNode.value = [];
+            deleteTeamNode.value = [];
+        }
         else
             ElMessage.error('团队架构保存失败。');
     }

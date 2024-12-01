@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useNewUser } from '../utils/new-user';
 import axios from 'axios';
 import apiClient from '@/axios/axios';
+import _ from 'lodash'; // 引入 lodash
 // 导入点赞前后的 SVG 图标
 import hand1 from '@/assets/icons/personal-center-hand1.svg';
 import hand2 from '@/assets/icons/personal-center-hand2.svg';
@@ -124,22 +125,22 @@ async function fetchUserData() {
             },
         });
         console.log('获取用户点赞数据:', response.data);
-        if (response.data.code === 20000) {
-            const data = response.data.data;
-            likeCount.value = data.like_count; // 确保使用like_count字段
-            isLiked.value = data.is_liked === 1; // 确保使用is_liked字段作为布尔值
+        const { code, data } = response.data;
+        if (code === 20000) {
+            likeCount.value = data.like_count || 0; // 初始化点赞数
+            isLiked.value = data.is_liked === 1; // 初始化点赞状态
         }
         else {
-            console.error('获取点赞数据失败', response.data.message);
+            ElMessage.error('加载用户数据失败');
         }
     }
     catch (error) {
-        console.error('Error fetching like data:', error);
+        console.error('加载用户数据失败:', error);
+        ElMessage.error('网络错误，请稍后重试');
     }
 }
 // 点赞切换逻辑
-async function toggleLike() {
-    // 本地更新点赞状态和数值
+const handleLike = async () => {
     const originalLiked = isLiked.value;
     const originalLikeCount = likeCount.value;
     // 本地立即切换状态
@@ -153,7 +154,8 @@ async function toggleLike() {
         console.log('点赞请求:', response.data);
         if (code === 20000) {
             // 更新点赞数为后端返回的值
-            likeCount.value = data.like_count || 0;
+            likeCount.value = data.like_count || 0; // 更新点赞数
+            isLiked.value = data.like_count > 0; // 更新点赞状态
         }
         else {
             console.error('点赞请求失败:', message);
@@ -172,7 +174,9 @@ async function toggleLike() {
         // 提示用户网络或其他错误
         ElMessage.error('网络错误，请稍后重试');
     }
-}
+};
+// 防抖处理
+const toggleLike = _.debounce(handleLike, 1000); // 防抖时间为 1000 毫秒
 // 错误处理函数
 function handleLikeError(code, message) {
     switch (code) {

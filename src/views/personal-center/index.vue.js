@@ -9,10 +9,7 @@ const { defineProps, defineSlots, defineEmits, defineExpose, defineModel, define
 // 定义响应式变量
 const userData = ref({}); // 用户个人信息
 const likeCount = ref(0); // 点赞数
-const isLiked = ref(false); // 点赞状态
-// 保存初始状态的变量
-const initialIsLiked = ref(false);
-const initialLikeCount = ref(0);
+const isLiked = ref(0); // 点赞状态
 // 获取用户数据函数
 async function fetchUserData() {
     try {
@@ -43,12 +40,9 @@ async function fetchUserData() {
             userData.value = {
                 ...data
             };
-            // 初始化点赞数（不覆盖本地状态）
+            // 初始化点赞状态
             likeCount.value = data.like_count || 0;
-            isLiked.value = data.like_count > 0;
-            initialIsLiked.value = isLiked.value;
-            initialLikeCount.value = likeCount.value;
-            console.log('个人中心用户点赞数据加载成功:', isLiked.value, likeCount.value);
+            isLiked.value = data.is_liked || 0; // 0 为未点赞，1 为已点赞
         }
         else {
             ElMessage.error('获取个人中心用户数据失败');
@@ -61,7 +55,7 @@ async function fetchUserData() {
 }
 ;
 // 点赞切换逻辑
-const { toggleLike, rollbackToInitialState } = useLike(isLiked, likeCount, initialIsLiked, initialLikeCount);
+const { toggleLike } = useLike(isLiked, likeCount);
 // 页面加载时获取用户数据
 onMounted(() => {
     fetchUserData();
@@ -143,22 +137,7 @@ function __VLS_template() {
     // @ts-ignore
     [likeCount,];
     __VLS_elementAsFunction(__VLS_intrinsicElements.div, __VLS_intrinsicElements.div)({ ...{ class: ("info-box") }, });
-    // @ts-ignore
-    const __VLS_14 = {}
-        .ElScrollbar;
-    ({}.ElScrollbar);
-    ({}.ElScrollbar);
-    __VLS_components.ElScrollbar;
-    __VLS_components.elScrollbar;
-    __VLS_components.ElScrollbar;
-    __VLS_components.elScrollbar;
-    // @ts-ignore
-    [ElScrollbar, ElScrollbar,];
-    // @ts-ignore
-    const __VLS_15 = __VLS_asFunctionalComponent(__VLS_14, new __VLS_14({ ...{ class: ("custom-scrollbar") }, height: ("500px"), wrapStyle: ("overflow-y: auto; overflow-x: hidden;"), }));
-    const __VLS_16 = __VLS_15({ ...{ class: ("custom-scrollbar") }, height: ("500px"), wrapStyle: ("overflow-y: auto; overflow-x: hidden;"), }, ...__VLS_functionalComponentArgsRest(__VLS_15));
-    ({}({ ...{ class: ("custom-scrollbar") }, height: ("500px"), wrapStyle: ("overflow-y: auto; overflow-x: hidden;"), }));
-    const __VLS_19 = __VLS_nonNullable(__VLS_pickFunctionalComponentCtx(__VLS_14, __VLS_16));
+    __VLS_elementAsFunction(__VLS_intrinsicElements.div, __VLS_intrinsicElements.div)({ ...{ class: ("custom-scrollbar") }, height: ("500px"), "wrap-style": ("overflow-y: auto; overflow-x: hidden;"), });
     __VLS_elementAsFunction(__VLS_intrinsicElements.div, __VLS_intrinsicElements.div)({ ...{ class: ("info-section") }, });
     __VLS_elementAsFunction(__VLS_intrinsicElements.div, __VLS_intrinsicElements.div)({ ...{ class: ("info-row") }, });
     __VLS_elementAsFunction(__VLS_intrinsicElements.div, __VLS_intrinsicElements.div)({});
@@ -240,7 +219,6 @@ function __VLS_template() {
     (__VLS_ctx.userData.status || '未填写');
     // @ts-ignore
     [userData,];
-    __VLS_nonNullable(__VLS_19.slots).default;
     if (typeof __VLS_styleScopedClasses === 'object' && !Array.isArray(__VLS_styleScopedClasses)) {
         __VLS_styleScopedClasses['personal-center'];
         __VLS_styleScopedClasses['content-wrapper'];
