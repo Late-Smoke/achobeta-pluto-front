@@ -588,23 +588,13 @@ onMounted(async() =>{
             <el-dropdown-item v-if="showAddTeam" @click="toggleAddTeam">
             <span>新增团队</span>
           </el-dropdown-item>
-          <el-form v-else>
-            <el-form-item>
-              <el-input
-              v-model="teamName"
-              style="width: 150px; margin-left: 5px;"
-              placeholder="请输入团队名称"
-              @keyup.enter="addTeam"
-              />
-            </el-form-item>
-          </el-form>
-          <!-- <el-input
+          <el-input
             v-else
             v-model="teamName"
             style="width: 120px; margin-left: 5px;"
             placeholder="请输入团队名称"
             @keyup.enter="addTeam"
-          /> -->
+          />
           </div>
 
         </el-dropdown-menu>
@@ -619,8 +609,8 @@ onMounted(async() =>{
       </el-button>
     </div>
     </div>
-    <div class="box-team" v-infinite-scroll="loadMore" infinite-scroll-disabled="loading || noMore" infinite-scroll-distance="10" style="cursor: default">
-      <el-table :data="currentData" stripe style="width: 100%"  height="550px" class="large-text-table">
+    <div class="box-team" style="cursor: default">
+      <el-table :data="currentData" stripe style="width: 100%" class="large-text-table">
           <el-table-column prop="name" label="姓名"/>
           <el-table-column prop="positions" label="组别"/>
           <el-table-column prop="grade" label="年级"/>
@@ -827,4 +817,10 @@ p {
   margin-bottom: 15px;
   padding-right: 20px;
 }
+
+/* 自定义分页样式 */
+el-pagination {
+  justify-content: center;
+}
+
 </style>
