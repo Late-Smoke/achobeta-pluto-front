@@ -31,20 +31,30 @@ html, body {
   box-sizing: border-box;
 }
 
-    /* 自定义滚动条样式 */
-    ::-webkit-scrollbar {
-      width: 8px; /* 滚动条宽度 */
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f1f1; /* 滚动条轨道背景色 */
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #888; /* 滚动条滑块背景色 */
-      border-radius: 4px; /* 滚动条滑块圆角 */
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #555; /* 鼠标悬停时滚动条滑块背景色 */
-    }
+/* 自定义滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px; /* 滚动条宽度 */
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* 滚动条轨道背景色 */
+}
+::-webkit-scrollbar-thumb {
+  background: #888; /* 滚动条滑块背景色 */
+  border-radius: 4px; /* 滚动条滑块圆角 */
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555; /* 鼠标悬停时滚动条滑块背景色 */
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  height: auto!important;
+  line-height: normal!important;
+  padding: 0.5rem 0.75rem!important;
+}
+
+
 
 
 

@@ -40,8 +40,6 @@ export function login(phoneInput, captchaInput, captchaError, loginRemember) {
          localStorage.setItem('service_id', responseData.id); // 业务id
          localStorage.setItem('user_agent', responseData.user_agent); // 用户代理信息
          localStorage.setItem('ip', responseData.ip); // IP地址
-         if(responseData.rtoken) console.log("登录时储存的rtoken为:",localStorage.getItem('rtoken'));
-         console.log("登录时储存的atoken为:",localStorage.getItem('atoken'));
       } else {
         captchaError.style.display = 'block';
         captchaError.textContent = '非团队成员，无法进入系统';
