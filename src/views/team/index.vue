@@ -33,7 +33,7 @@ const handleViewDetail = (id) => {
 };
 
 let currentData = ref([]);
-const pageSize = 2; // 每页显示的数据条数
+const pageSize = 6; // 每页显示的数据条数
 let currentPage = ref(1);//当前页面
 let totalPages = ref(1);//总数据条数
 
@@ -172,6 +172,7 @@ const handleTeamManage = async() => {
     console.log("团队架构-后端响应为：",response.data);
     if(response.data.code === -20000) ElMessage.error('登录已过期，请重新登陆！');
     else{
+      root_id.value = response.data.data.root_of_team;
       team_structures.value = response.data.data.team_structures;
       OldTeam_structures.value = response.data.data.team_structures.slice();
     }
@@ -190,7 +191,7 @@ let deleteMember = ref(false);
 let addMember = ref(false);
 //团队架构
 //const root_id = team_structures.value.find(node => node.father_id === 1)?.myself_id;//根节点id
-const root_id = 824713004096;
+const root_id = ref(0);
 const showLevel2 = ref(false);//展示目录面
 const showLevel3 = ref(false);
 const showLevel4 = ref(false);
