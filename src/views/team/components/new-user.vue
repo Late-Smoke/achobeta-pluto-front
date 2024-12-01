@@ -280,7 +280,6 @@ const saveUserData = async () => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 30px;
   margin: 0 auto;
-  height: 750px;
   position: relative; /* 添加相对定位 */
 }
 
@@ -293,22 +292,6 @@ const saveUserData = async () => {
 
 .back-icon:hover {
   color: #409eff;
-}
-
-/* 滚动条样式 */
-.custom-scrollbar ::v-deep(.el-scrollbar__bar) {
-  background: transparent;
-}
-
-.custom-scrollbar ::v-deep(.el-scrollbar__thumb) {
-  height: 5px;
-  background: #90a4ae;
-  border-radius: 4px;
-  opacity: 0.8;
-}
-
-.custom-scrollbar ::v-deep(.el-scrollbar__thumb:hover) {
-  background: #607d8b;
 }
 
 .header {
@@ -365,6 +348,7 @@ const saveUserData = async () => {
   margin-top: 20px;
   position: relative;
   width: 100%;
+  margin-bottom: 20px;
 }
 
 /* 内容容器样式 */
@@ -373,14 +357,6 @@ const saveUserData = async () => {
   box-sizing: border-box;
 }
 
-/* 修改滚动条样式 */
-.custom-scrollbar ::v-deep(.el-scrollbar__wrap) {
-  overflow-x: hidden !important; /* 隐藏水平滚动条 */
-}
-
-.custom-scrollbar ::v-deep(.el-scrollbar__bar.is-horizontal) {
-  display: none; /* 隐藏水平滚动条 */
-}
 
 .custom-scrollbar ::v-deep(.el-scrollbar__bar.is-vertical) {
   width: 6px; /* 调整垂直滚动条宽度 */
