@@ -10,7 +10,9 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["vite/client"] // 添加 Vite 客户端类型定义
+    "types": ["vite/client"], // 添加 Vite 客户端类型定义
+    "forceConsistentCasingInFileNames": true, // 启用文件名大小写一致检查
+    "strict": true // 启用严格模式
   },
   "references": [
     {
