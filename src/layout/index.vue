@@ -34,7 +34,7 @@ import LayoutHeader from '@/components/layout/header.vue';
   }
 
   .aside {
-    background-color: rgb(51.2, 126.4, 204);
+    background-color: rgb(79, 157, 240);
   }
 
   /* 确保内容容器占满 */
