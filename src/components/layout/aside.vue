@@ -55,7 +55,7 @@ const additionalItems = [
   background-color: rgb(79, 157, 240); /* 蓝色背景 */
   overflow: hidden; /* 防止全局滚动 */
   position: relative; /* 确保子元素的定位以此为基准 */
-  border:solid 1px #ddd;
+  //border:solid 1px #ddd;
 }
 
 /* 菜单样式 */

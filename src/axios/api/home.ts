@@ -5,7 +5,6 @@ import axios from 'axios';
 
 // 获取用户真实姓名
 export function fetchNameApi() {
-    console.log(localStorage.getItem('atoken'));
     return apiClient.get('/api/user-profile/details',  {} );
 }
 

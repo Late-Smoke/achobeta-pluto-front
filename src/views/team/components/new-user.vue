@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted,nextTick } from 'vue';
+import { ref, onMounted,nextTick ,watch} from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useNewUser } from '../utils/new-user';
 import axios from 'axios';
@@ -12,7 +12,6 @@ const {
   initializeNewUser,// 初始化用户权限和团队信息
   resetForm, // 重置表单逻辑
   createTeamMember,// 保存数据逻辑
-  handleBack,// 返回按钮逻辑
 } = useNewUser(router);
 
 // 性别的选项值
@@ -30,8 +29,21 @@ const roleOptions = ref([
 const teamPositionOptions = ref([]); // 初始化为空数组
 const teamPositionProps = ref({
   multiple: true,
-  checkStrictly: true,
+  checkStrictly: false,
+  emitPath: false, // 确保返回完整对象
 });
+const findNodeById = (id, nodes) => {
+  for (const node of nodes) {
+    if (node.value === id) {
+      return node;
+    }
+    if (node.children) {
+      const found = findNodeById(id, node.children);
+      if (found) return found;
+    }
+  }
+  return null;
+};
 
 // 选中的团队/职位
 const selectedTeamPosition = ref([]);
@@ -39,61 +51,84 @@ const selectedTeamPosition = ref([]);
 // 获取团队职位数据
 const fetchTeamStructure = async (teamId) => {
   try {
-    const token = localStorage.getItem('atoken'); // 获取本地存储的 token
+    const token = localStorage.getItem('atoken');
     const response = await axios.get('/api/team/structure/collection', {
       params: { team_id: teamId },
-      headers: {
-        Authorization: token,
-      },
+      headers: { Authorization: token },
     });
-    
-    console.log('获取团队职位数据',response)
-    if (response.data.code === 20000) {
-      const teamStructures = response.data.data.team_structures || [];
 
-      // 根据返回的数据生成选项
+    if (response.data.code === 20000) {
+      const teamStructures = response.data.data?.team_structures || [];
       const teamOptions = teamStructures.map((item) => ({
         value: item.myself_id,
         label: item.node_name,
+        children: item.positions?.map((pos) => ({
+          value: pos.position_id,
+          label: pos.position_name,
+        })) || [], // 确保 children 数据存在
       }));
-
-      // 添加一级选项
       teamPositionOptions.value = [
         {
           value: teamId,
-          label: route.params.teamName || '未知团队', // 选中的团队名称
+          label: route.params.teamName || '未知团队',
           children: teamOptions,
         },
       ];
-    }else if (response.data.code === 20403) {
-      ElMessage.error('权限不足，无法获取团队架构');
     } else {
-      ElMessage.error('加载团队职位数据失败');
+      ElMessage.error(response.data.message || '加载团队职位数据失败');
     }
   } catch (error) {
     ElMessage.error('加载团队职位数据失败，请稍后重试');
-    console.error('获取团队结构失败:', error);
   }
 };
+
+// 监听选中团队职位变化
+watch(selectedTeamPosition, (newValue) => {
+  console.log('选中的团队职位 (调试):', JSON.stringify(newValue, null, 2));
+
+  // 映射选中职位到完整的节点数据
+  const mappedPositions = newValue.map((id) => {
+    const node = findNodeById(id, teamPositionOptions.value[0]?.children || []);
+    if (!node) {
+      console.warn(`未找到职位 ID: ${id}`);
+    }
+    return node || { value: id, label: '未知职位' };
+  });
+
+  // 生成符合后端需求的 member_position 数据
+  formData.value.member_position = mappedPositions.map((item) => ({
+    team_id: route.params.teamId || null,
+    team_name: route.params.teamName || null,
+    position_node: [
+      {
+        position_id: item?.value || null,
+        position_name: item?.label || null,
+      },
+    ],
+    level: 1, // 默认级别
+  }));
+
+  console.log('生成的 member_position 数据:', JSON.stringify(formData.value.member_position, null, 2));
+});
 
 // 页面加载时执行
 onMounted(async () => {
   const selectedTeamId = route.params.teamId; // 获取路由参数中的团队 ID
   const selectedTeamName = route.params.teamName; // 获取团队名称
-  await initializeNewUser(selectedTeamId,selectedTeamName); // 初始化用户权限和团队信息
+
   await fetchTeamStructure(selectedTeamId); // 加载团队职位数据
+  initializeNewUser(selectedTeamId, selectedTeamName); // 初始化用户权限和团队信息
 });
 
 // 重置表单
 const resetUserData = async () => {
-  resetForm();// 调用封装的重置逻辑
   const selectedTeamId = route.params.teamId;
   const selectedTeamName = route.params.teamName;
-  selectedTeamPosition.value = []; // 清空团队和职位选中项
-  selectedRole.value = 0; // 重置管理权限
-  selectedGender.value = "null"; // 重置性别
-  await nextTick(); // 确保视图更新
-  await initializeNewUser(selectedTeamId, selectedTeamName);
+  selectedTeamPosition.value = [];
+  selectedRole.value = 0;
+  selectedGender.value = 'null';
+  await nextTick();
+  await resetForm(selectedTeamId, selectedTeamName);
 };
 
 // 保存表单
@@ -106,11 +141,6 @@ const saveUserData = async () => {
   if (success) {
     ElMessage.success('数据保存成功');
   }
-};
-
-// 返回按钮逻辑
-const handleBackClick = async () => {
-  await handleBack();// 调用封装的返回逻辑
 };
 </script>
 
@@ -133,12 +163,6 @@ const handleBackClick = async () => {
 
       <!-- 使用 el-scrollbar 包裹内容区域 -->
       <div class="info-box">
-        <el-scrollbar 
-           class="custom-scrollbar" 
-           height="600px"
-           :native="false"
-           :noresize="false"
-           >
            <div class="scrollbar-content">
           <div class="info-section">
             <!-- 通用行 -->
@@ -240,7 +264,6 @@ const handleBackClick = async () => {
             </div>
           </div>
           </div>
-        </el-scrollbar>
       </div>
     </div>
   </div>

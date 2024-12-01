@@ -335,7 +335,7 @@ function resetTeam(){//重置
 }
 const saveTeam = async() => {//保存
 try{
-  const response1 = await putTeamNodeApi({team_structures:addTeamNode.value});
+  const response1 = await putTeamNodeApi({team_id:selectedTeamId.value, team_structures:addTeamNode.value});
   console.log("保存结点-后端响应为：",response1.data);
   const response2 = await putTeamNodeApi({team_id:selectedTeamId.value,team_structures:deleteTeamNode.value});
   console.log("删除结点-后端响应为：",response2.data);
@@ -451,7 +451,7 @@ onMounted(async() =>{
           <el-input
             v-else
             v-model="teamName"
-            style="width: 120px; margin-left: 5px;"
+            style="width: 150px; margin-left: 5px;"
             placeholder="请输入团队名称"
             @keyup.enter="addTeam"
           />
@@ -588,13 +588,23 @@ onMounted(async() =>{
             <el-dropdown-item v-if="showAddTeam" @click="toggleAddTeam">
             <span>新增团队</span>
           </el-dropdown-item>
-          <el-input
+          <el-form v-else>
+            <el-form-item>
+              <el-input
+              v-model="teamName"
+              style="width: 150px; margin-left: 5px;"
+              placeholder="请输入团队名称"
+              @keyup.enter="addTeam"
+              />
+            </el-form-item>
+          </el-form>
+          <!-- <el-input
             v-else
             v-model="teamName"
             style="width: 120px; margin-left: 5px;"
             placeholder="请输入团队名称"
             @keyup.enter="addTeam"
-          />
+          /> -->
           </div>
 
         </el-dropdown-menu>
@@ -710,7 +720,10 @@ font-size: 20px;
 }
 .delete {
   padding:5px;
-  color: rgb(228, 0, 0); 
+  color: rgb(228, 82, 82); 
+}
+.delete:hover {
+  color: rgb(181, 6, 6);
 }
 .large-text-table {
   font-size: 18px; 
@@ -768,6 +781,7 @@ p {
 }
 .smallBox {
   height:400px;
+  width: 200px;
   border:solid 2px #656161;
   padding-top:10px;
 }
@@ -813,6 +827,4 @@ p {
   margin-bottom: 15px;
   padding-right: 20px;
 }
-
-
 </style>

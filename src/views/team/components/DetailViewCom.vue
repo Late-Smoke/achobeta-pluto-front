@@ -157,7 +157,6 @@ function formatDate(isoDate) {
 
       <!-- 使用 el-scrollbar 包裹滚动内容 -->
       <div class="info-box">
-        <el-scrollbar class="custom-scrollbar" height="500px" wrap-style="overflow-y: auto; overflow-x: hidden;">
           <div class="info-section">
             <!-- 第二行 -->
             <div class="info-row">
@@ -233,7 +232,6 @@ function formatDate(isoDate) {
               </div>
             </div>
           </div>
-        </el-scrollbar>
       </div>
     </div>
   </div>
