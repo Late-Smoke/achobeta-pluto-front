@@ -335,7 +335,7 @@ function resetTeam(){//重置
 }
 const saveTeam = async() => {//保存
 try{
-  const response1 = await putTeamNodeApi({team_structures:addTeamNode.value});
+  const response1 = await putTeamNodeApi({team_id:selectedTeamId.value, team_structures:addTeamNode.value});
   console.log("保存结点-后端响应为：",response1.data);
   const response2 = await putTeamNodeApi({team_id:selectedTeamId.value,team_structures:deleteTeamNode.value});
   console.log("删除结点-后端响应为：",response2.data);
@@ -710,7 +710,10 @@ font-size: 20px;
 }
 .delete {
   padding:5px;
-  color: rgb(228, 0, 0); 
+  color: rgb(228, 82, 82); 
+}
+.delete:hover {
+  color: rgb(181, 6, 6);
 }
 .large-text-table {
   font-size: 18px; 

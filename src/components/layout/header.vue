@@ -103,6 +103,7 @@ const updateCurrentGridData = async() => {
       totalDevices.value = response.data.data.total;
       buttonStates.value = currentGridData.value.map(() => false);
       for(let i = 0; i < currentGridData.value.length; i++){
+        if(!currentGridData.value[i].device_name) currentGridData.value[i].device_name = `设备${i+1}`;
         let time = currentGridData.value[i].online_time;
         currentGridData.value[i].online_time = dayjs(time).format('YYYY-MM-DD HH:mm:ss ');
         }}
@@ -219,10 +220,10 @@ onMounted(async () => {
 }
 
 .main-content {
-  margin-top: 60px; /* 留出 header 的高度，避免内容被遮挡 */
+  margin-top: 70px; /* 留出 header 的高度，避免内容被遮挡 */
   padding: 20px;
   overflow-y: auto; /* 启用垂直滚动，仅在内容超出时滚动 */
-  height: calc(100vh - 60px); /* 高度为视口高度减去 header 的高度 */
+  height: calc(100vh - 70px); /* 高度为视口高度减去 header 的高度 */
 }
 
 
