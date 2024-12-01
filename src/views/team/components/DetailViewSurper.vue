@@ -8,14 +8,17 @@ import apiClient from '@/axios/axios'
 import hand1 from '@/assets/icons/personal-center-hand1.svg';
 import hand2 from '@/assets/icons/personal-center-hand2.svg';
 
-defineProps({
-  id: { type: Number, default: '' },
+// 路由和逻辑方法
+const route = useRoute();
+const router = useRouter();
+
+const props = defineProps({
+  id: { type: String, default: '' },
   teamId: { type: String, default: '' },
   teamName: { type: String, default: '' },
   level: { type: [String, Number], default: '' },
 });
 console.log('接收到的参数:', props.id, props.teamId, props.teamName, props.level);
-
 
 // 定义响应式变量
 const likeCount = ref(0); // 点赞数

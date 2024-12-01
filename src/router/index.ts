@@ -6,8 +6,16 @@ import Layout from '@/layout/index.vue';
 const constantRoutes = [
   {
     path: '/',
+    redirect: '/login', // 根路径重定向到登录页面
+  },
+  {
+    path: '/login',
+    component: () => import('@/views/login/index.vue'),
+    hidden: true,
+  },
+  {
+    path: '/',
     component: Layout,
-    redirect: '/login',
     children: [
       {
         path: 'home',
@@ -52,16 +60,6 @@ const constantRoutes = [
         name: 'PersonalCenter',
       },
     ],
-  },
-  {
-    path: '/login',
-    component: () => import('@/views/login/index.vue'),
-    hidden: true,
-  },
-  {
-    path: '/404',
-    component: () => import('@/views/error-page/404.vue'),
-    hidden: true,
   },
 ];
 

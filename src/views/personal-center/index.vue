@@ -31,7 +31,7 @@ async function fetchUserData() {
       },
       timeout: 2000, // 设置请求超时时间
     });
-    console.log('用户数据:', response);
+    console.log('个人中心用户数据:', response);
     if (response.data.code === 20000) {
       const data = response.data.data;
 
@@ -40,10 +40,15 @@ async function fetchUserData() {
         data.member_position = data.member_position.map((team) => {
           const positions = team.position_node
             .map((pos) => pos.position_name)
-            .join('，'); // 使用顿号分隔多个职位
+            .join('， '); // 使用顿号分隔多个职位
           return `${team.team_name}（${positions}）`; // 输出格式：团队名（职位1，职位2）
         }).join('；'); // 使用分号分隔多个团队
       }
+
+      // 赋值到 userData，确保数据全部存入
+      userData.value = {
+        ...data
+      };
 
       // 初始化点赞数（不覆盖本地状态）
       likeCount.value = data.like_count || 0;
@@ -51,7 +56,7 @@ async function fetchUserData() {
 
       initialIsLiked.value = isLiked.value;
       initialLikeCount.value = likeCount.value;
-      console.log('用户数据加载成功:', isLiked.value, likeCount.value);
+      console.log('个人中心用户点赞数据加载成功:', isLiked.value, likeCount.value);
     } else {
       ElMessage.error('获取个人中心用户数据失败');
     }

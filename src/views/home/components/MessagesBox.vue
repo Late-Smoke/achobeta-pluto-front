@@ -30,7 +30,13 @@
         </div>
       </li>
     </template>
-    <p v-else class="no-data-text">暂无信息</p>
+    <template v-else>
+        <!-- 无消息时显示图标和提示 -->
+        <div class="no-data-container">
+          <img :src="NoDataIcon" alt="暂无消息" class="no-data-icon" />
+          <p class="no-data-text">暂无消息</p>
+        </div>
+      </template>
     </ul>
 
     <!-- 分页控件 -->
@@ -64,6 +70,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { getMessages, markMessageAsRead, markMessagesAsRead } from '../utils/message.js';
+import NoDataIcon from '@/assets/icons/no-data.svg';
 
 const messages = ref([]); // 当前页的消息列表
 const currentPage = ref(1); // 当前页码
@@ -394,10 +401,25 @@ onUnmounted(() => {
   margin-top: 10px;
 }
 
+no-data-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.no-data-icon {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto; /* 保证图标左右居中 */
+  display: block; /* 确保为块级元素 */
+}
+
 .no-data-text {
   text-align: center;
   color: gray;
-  font-size: 3em;
+  font-size: 1.2em;
   font-weight: 500; 
   margin-top: 20px;
 }

@@ -356,7 +356,7 @@ const getRight = async() => {//获取权限组和团队列表
     console.log('获取权限组和团队列表-后端响应:', data.data);
     urls.value = data.data.data.urls;
     dropdownItems.value = data.data.data.teams;
-    level.value = data.data.level;
+    level.value = data.data.data.level;
     if(urls.value){
       addNewTeam = computed(() => urls.value.includes("/api/team/structure/create")); //新增团队
       TeamStrManage = computed(() => urls.value.includes("/api/team/structure/collection"));//团队架构管理
