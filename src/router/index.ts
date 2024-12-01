@@ -18,11 +18,6 @@ const constantRoutes = [
     component: Layout,
     children: [
       {
-        path: 'hello',
-        component: () => import('@/views/hello/index.vue'),
-        name: 'hello',
-      },
-      {
         path: 'home',
         component: () => import('@/views/home/Homepage.vue'),
         name: 'home',

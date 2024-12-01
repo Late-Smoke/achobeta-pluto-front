@@ -24,17 +24,17 @@ import LayoutHeader from '@/components/layout/header.vue';
 
 <style lang="scss" scoped>
 .common-layout {
-  min-height: 100vh;
-  width: 100%; /* 强制主布局宽度为 100% */
+  // min-height: 100vh;
+  // width: 100%; /* 强制主布局宽度为 100% */
 
   .header {
-    background-color: #409eff;
+    background-color: rgb(79, 157, 240);
     width: 100%; /* 确保 header 宽度为 100% */
     box-sizing: border-box; /* 确保 padding 不影响宽度 */
   }
 
   .aside {
-    background-color: aqua;
+    background-color: rgb(51.2, 126.4, 204);
   }
 
   /* 确保内容容器占满 */

@@ -7,24 +7,23 @@ const upcoming_overdue_task_count = ref('0');
 const overdue_task_count = ref('0');
 
 onMounted(async () => {
-    await getProgressApi({'force-update':false})
-    .then(data => {
-      console.log('后端响应:', data.data);
-      if(data.data.data == null){
-        ElMessage.error('项目进度获取失败。');
-      }
-      else{
-        total_task_count.value = data.data.data.total_task_count;
-        incomplete_task_count.value = data.data.data.unfinished_task_count;
-        upcoming_overdue_task_count.value = data.data.data.will_overdue_task_count;
-        overdue_task_count.value = data.data.data.overdue_task_count;
-      }
-  })
-  .catch(error => {
+  try{
+    const data = await getProgressApi({'force-update':false});
+    console.log('后端响应:', data.data);
+    if(data.data.data == null){
+      ElMessage.error('项目进度获取失败。');
+    }
+    else{
+      total_task_count.value = data.data.data.total_task_count;
+      incomplete_task_count.value = data.data.data.unfinished_task_count;
+      upcoming_overdue_task_count.value = data.data.data.will_overdue_task_count;
+      overdue_task_count.value = data.data.data.overdue_task_count;
+    }
+  }
+  catch(error){
     ElMessage.error('项目进度获取失败。')
     console.error('Error fetching progress:', error);
-  });
-  })
+  }});
 </script>
 
 <template>
