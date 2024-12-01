@@ -33,7 +33,7 @@ const handleViewDetail = (id) => {
 };
 
 let currentData = ref([]);
-const pageSize = 6; // 每页显示的数据条数
+const pageSize = 5; // 每页显示的数据条数
 let currentPage = ref(1);//当前页面
 let totalPages = ref(1);//总数据条数
 

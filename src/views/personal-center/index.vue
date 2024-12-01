@@ -10,11 +10,7 @@ import hand2 from '@/assets/icons/personal-center-hand2.svg';
 // 定义响应式变量
 const userData = ref({}); // 用户个人信息
 const likeCount = ref(0); // 点赞数
-const isLiked = ref(false); // 点赞状态
-
-// 保存初始状态的变量
-const initialIsLiked = ref(false);
-const initialLikeCount = ref(0);
+const isLiked = ref(0); // 点赞状态
 
 // 获取用户数据函数
 async function fetchUserData() {
@@ -50,13 +46,9 @@ async function fetchUserData() {
         ...data
       };
 
-      // 初始化点赞数（不覆盖本地状态）
+      // 初始化点赞状态
       likeCount.value = data.like_count || 0;
-      isLiked.value = data.like_count > 0;
-
-      initialIsLiked.value = isLiked.value;
-      initialLikeCount.value = likeCount.value;
-      console.log('个人中心用户点赞数据加载成功:', isLiked.value, likeCount.value);
+      isLiked.value = data.is_liked || 0; // 0 为未点赞，1 为已点赞
     } else {
       ElMessage.error('获取个人中心用户数据失败');
     }
@@ -67,12 +59,7 @@ async function fetchUserData() {
 };
 
 // 点赞切换逻辑
-const { toggleLike, rollbackToInitialState } = useLike(
-  isLiked,
-  likeCount,
-  initialIsLiked,
-  initialLikeCount
-);
+const { toggleLike } = useLike(isLiked, likeCount);
 
 // 页面加载时获取用户数据
 onMounted(() => {
@@ -113,7 +100,7 @@ function formatDate(isoDate) {
 
       <!-- 使用 el-scrollbar 包裹滚动内容 -->
       <div class="info-box">
-        <el-scrollbar class="custom-scrollbar" height="500px" wrap-style="overflow-y: auto; overflow-x: hidden;">
+        <div class="custom-scrollbar" height="500px" wrap-style="overflow-y: auto; overflow-x: hidden;">
           <div class="info-section">
             <!-- 第二行 -->
             <div class="info-row">
@@ -189,7 +176,7 @@ function formatDate(isoDate) {
               </div>
             </div>
           </div>
-        </el-scrollbar>
+        </div>
       </div>
     </div>
   </div>
@@ -209,7 +196,7 @@ function formatDate(isoDate) {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 30px; /* 包裹内边距 */
   margin: 0 auto;
-  height: 750px; /* 固定高度*/
+  margin-top: 10px;
 }
 
 .back-icon {
@@ -227,28 +214,9 @@ function formatDate(isoDate) {
   flex: 1; /* 占据剩余空间 */
   position: relative; /* 使图标相对于滚动内容区域 */
   margin-top: 20px; /* 为 info-box 添加顶部间距 */
+  margin-bottom: 40px;
   padding: 10px 120px; /* 左侧增加额外的内边距 */
-  max-height: 800px; /* 限制高度 */
-}
-
-.el-scrollbar__bar {
-  background: #cfd8dc; /* 滚动条的背景色 */
-  border-radius: 4px;
-}
-
-.custom-scrollbar ::v-deep(.el-scrollbar__bar) {
-  background: transparent; /* 滚动条背景透明 */
-}
-
-.custom-scrollbar ::v-deep(.el-scrollbar__thumb) {
-  height: 5px; /* 固定滑块高度 */
-  background: #90a4ae; /* 滑块颜色 */
-  border-radius: 4px;  /* 滑块圆角 */
-  opacity: 0.8;        /* 滑块透明度 */
-}
-
-.custom-scrollbar ::v-deep(.el-scrollbar__thumb:hover) {
-  background: #607d8b; /* 鼠标悬停时滑块颜色 */
+  overflow: visible; /* 显示所有内容，无滚动条 */
 }
 
 .header {

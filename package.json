@@ -27,6 +27,7 @@
     "axios": "^1.7.7",
     "dayjs": "^1.11.13",
     "element-plus": "^2.8.7",
+    "lodash": "^4.17.21",
     "normalize.css": "^8.0.1",
     "pinia": "^2.2.6",
     "pinia-plugin-persistedstate": "^4.1.2",
