@@ -35,9 +35,6 @@ export async function login(phoneInput, captchaInput, captchaError, loginRemembe
         localStorage.setItem('user_agent', responseData.user_agent);
         localStorage.setItem('ip', responseData.ip);
 
-        console.log("登录时储存的rtoken为:", localStorage.getItem('rtoken'));
-        console.log("登录时储存的atoken为:", localStorage.getItem('atoken'));
-
         // 登录成功后跳转到主页
         router.push('/home');
       } else {

@@ -275,10 +275,6 @@ const saveUserData = async () => {
   
         <!-- 内容区域 -->
         <div class="info-box">
-          <el-scrollbar class="custom-scrollbar" height="600px"
-           :native="false"
-           :noresize="false"
-           >
            <div class="scrollbar-content">
             <!-- 滚动条中的内容 -->
             <div class="info-section">
@@ -383,7 +379,6 @@ const saveUserData = async () => {
               </div>
             </div>
            </div>
-          </el-scrollbar>
         </div>
       </div>
     </div>

@@ -451,7 +451,7 @@ onMounted(async() =>{
           <el-input
             v-else
             v-model="teamName"
-            style="width: 120px; margin-left: 5px;"
+            style="width: 150px; margin-left: 5px;"
             placeholder="请输入团队名称"
             @keyup.enter="addTeam"
           />
@@ -588,13 +588,23 @@ onMounted(async() =>{
             <el-dropdown-item v-if="showAddTeam" @click="toggleAddTeam">
             <span>新增团队</span>
           </el-dropdown-item>
-          <el-input
+          <el-form v-else>
+            <el-form-item>
+              <el-input
+              v-model="teamName"
+              style="width: 150px; margin-left: 5px;"
+              placeholder="请输入团队名称"
+              @keyup.enter="addTeam"
+              />
+            </el-form-item>
+          </el-form>
+          <!-- <el-input
             v-else
             v-model="teamName"
             style="width: 120px; margin-left: 5px;"
             placeholder="请输入团队名称"
             @keyup.enter="addTeam"
-          />
+          /> -->
           </div>
 
         </el-dropdown-menu>
@@ -771,6 +781,7 @@ p {
 }
 .smallBox {
   height:400px;
+  width: 200px;
   border:solid 2px #656161;
   padding-top:10px;
 }
@@ -816,6 +827,4 @@ p {
   margin-bottom: 15px;
   padding-right: 20px;
 }
-
-
 </style>
