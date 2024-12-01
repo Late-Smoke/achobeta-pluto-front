@@ -97,8 +97,7 @@ const handlePageChange = (page) => {
 }
 const updateCurrentGridData = async() => {
   try{
-    // const response = await getDevicesApi({page_number:currentPage.value,line_number:pageSize});
-    const response = await getDevicesApi({page_number:1,line_number:6});
+    const response = await getDevicesApi({page_number:currentPage.value,line_number:pageSize});
     console.log('更新常用设备列表-后端响应内容:', response.data); // 打印后端响应内容 
       currentGridData.value = response.data.data.devices;
       totalDevices.value = response.data.data.total;
@@ -114,18 +113,17 @@ const updateCurrentGridData = async() => {
 
 ////挂载
 onMounted(async () => {
-  fetchNameApi()
-  .then(data => {
+  try{
+  const data = await fetchNameApi();
     console.log('获取用户姓名-后端响应:', data.data);
     if(data.data.data)
-      name.value = data.data.data.name;
-    else ElMessage.error('名字获取失败。');
-  })
-  .catch(error => {
+    name.value = data.data.data.name;
+  else ElMessage.error('名字获取失败。');
+}
+  catch(error){
     ElMessage.error('名字获取失败。');
     console.error('Error fetching name:', error);
-  });
-})
+}})
 
 </script>
 
@@ -211,13 +209,13 @@ onMounted(async () => {
   top: 0; /* 距离顶部 0 */
   left: 0; /* 左对齐 */
   width: 100%; /* 占满宽度 */
-  height: 60px; /* 固定高度 */
-  background-color: #409eff; /* 背景颜色 */
+  height: 70px; /* 固定高度 */
   z-index: 1000; /* 确保层级在其他内容之上 */
   display: flex;
   justify-content: flex-end;
   align-items: center;
   padding: 0 20px;
+  border:solid 2px #ddd;
 }
 
 .main-content {
@@ -232,7 +230,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 5px;
-  color: black;
+  color: rgb(255, 255, 255);
   padding: 10px;
   border-radius: 5px;
 }

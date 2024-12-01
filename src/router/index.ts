@@ -10,16 +10,6 @@ const constantRoutes = [
     redirect: '/login',
     children: [
       {
-        path: 'dashboard',
-        component: () => import('@/views/dashboard/index.vue'),
-        name: 'Dashboard',
-      },
-      {
-        path: 'hello',
-        component: () => import('@/views/hello/index.vue'),
-        name: 'hello',
-      },
-      {
         path: 'home',
         component: () => import('@/views/home/Homepage.vue'),
         name: 'home',
