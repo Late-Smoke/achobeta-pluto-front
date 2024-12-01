@@ -25,19 +25,7 @@ apiClient.interceptors.request.use((config) => {
 
 // 响应拦截器
 apiClient.interceptors.response.use(
- (response: AxiosResponse) => {
-  // if (typeof response.data === 'object' && response.data!== null) {
-  //   // 如果是对象，直接返回
-  //   return response;
-  // } else {
-  //   // 如果不是对象，尝试解析为 JSON
-  //   try {
-  //     response.data = JSON.parse(response.data);
-  //   } catch (e) {
-  //     // 如果解析失败，记录错误并返回原始数据
-  //     console.error('Error parsing JSON:', e);
-  //   }
-  //   return response;}
+ (response: AxiosResponse) =>{
   return response;
   },
   async (error: AxiosError) => {
@@ -52,10 +40,10 @@ apiClient.interceptors.response.use(
           break;
         case 401:
           errorMessage = '未授权，请登录';
-          if (!config.url.includes('/refresh')) {
-            await handleAuthRefresh(error);
-            return;
-          }
+          // if (!config.url.includes('/refresh')) {
+          //   await handleAuthRefresh(error);
+          //   return;
+          // }
           break;
         case 403:
           errorMessage = '拒绝访问';
@@ -83,9 +71,10 @@ apiClient.interceptors.response.use(
 );
 
 async function handleAuthRefresh(error: AxiosError) {
+  
   if (refreshing) {
     return new Promise((resolve, reject) => {
-      queue.push({ config: error.config, resolve, reject });
+      // queue.push({ config: error.config, resolve, reject });
     });
   }
 
