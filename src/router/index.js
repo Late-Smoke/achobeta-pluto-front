@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import Layout from '@/layout/index.vue';
 // 静态路由
 const constantRoutes = [
@@ -62,7 +62,7 @@ const constantRoutes = [
     },
 ];
 const router = createRouter({
-    history: createWebHistory(), // 使用浏览器历史模式
+    history: createWebHashHistory(), // 使用浏览器历史模式
     routes: constantRoutes,
 });
 export default router;
