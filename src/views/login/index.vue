@@ -34,7 +34,9 @@ onMounted(async() => {
 
 // 封装函数调用
 const handleGetCodeClick = () => requestCaptcha(phoneInput.value, phoneError.value, () => updateCountdown(getCodeButton.value, () => resetGetCodeButton(getCodeButton.value)));
-const handleLoginClick = () => login(phoneInput.value, captchaInput.value, captchaError.value, loginRemember.value);
+const handleLoginClick = async () => {
+  await login(phoneInput.value, captchaInput.value, captchaError.value, loginRemember.value);
+};
 </script>
 
 <template>
