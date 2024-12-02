@@ -10,7 +10,6 @@ const pathSrc = path.resolve(__dirname, 'src');
 // https://vitejs.dev/config/
 /** @type {import('vite').UserConfig} */
 export default defineConfig({
-  base: '', // 设置根目录为相对目录
   resolve: {
     alias: {
       '@': pathSrc,
