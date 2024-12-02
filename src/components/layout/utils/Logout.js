@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+axios.defaults.baseURL = 'http://117.72.97.101:8085';
 export async function exitSystem() {
   const atoken = localStorage.getItem('atoken'); // 从本地获取 atoken
 
