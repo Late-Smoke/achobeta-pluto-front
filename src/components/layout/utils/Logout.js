@@ -10,9 +10,9 @@ export async function exitSystem() {
   try {
     const response = await axios.delete('/api/login/exit', { 
       data: { token: atoken },
-      timeout: 500, // 设置超时时间
+      //timeout: 500, // 设置超时时间
     });
-
+console.log(response.data);
     if (response.data.code === 20000) {
       return { success: true, message: '退出成功' };
     } else if (response.data.code === -20000) {

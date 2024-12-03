@@ -4,7 +4,7 @@
         <PointsBox />
         <MessagesBox />
       </div>
-      <div class="box progress-box">
+      <div class="progress-box">
         <Progress />
       </div>
     </div>
@@ -26,7 +26,7 @@
     width: 100%;
     height:100%;
   }
-  
+
   .top-row , .progress-box{
     display: flex;
     justify-content: space-between;

@@ -610,7 +610,7 @@ onMounted(async() =>{
       </template>
     </el-dropdown>
     <div v-if="urls!=0" class="btn-group">
-      <el-button v-if="TeamStrManage" type="info" plain class="btn1">
+      <el-button v-if="TeamStrManage" type="primary" plain class="btn1">
         <span class="btn-content" @click="handleTeamManage()">团队架构管理</span>
       </el-button>
       <el-button v-if="addMember" type="primary" plain class="btn2" @click="handleAddUser(selectedTeamId,selectedTeamName,level)">
@@ -704,7 +704,7 @@ onMounted(async() =>{
   margin-left:40px;
 }
 .btn1:hover {
-    border:solid 1.5px #1f0202;
+    border:solid 1.5px #005eff;
 }
 .btn2:hover {
   border:solid 1.5px #005eff;

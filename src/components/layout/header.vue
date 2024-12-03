@@ -103,7 +103,7 @@ const updateCurrentGridData = async() => {
       totalDevices.value = response.data.data.total;
       buttonStates.value = currentGridData.value.map(() => false);
       for(let i = 0; i < currentGridData.value.length; i++){
-        if(!currentGridData.value[i].device_name) currentGridData.value[i].device_name = `设备${i+1}`;
+        if(!currentGridData.value[i].device_name) currentGridData.value[i].device_name = `设备${6*(currentPage.value-1)+(i+1)}`;
         let time = currentGridData.value[i].online_time;
         currentGridData.value[i].online_time = dayjs(time).format('YYYY-MM-DD HH:mm:ss ');
         }}

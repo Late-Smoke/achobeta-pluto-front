@@ -14,21 +14,24 @@ const loginRemember = ref(false);
 
 // 在页面加载时启动倒计时检查
 onMounted(async() => {
+  try{
   const rtoken = localStorage.getItem('rtoken');
-  console.log("自动登录-前端获取的rtoken:",rtoken);
-  await checkAutoLoginApi(rtoken).then((response) => {
-    console.log("自动登录-后端响应:",response.data)
-    if (response.data.code === 20000) {
-      // 自动登录成功，跳转到主页
-      router.push('/home');
-    } else {
-      // 自动登录失败，显示登录弹窗
-      ElMessage.error('登录已过期，请重新登录！')
-    }
-  }).catch((error) => {
+  //console.log("自动登录-前端获取的rtoken:",rtoken);
+  const response = await checkAutoLoginApi(rtoken);
+  console.log("自动登录-后端响应:",response.data)
+  if (response.data.code === 20000) {
+    // 自动登录成功，跳转到主页
+    router.push('/home');
+    localStorage.setItem('rtoken', response.data.data.rtoken);
+    localStorage.setItem('atoken', response.data.data.atoken);
+  } else {
+    // 自动登录失败，显示登录弹窗
+    console.log('自动登录失败');
+  }}
+  catch(error){
     // 处理请求错误
     console.error('Failed to check auto login:', error);
-  });
+  };
   updateCountdown(getCodeButton.value, () => resetGetCodeButton(getCodeButton.value));
 });
 

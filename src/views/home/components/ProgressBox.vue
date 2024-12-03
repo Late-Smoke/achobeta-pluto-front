@@ -48,7 +48,7 @@ onMounted(async () => {
           <template #header>
             <div class="item-title">
               <el-icon><PieChart /></el-icon>
-              <span>我的未完成任务</span>
+              <span>未完成任务</span>
             </div>
           </template>
           <div class="item-content">{{ incomplete_task_count }}</div>
@@ -107,7 +107,6 @@ onMounted(async () => {
   flex-wrap: wrap; /* 允许子元素换行 */
   gap: 30px;
   width: 100%;
-  height: 100%;
   margin-top: 10px;
   padding: 20px;
   position:relative;
@@ -116,7 +115,6 @@ onMounted(async () => {
  
 .progress-card {
   flex: 1 1 230px; /* 设置卡片的灵活宽度，最小宽度为230px */
-  height: 70%;
   padding: 5px;
   background-color: rgba(220, 234, 247, 0.05);
   border-top: solid 1px #333;

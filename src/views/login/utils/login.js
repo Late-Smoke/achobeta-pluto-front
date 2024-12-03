@@ -1,5 +1,6 @@
 import axios from 'axios';
 import router from '@/router'; // 根据实际路径调整
+import reflash from '@/axios/request.js';
 
 export async function login(phoneInput, captchaInput, captchaError, loginRemember) {
   const phoneNumber = phoneInput.value;
@@ -34,7 +35,7 @@ export async function login(phoneInput, captchaInput, captchaError, loginRemembe
         localStorage.setItem('service_id', responseData.id);
         localStorage.setItem('user_agent', responseData.user_agent);
         localStorage.setItem('ip', responseData.ip);
-
+        reflash = false;
         // 登录成功后跳转到主页
         router.push('/home');
       } else {
