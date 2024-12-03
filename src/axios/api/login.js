@@ -1,12 +1,11 @@
-import apiClient from '@/axios/axios'
-import axios from 'axios';
+import apiClient from '@/axios/axios';
 export function reflashRtokenApi(params) {
     return apiClient.post('/api/common/rtoken', {
-        body:{token:params}
+        body: { token: params }
     });
 }
 export function checkAutoLoginApi(params) {
-    return apiClient.post('/api/login/auto',  {
-        body:{token:params}
-    } );
+    return apiClient.post('/api/login/auto', {
+        body: { token: params }
+    });
 }

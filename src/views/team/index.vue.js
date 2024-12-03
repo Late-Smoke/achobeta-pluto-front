@@ -1716,9 +1716,9 @@ function __VLS_template() {
             // @ts-ignore
             [ElButton, ElButton,];
             // @ts-ignore
-            const __VLS_365 = __VLS_asFunctionalComponent(__VLS_364, new __VLS_364({ type: ("info"), plain: (true), ...{ class: ("btn1") }, }));
-            const __VLS_366 = __VLS_365({ type: ("info"), plain: (true), ...{ class: ("btn1") }, }, ...__VLS_functionalComponentArgsRest(__VLS_365));
-            ({}({ type: ("info"), plain: (true), ...{ class: ("btn1") }, }));
+            const __VLS_365 = __VLS_asFunctionalComponent(__VLS_364, new __VLS_364({ type: ("primary"), plain: (true), ...{ class: ("btn1") }, }));
+            const __VLS_366 = __VLS_365({ type: ("primary"), plain: (true), ...{ class: ("btn1") }, }, ...__VLS_functionalComponentArgsRest(__VLS_365));
+            ({}({ type: ("primary"), plain: (true), ...{ class: ("btn1") }, }));
             const __VLS_369 = __VLS_nonNullable(__VLS_pickFunctionalComponentCtx(__VLS_364, __VLS_366));
             __VLS_elementAsFunction(__VLS_intrinsicElements.span, __VLS_intrinsicElements.span)({ ...{ onClick: (...[$event]) => {
                         if (!((__VLS_ctx.urls != 0)))

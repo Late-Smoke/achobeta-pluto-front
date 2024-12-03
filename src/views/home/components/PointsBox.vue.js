@@ -20,13 +20,13 @@ onMounted(async () => {
         // 跳转到登录页面
         return;
     }
-    const points = await getPoints(atoken);
-    if (points) {
-        pointsData.value[0].value = points.monthly_points || '00';
-        pointsData.value[1].value = points.monthly_ranking || '00';
-        pointsData.value[2].value = points.current_points || '00';
-        pointsData.value[3].value = points.total_points || '00';
-    }
+    // const points = await getPoints(atoken);
+    // if (points) {
+    //   pointsData.value[0].value = points.monthly_points || '00';
+    //   pointsData.value[1].value = points.monthly_ranking || '00';
+    //   pointsData.value[2].value = points.current_points || '00';
+    //   pointsData.value[3].value = points.total_points || '00';
+    // }
 });
 const __VLS_fnComponent = (await import('vue')).defineComponent({});
 ;

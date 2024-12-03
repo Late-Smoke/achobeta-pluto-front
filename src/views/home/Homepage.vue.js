@@ -33,7 +33,7 @@ function __VLS_template() {
     const __VLS_6 = __VLS_5({}, ...__VLS_functionalComponentArgsRest(__VLS_5));
     ({}({}));
     const __VLS_9 = __VLS_nonNullable(__VLS_pickFunctionalComponentCtx(MessagesBox, __VLS_6));
-    __VLS_elementAsFunction(__VLS_intrinsicElements.div, __VLS_intrinsicElements.div)({ ...{ class: ("box progress-box") }, });
+    __VLS_elementAsFunction(__VLS_intrinsicElements.div, __VLS_intrinsicElements.div)({ ...{ class: ("progress-box") }, });
     // @ts-ignore
     [Progress,];
     // @ts-ignore
@@ -44,7 +44,6 @@ function __VLS_template() {
     if (typeof __VLS_styleScopedClasses === 'object' && !Array.isArray(__VLS_styleScopedClasses)) {
         __VLS_styleScopedClasses['homepage'];
         __VLS_styleScopedClasses['top-row'];
-        __VLS_styleScopedClasses['box'];
         __VLS_styleScopedClasses['progress-box'];
     }
     var __VLS_slots;
